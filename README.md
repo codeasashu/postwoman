@@ -386,7 +386,7 @@ Support this project with your organization. Your logo will show up here with a 
 
 ### Code Contributors
 
-This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
+This project exists thanks to all the people who can contribute. [[Contribute](CONTRIBUTING.md)].
 
 <a href="https://github.com/liyasthomas/postwoman/graphs/contributors"><img src="https://opencollective.com/postwoman/contributors.svg?width=890&button=false" /></a>
 
