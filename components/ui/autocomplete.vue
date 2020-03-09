@@ -1,18 +1,18 @@
 <template>
   <div class="autocomplete-wrapper">
-    <input
-      type="text"
-      :placeholder="placeholder"
-      v-model="text"
-      @input="updateSuggestions"
-      @keyup="updateSuggestions"
-      @click="updateSuggestions"
-      @keydown="handleKeystroke"
-      ref="acInput"
-      :spellcheck="spellcheck"
-      :autocapitalize="spellcheck"
-      :autocorrect="spellcheck"
-    />
+      <md-input
+        type="text"
+        :placeholder="placeholder"
+        v-model="text"
+        @input="updateSuggestions"
+        @keyup="updateSuggestions"
+        @click="updateSuggestions"
+        @keydown="handleKeystroke"
+        ref="acInput"
+        :spellcheck="spellcheck"
+        :autocapitalize="spellcheck"
+        :autocorrect="spellcheck"
+      />
     <ul
       class="suggestions"
       v-if="suggestions.length > 0 && suggestionsVisible"
@@ -143,7 +143,7 @@ export default {
 
     forceSuggestion(text) {
       let input = this.text.substring(0, this.selectionStart)
-      this.text = input + text
+      this.text = text
 
       this.selectionStart = this.text.length
       this.suggestionsVisible = true

@@ -2,7 +2,10 @@
   <div>
     <div class="md-layout">
       <div class="md-layout-item md-size-80">
-        <h3>{{ $t("header_list") }}</h3>
+        <md-button class="md-primary md-raised" @click="$emit('add_new')">
+          <md-icon>add</md-icon>
+          <span>{{ $t("add_new") }}</span>
+        </md-button>
       </div>
       <div class="md-layout-item md-size-20">
         <md-button
@@ -46,12 +49,6 @@
           ><md-icon>delete</md-icon></md-button
         >
       </div>
-    </div>
-    <div class="md-layout">
-      <md-button class="md-primary md-raised" @click="$emit('add_new')">
-        <md-icon>add</md-icon>
-        <span>{{ $t("add_new") }}</span>
-      </md-button>
     </div>
   </div>
 </template>
