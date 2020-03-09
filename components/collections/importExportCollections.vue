@@ -1,76 +1,19 @@
 <template>
-  <modal v-if="show" @close="hideModal">
+  <modal :show="show" @close="hideModal">
     <div slot="header">
-      <ul>
-        <li>
-          <div class="flex-wrap">
-            <h3 class="title">Import / Export Collections</h3>
-            <div>
-              <button class="icon" @click="hideModal">
-                <i class="material-icons">close</i>
-              </button>
-            </div>
-          </div>
-          <div class="flex-wrap">
-            <span
-              v-tooltip="{
-                content: !fb.currentUser ? $t('login_first') : $t('replace_current'),
-              }"
-            >
-              <button :disabled="!fb.currentUser" class="icon" @click="syncCollections">
-                <i class="material-icons">folder_shared</i>
-                <span>{{ $t("import_from_sync") }}</span>
-              </button>
-            </span>
-            <button
-              class="icon"
-              @click="openDialogChooseFileToReplaceWith"
-              v-tooltip="$t('replace_current')"
-            >
-              <i class="material-icons">create_new_folder</i>
-              <span>{{ $t("replace_json") }}</span>
-              <input
-                type="file"
-                @change="replaceWithJSON"
-                style="display: none;"
-                ref="inputChooseFileToReplaceWith"
-                accept="application/json"
-              />
-            </button>
-            <button
-              class="icon"
-              @click="openDialogChooseFileToImportFrom"
-              v-tooltip="$t('preserve_current')"
-            >
-              <i class="material-icons">folder_special</i>
-              <span>{{ $t("import_json") }}</span>
-              <input
-                type="file"
-                @change="importFromJSON"
-                style="display: none;"
-                ref="inputChooseFileToImportFrom"
-                accept="application/json"
-              />
-            </button>
-          </div>
-        </li>
-      </ul>
+      <h3 class="title">Import / Export Collections</h3>
     </div>
     <div slot="body">
-      <textarea v-model="collectionJson" rows="8"></textarea>
+      <md-field>
+        <label>Export</label>
+        <md-textarea v-model="collectionJson"></md-textarea>
+      </md-field>
     </div>
     <div slot="footer">
-      <div class="flex-wrap">
-        <span></span>
-        <span>
-          <button class="icon" @click="hideModal">
-            {{ $t("cancel") }}
-          </button>
-          <button class="icon primary" @click="exportJSON" v-tooltip="$t('download_file')">
-            {{ $t("export") }}
-          </button>
-        </span>
-      </div>
+      <md-button class="md-primary" @click="hideModal">{{ $t("cancel") }}</md-button>
+      <md-button class="md-primary" @click="exportJSON" v-tooltip="$t('download_file')">{{
+        $t("export")
+      }}</md-button>
     </div>
   </modal>
 </template>

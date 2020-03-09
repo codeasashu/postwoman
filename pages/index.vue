@@ -1,41 +1,121 @@
 <template>
   <div class="page">
-    <div class="content">
-      <div class="page-columns inner-left">
-        <pw-section v-if="showPreRequestScript" class="orange" label="Pre-Request" ref="preRequest">
-          <ul>
-            <li>
-              <div class="flex-wrap">
-                <label for="generatedCode">{{ $t("javascript_code") }}</label>
-                <div>
-                  <a
-                    href="https://github.com/liyasthomas/postwoman/wiki/Pre-Request-Scripts"
-                    target="_blank"
-                    rel="noopener"
-                  >
-                    <button class="icon" v-tooltip="$t('wiki')">
-                      <i class="material-icons">help</i>
-                    </button>
-                  </a>
-                </div>
-              </div>
-              <Editor
-                v-model="preRequestScript"
-                :lang="'javascript'"
-                :options="{
-                  maxLines: '16',
-                  minLines: '8',
-                  fontSize: '16px',
-                  autoScrollEditorIntoView: true,
-                  showPrintMargin: false,
-                  useWorker: false,
-                }"
-              />
-            </li>
-          </ul>
-        </pw-section>
+    <div class="content md-layout md-gutter">
+      
+      <div class="md-layout-item md-size-100">
+        <div class="md-layout">
+            <div class="md-layout-item md-size-20">
+              <md-field>
+                <label for="method">{{ $t("method") }}</label>
+                <md-select v-model="method" name="method" id="method">
+                    <md-option value="GET">GET</md-option>
+                    <md-option value="POST">POST</md-option>
+                    <md-option value="PUT">PUT</md-option>
+                    <md-option value="DELETE">DELETE</md-option>
+                </md-select>
+              </md-field>
+            </div>
+            <div class="md-layout-item md-size-50">
+              <md-field>
+                <label for="url">{{ $t("url") }}</label>
+                <md-input
+                  name="url" id="url"
+                  :class="{ error: !isValidURL }"
+                  @keyup.enter="isValidURL ? sendRequest() : null"
+                  v-model="uri" spellcheck="false" />
+              </md-field>
+            </div>
+            <div class="md-layout-item md-size-30">
+              <md-button class="md-primary md-raised"
+                :disabled="!isValidURL"
+                @click="sendRequest"
+                id="send" ref="sendButton"
+              >{{ $t("send") }}
+                <md-icon>send</md-icon>
+              </md-button>
+              <md-button class="md-primary md-raised md-icon-button"
+                :disabled="!isValidURL"
+                @click="copyRequest"
+                v-tooltip.bottom="$t('copy_request_link')"
+                id="copyRequest" ref="copyRequest"
+              >
+                <md-icon v-if="navigatorShare">share</md-icon>
+                <md-icon v-else>file_copy</md-icon>
+              </md-button>
+              <md-button class="md-primary md-raised md-icon-button"
+                :disabled="!isValidURL"
+                @click="saveRequest"
+                id="saveRequest" ref="saveRequest"
+                v-tooltip.bottom="$t('save_to_collections')"
+              >
+                <md-icon>save</md-icon>
+              </md-button>
+              <md-button class="md-primary md-raised md-icon-button"
+                @click="clearContent('', $event)"
+                id="clearAll" ref="clearAll"
+                v-tooltip.bottom="$t('clear_all')"
+              >
+                <md-icon>clear_all</md-icon>
+              </md-button>
+              <md-menu
+                class="md-layout md-alignment-center-right"
+                :mdCloseOnClick="true" 
+                :mdCloseOnSelect="true"
+                md-direction="bottom-start"
+                v-tooltip="$t('more')">
+                <md-icon md-menu-trigger>more_vert</md-icon>
+                <md-menu-content>
+                  <md-menu-item>
+                    <md-button @click="showModal = true">
+                      <span>{{ $t("import_curl") }}</span>
+                    </md-button>
+                  </md-menu-item>
+                </md-menu-content>
+              </md-menu>
+            </div>
+        </div>
+      </div>
 
-        <pw-section class="blue" :label="$t('request')" ref="request">
+      <div class="md-layout-item md-size-100">
+        <md-tabs>
+          <md-tab id="tab-params" :md-label="$t('parameters')">
+            <query-params
+              :params="params"
+              @set_key="(event) => $store.commit('setKeyParams', ...event)"
+              @set_value="(event) => $store.commit('setValueParams', ...event)"
+              @clear_all="clearContent('parameters', $event)"
+              @delete="index => removeRequestParam(index)"
+              @add_new="addRequestParam"
+            >
+            </query-params>
+          </md-tab>
+          <md-tab id="tab-auth" :md-label="$t('auth')">
+            <authentication
+              :auth="auth"
+              @set_select="(val) => {auth=val}"
+              @clear_all="clearContent('auth', $event)"
+            />
+          </md-tab>
+          <md-tab id="tab-headers" :md-label="$t('headers')">
+            <headers
+              :headers="headers"
+              :commonHeaders="commonHeaders"
+              @set_route_query="setRouteQueryState"
+              @set_key="(event) => $store.commit('setKeyHeader', ...event)"
+              @set_value="(event) => $store.commit('setValueHeader', ...event)"
+              @delete="index => removeRequestHeader(index)"
+              @add_new="addRequestHeader"
+              @clear_all="clearContent('headers', $event)"
+            />
+          </md-tab>
+          <md-tab id="tab-requestbody" md-label="Body">
+            
+          </md-tab>
+        </md-tabs>
+      </div>
+
+<!-- Request -->
+<pw-section class="blue" :label="$t('request')" ref="request">
           <ul>
             <div>
               <li>
@@ -445,7 +525,8 @@
             </span>
           </div>
         </pw-section>
-
+<!-- END request -->
+<!-- Tests -->
         <pw-section v-if="testsEnabled" class="orange" label="Tests" ref="postRequestTests">
           <ul>
             <li>
@@ -509,393 +590,8 @@
             </li>
           </ul>
         </pw-section>
-
-        <section id="options">
-          <input id="tab-one" type="radio" name="options" checked="checked" />
-          <label for="tab-one">{{ $t("authentication") }}</label>
-          <div class="tab">
-            <pw-section class="cyan" :label="$t('authentication')" ref="authentication">
-              <ul>
-                <li>
-                  <div class="flex-wrap">
-                    <label for="auth">{{ $t("authentication") }}</label>
-                    <div>
-                      <button
-                        class="icon"
-                        @click="clearContent('auth', $event)"
-                        v-tooltip.bottom="$t('clear')"
-                      >
-                        <i class="material-icons">clear_all</i>
-                      </button>
-                    </div>
-                  </div>
-                  <span class="select-wrapper">
-                    <select id="auth" v-model="auth">
-                      <option>None</option>
-                      <option>Basic Auth</option>
-                      <option>Bearer Token</option>
-                      <option>OAuth 2.0</option>
-                    </select>
-                  </span>
-                </li>
-              </ul>
-              <ul v-if="auth === 'Basic Auth'">
-                <li>
-                  <input placeholder="User" name="http_basic_user" v-model="httpUser" />
-                </li>
-                <li>
-                  <input
-                    placeholder="Password"
-                    name="http_basic_passwd"
-                    :type="passwordFieldType"
-                    v-model="httpPassword"
-                  />
-                </li>
-                <div>
-                  <li>
-                    <button
-                      class="icon"
-                      id="switchVisibility"
-                      ref="switchVisibility"
-                      @click="switchVisibility"
-                    >
-                      <i class="material-icons" v-if="passwordFieldType === 'text'">visibility</i>
-                      <i class="material-icons" v-if="passwordFieldType !== 'text'"
-                        >visibility_off</i
-                      >
-                    </button>
-                  </li>
-                </div>
-              </ul>
-              <ul v-if="auth === 'Bearer Token' || auth === 'OAuth 2.0'">
-                <li>
-                  <div class="flex-wrap">
-                    <input placeholder="Token" name="bearer_token" v-model="bearerToken" />
-                    <button
-                      v-if="auth === 'OAuth 2.0'"
-                      class="icon"
-                      @click="showTokenList = !showTokenList"
-                      v-tooltip.bottom="$t('use_token')"
-                    >
-                      <i class="material-icons">open_in_new</i>
-                    </button>
-                    <button
-                      v-if="auth === 'OAuth 2.0'"
-                      class="icon"
-                      @click="showTokenRequest = !showTokenRequest"
-                      v-tooltip.bottom="$t('get_token')"
-                    >
-                      <i class="material-icons">vpn_key</i>
-                    </button>
-                  </div>
-                </li>
-              </ul>
-              <div class="flex-wrap">
-                <pw-toggle :on="!urlExcludes.auth" @change="setExclude('auth', !$event)">
-                  {{ $t("include_in_url") }}
-                </pw-toggle>
-              </div>
-            </pw-section>
-            <pw-section
-              v-if="showTokenRequest"
-              class="red"
-              label="Access Token Request"
-              ref="accessTokenRequest"
-            >
-              <ul>
-                <li>
-                  <div class="flex-wrap">
-                    <label for="token-name">{{ $t("token_name") }}</label>
-                    <div>
-                      <button
-                        class="icon"
-                        @click="showTokenRequestList = true"
-                        v-tooltip.bottom="$t('manage_token_req')"
-                      >
-                        <i class="material-icons">library_add</i>
-                      </button>
-                      <button
-                        class="icon"
-                        @click="clearContent('access_token', $event)"
-                        v-tooltip.bottom="$t('clear')"
-                      >
-                        <i class="material-icons">clear_all</i>
-                      </button>
-                      <button
-                        class="icon"
-                        @click="showTokenRequest = false"
-                        v-tooltip.bottom="$t('close')"
-                      >
-                        <i class="material-icons">close</i>
-                      </button>
-                    </div>
-                  </div>
-                  <input
-                    id="token-name"
-                    :placeholder="$t('optional')"
-                    name="token_name"
-                    v-model="accessTokenName"
-                    type="text"
-                  />
-                </li>
-              </ul>
-              <ul>
-                <li>
-                  <label for="oidc-discovery-url">
-                    {{ $t("oidc_discovery_url") }}
-                  </label>
-                  <input
-                    :disabled="this.authUrl !== '' || this.accessTokenUrl !== ''"
-                    id="oidc-discovery-url"
-                    name="oidc_discovery_url"
-                    type="url"
-                    v-model="oidcDiscoveryUrl"
-                    placeholder="https://example.com/.well-known/openid-configuration"
-                  />
-                </li>
-              </ul>
-              <ul>
-                <li>
-                  <label for="auth-url">{{ $t("auth_url") }}</label>
-                  <input
-                    :disabled="this.oidcDiscoveryUrl !== ''"
-                    id="auth-url"
-                    name="auth_url"
-                    type="url"
-                    v-model="authUrl"
-                    placeholder="https://example.com/login/oauth/authorize"
-                  />
-                </li>
-              </ul>
-              <ul>
-                <li>
-                  <label for="access-token-url">
-                    {{ $t("access_token_url") }}
-                  </label>
-                  <input
-                    :disabled="this.oidcDiscoveryUrl !== ''"
-                    id="access-token-url"
-                    name="access_token_url"
-                    type="url"
-                    v-model="accessTokenUrl"
-                    placeholder="https://example.com/login/oauth/access_token"
-                  />
-                </li>
-              </ul>
-              <ul>
-                <li>
-                  <label for="client-id">{{ $t("client_id") }}</label>
-                  <input
-                    id="client-id"
-                    name="client_id"
-                    type="text"
-                    v-model="clientId"
-                    placeholder="Client ID"
-                  />
-                </li>
-              </ul>
-              <ul>
-                <li>
-                  <label for="scope">{{ $t("scope") }}</label>
-                  <input
-                    id="scope"
-                    name="scope"
-                    type="text"
-                    v-model="scope"
-                    placeholder="e.g. read:org"
-                  />
-                </li>
-              </ul>
-              <ul>
-                <li>
-                  <button class="icon" @click="handleAccessTokenRequest">
-                    <i class="material-icons">vpn_key</i>
-                    <span>{{ $t("request_token") }}</span>
-                  </button>
-                </li>
-              </ul>
-            </pw-section>
-          </div>
-
-          <input id="tab-two" type="radio" name="options" />
-          <label for="tab-two">{{ $t("headers") }}</label>
-          <div class="tab">
-            <pw-section class="orange" label="Headers" ref="headers">
-              <ul>
-                <li>
-                  <div class="flex-wrap">
-                    <label for="headerList">{{ $t("header_list") }}</label>
-                    <div>
-                      <button
-                        class="icon"
-                        @click="clearContent('headers', $event)"
-                        v-tooltip.bottom="$t('clear')"
-                      >
-                        <i class="material-icons">clear_all</i>
-                      </button>
-                    </div>
-                  </div>
-                  <textarea
-                    id="headerList"
-                    readonly
-                    v-textarea-auto-height="headerString"
-                    v-model="headerString"
-                    :placeholder="$t('add_one_header')"
-                    rows="1"
-                  ></textarea>
-                </li>
-              </ul>
-              <ul v-for="(header, index) in headers" :key="index">
-                <li>
-                  <autocomplete
-                    :placeholder="$t('header_count', { count: index + 1 })"
-                    :source="commonHeaders"
-                    :spellcheck="false"
-                    :value="header.key"
-                    @input="
-                      $store.commit('setKeyHeader', {
-                        index,
-                        value: $event,
-                      })
-                    "
-                    @keyup.prevent="setRouteQueryState"
-                    autofocus
-                  />
-                </li>
-                <li>
-                  <input
-                    :placeholder="$t('value_count', { count: index + 1 })"
-                    :name="'value' + index"
-                    :value="header.value"
-                    @change="
-                      $store.commit('setValueHeader', {
-                        index,
-                        value: $event.target.value,
-                      })
-                    "
-                    @keyup.prevent="setRouteQueryState"
-                  />
-                </li>
-                <div>
-                  <li>
-                    <button
-                      class="icon"
-                      @click="removeRequestHeader(index)"
-                      v-tooltip.bottom="$t('delete')"
-                      id="header"
-                    >
-                      <i class="material-icons">delete</i>
-                    </button>
-                  </li>
-                </div>
-              </ul>
-              <ul>
-                <li>
-                  <button class="icon" @click="addRequestHeader">
-                    <i class="material-icons">add</i>
-                    <span>{{ $t("add_new") }}</span>
-                  </button>
-                </li>
-              </ul>
-            </pw-section>
-          </div>
-
-          <input id="tab-three" type="radio" name="options" />
-          <label for="tab-three">{{ $t("parameters") }}</label>
-          <div class="tab">
-            <pw-section class="pink" label="Parameters" ref="parameters">
-              <ul>
-                <li>
-                  <div class="flex-wrap">
-                    <label for="paramList">{{ $t("parameter_list") }}</label>
-                    <div>
-                      <button
-                        class="icon"
-                        @click="clearContent('parameters', $event)"
-                        v-tooltip.bottom="$t('clear')"
-                      >
-                        <i class="material-icons">clear_all</i>
-                      </button>
-                    </div>
-                  </div>
-                  <textarea
-                    id="paramList"
-                    readonly
-                    v-textarea-auto-height="queryString"
-                    v-model="queryString"
-                    :placeholder="$t('add_one_parameter')"
-                    rows="1"
-                  ></textarea>
-                </li>
-              </ul>
-              <ul v-for="(param, index) in params" :key="index">
-                <li>
-                  <input
-                    :placeholder="$t('parameter_count', { count: index + 1 })"
-                    :name="'param' + index"
-                    :value="param.key"
-                    @change="
-                      $store.commit('setKeyParams', {
-                        index,
-                        value: $event.target.value,
-                      })
-                    "
-                    autofocus
-                  />
-                </li>
-                <li>
-                  <input
-                    :placeholder="$t('value_count', { count: index + 1 })"
-                    :name="'value' + index"
-                    :value="param.value"
-                    @change="
-                      $store.commit('setValueParams', {
-                        index,
-                        value: $event.target.value,
-                      })
-                    "
-                  />
-                </li>
-                <div>
-                  <li>
-                    <button
-                      class="icon"
-                      @click="removeRequestParam(index)"
-                      v-tooltip.bottom="$t('delete')"
-                      id="param"
-                    >
-                      <i class="material-icons">delete</i>
-                    </button>
-                  </li>
-                </div>
-              </ul>
-              <ul>
-                <li>
-                  <button class="icon" @click="addRequestParam">
-                    <i class="material-icons">add</i>
-                    <span>{{ $t("add_new") }}</span>
-                  </button>
-                </li>
-              </ul>
-            </pw-section>
-          </div>
-
-          <!-- <div class="flex-wrap">
-            <span></span>
-            <button
-              class="icon hide-on-small-screen"
-              @click="activeSidebar = !activeSidebar"
-              v-tooltip="{
-                content: activeSidebar ? 'Hide Sidebar' : 'Show Sidebar'
-              }"
-            >
-              <i class="material-icons">
-                {{ activeSidebar ? "last_page" : "first_page" }}
-              </i>
-            </button>
-          </div> -->
-        </section>
-
+<!-- /* END Tests */ -->
+<!-- Response -->
         <pw-section class="purple" id="response" :label="$t('response')" ref="response">
           <ul>
             <li>
@@ -990,7 +686,7 @@
           </ul>
         </pw-section>
       </div>
-
+<!-- END Response -->
       <aside v-if="activeSidebar" class="sticky-inner inner-right">
         <section>
           <input id="history-tab" type="radio" name="side" checked="checked" />
@@ -1380,6 +1076,10 @@ export default {
     inputform: () => import("../components/firebase/inputform"),
     notes: () => import("../components/firebase/feeds"),
     environments: () => import("../components/environments"),
+    queryParams: () => import("../components/request/queryParams"),
+    authentication: () => import("../components/request/authentication"),
+    headers: () => import("../components/request/headers"),
+    requestBody: () => import("../components/request/requestBody"),
   },
   data() {
     return {
@@ -2214,6 +1914,7 @@ export default {
       return false
     },
     removeRequestHeader(index) {
+      console.log('idx', index)
       // .slice() gives us an entirely new array rather than giving us just the reference
       const oldHeaders = this.headers.slice()
       this.$store.commit("removeHeaders", index)

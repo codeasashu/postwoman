@@ -163,6 +163,11 @@ export default {
     ],
     link: [
       {
+        rel: "stylesheet",
+        href:
+          "//fonts.googleapis.com/css?family=Roboto:100,200,300,400,500,700,400italic|Material+Icons",
+      },
+      {
         rel: "icon",
         type: "image/x-icon",
         href: `${routerBase.router.base}favicon.ico`,
@@ -211,11 +216,19 @@ export default {
   /*
    ** Global CSS
    */
-  css: ["~/assets/css/styles.scss", "~/assets/css/themes.scss", "~/assets/css/fonts.scss"],
+  // css: ["~/assets/css/styles.scss", "~/assets/css/themes.scss", "~/assets/css/fonts.scss"],
+  css: [
+    { src: "vue-material/dist/vue-material.min.css", lang: "css" },
+    { src: "~/assets/theme.scss", lang: "scss" }, // include vue-material theme engine
+    { src: "~/assets/style.scss", lang: "scss" },
+  ],
   /*
    ** Plugins to load before mounting the App
    */
   plugins: [
+    {
+      src: "~/plugins/vue-material",
+    },
     {
       src: "~/plugins/vuex-persist",
     },
@@ -353,14 +366,14 @@ export default {
         code: "ja",
         name: "日本語",
         iso: "ja-JP",
-        file: "ja-JP.js"
+        file: "ja-JP.js",
       },
       {
         code: "ko",
         name: "한국어",
         iso: "ko-KR",
-        file: "ko-KR.js"
-      }
+        file: "ko-KR.js",
+      },
     ],
     defaultLocale: "en",
     vueI18n: {

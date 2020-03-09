@@ -1,43 +1,21 @@
 <template>
-  <modal v-if="show" @close="show = false">
+  <modal :show="show" @close="show = false">
     <div slot="header">
-      <ul>
-        <li>
-          <div class="flex-wrap">
-            <h3 class="title">{{ $t("new_folder") }}</h3>
-            <div>
-              <button class="icon" @click="hideModal">
-                <i class="material-icons">close</i>
-              </button>
-            </div>
-          </div>
-        </li>
-      </ul>
+      <h3>{{ $t("new_folder") }}</h3>
     </div>
     <div slot="body">
-      <ul>
-        <li>
-          <input
-            type="text"
-            v-model="name"
-            :placeholder="$t('my_new_folder')"
-            @keyup.enter="addNewFolder"
-          />
-        </li>
-      </ul>
+      <md-field>
+        <label>Folder name</label>
+        <md-input
+          :placeholder="$t('my_new_folder')"
+          v-model="name"
+          @keyup.enter="addNewFolder"
+        ></md-input>
+      </md-field>
     </div>
     <div slot="footer">
-      <div class="flex-wrap">
-        <span></span>
-        <span>
-          <button class="icon" @click="hideModal">
-            {{ $t("cancel") }}
-          </button>
-          <button class="icon primary" @click="addNewFolder">
-            {{ $t("save") }}
-          </button>
-        </span>
-      </div>
+      <md-button class="md-primary" @click="hideModal">{{ $t("cancel") }}</md-button>
+      <md-button class="md-primary" @click="addNewFolder">{{ $t("save") }}</md-button>
     </div>
   </modal>
 </template>
@@ -66,6 +44,7 @@ export default {
       this.hideModal()
     },
     hideModal() {
+      this.name = undefined
       this.$emit("hide-modal")
     },
   },

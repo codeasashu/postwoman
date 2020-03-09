@@ -1,43 +1,23 @@
 <template>
-  <modal v-if="show" @close="hideModal">
+  <modal :show="show" @close="hideModal">
     <div slot="header">
-      <ul>
-        <li>
-          <div class="flex-wrap">
-            <h3 class="title">{{ $t("new_collection") }}</h3>
-            <div>
-              <button class="icon" @click="hideModal">
-                <i class="material-icons">close</i>
-              </button>
-            </div>
-          </div>
-        </li>
-      </ul>
+      <div class="flex-wrap">
+        <h3 class="title">{{ $t("new_collection") }}</h3>
+      </div>
     </div>
     <div slot="body">
-      <ul>
-        <li>
-          <input
-            type="text"
-            v-model="name"
-            :placeholder="$t('my_new_collection')"
-            @keyup.enter="addNewCollection"
-          />
-        </li>
-      </ul>
+      <md-field>
+        <label>{{ $t("my_new_collection") }}</label>
+        <md-input
+          :placeholder="$t('my_new_collection')"
+          v-model="name"
+          @keyup.enter="addNewCollection"
+        ></md-input>
+      </md-field>
     </div>
     <div slot="footer">
-      <div class="flex-wrap">
-        <span></span>
-        <span>
-          <button class="icon" @click="hideModal">
-            {{ $t("cancel") }}
-          </button>
-          <button class="icon primary" @click="addNewCollection">
-            {{ $t("save") }}
-          </button>
-        </span>
-      </div>
+      <md-button class="md-primary" @click="hideModal">{{ $t("cancel") }}</md-button>
+      <md-button class="md-primary" @click="addNewCollection">{{ $t("save") }}</md-button>
     </div>
   </modal>
 </template>
@@ -77,6 +57,7 @@ export default {
       this.syncCollections()
     },
     hideModal() {
+      this.name = undefined
       this.$emit("hide-modal")
     },
   },

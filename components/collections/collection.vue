@@ -1,39 +1,44 @@
 <template>
-  <div>
-    <div class="flex-wrap">
-      <div>
-        <button class="icon" @click="toggleShowChildren">
-          <i class="material-icons" v-show="!showChildren">arrow_right</i>
-          <i class="material-icons" v-show="showChildren">arrow_drop_down</i>
-          <i class="material-icons">folder</i>
+  <div class="md-layout-item">
+    <div class="md-layout-item">
+      <div @click="toggleShowChildren" class="md-layout">
+        <div class="md-gutter md-layout-item">
+          <md-icon v-show="!showChildren">arrow_right</md-icon>
+          <md-icon v-show="showChildren">arrow_drop_down</md-icon>
+          <md-icon>folder</md-icon>
           <span>{{ collection.name }}</span>
-        </button>
+        </div>
+        <div class="md-gutter md-layout-item">
+          <md-menu
+            class="md-layout md-alignment-center-right"
+            :mdCloseOnClick="true"
+            :mdCloseOnSelect="true"
+            md-direction="bottom-start"
+            v-tooltip="$t('more')"
+          >
+            <md-icon md-menu-trigger>more_vert</md-icon>
+            <!-- <md-button md-menu-trigger>Bottom Start</md-button> -->
+
+            <md-menu-content>
+              <md-menu-item>
+                <md-button @click="$emit('add-folder')">
+                  <span>{{ $t("new_folder") }}</span>
+                </md-button>
+              </md-menu-item>
+              <md-menu-item>
+                <md-button @click="$emit('edit-collection')">
+                  <span>{{ $t("edit") }}</span>
+                </md-button>
+              </md-menu-item>
+              <md-menu-item>
+                <md-button @click="removeCollection">
+                  <span>{{ $t("delete") }}</span>
+                </md-button>
+              </md-menu-item>
+            </md-menu-content>
+          </md-menu>
+        </div>
       </div>
-      <v-popover>
-        <button class="tooltip-target icon" v-tooltip="$t('more')">
-          <i class="material-icons">more_vert</i>
-        </button>
-        <template slot="popover">
-          <div>
-            <button class="icon" @click="$emit('add-folder')" v-close-popover>
-              <i class="material-icons">create_new_folder</i>
-              <span>{{ $t("new_folder") }}</span>
-            </button>
-          </div>
-          <div>
-            <button class="icon" @click="$emit('edit-collection')" v-close-popover>
-              <i class="material-icons">create</i>
-              <span>{{ $t("edit") }}</span>
-            </button>
-          </div>
-          <div>
-            <button class="icon" @click="removeCollection" v-close-popover>
-              <i class="material-icons">delete</i>
-              <span>{{ $t("delete") }}</span>
-            </button>
-          </div>
-        </template>
-      </v-popover>
     </div>
 
     <div v-show="showChildren">

@@ -1,78 +1,66 @@
 <template>
-  <modal v-if="show" @close="hideModal">
+  <modal :show="show" @close="hideModal">
     <div slot="header">
-      <ul>
-        <li>
-          <div class="flex-wrap">
-            <h3 class="title">{{ $t("save_request_as") }}</h3>
-            <div>
-              <button class="icon" @click="hideModal">
-                <i class="material-icons">close</i>
-              </button>
-            </div>
-          </div>
-        </li>
-      </ul>
+      <h3 class="title">{{ $t("save_request_as") }}</h3>
     </div>
     <div slot="body">
-      <ul>
-        <li>
-          <label for="selectLabel">{{ $t("label") }}</label>
-          <input
-            type="text"
-            id="selectLabel"
-            v-model="requestData.name"
-            :placeholder="defaultRequestName"
-            @keyup.enter="saveRequestAs"
-          />
-          <label for="selectCollection">{{ $t("collection") }}</label>
-          <span class="select-wrapper">
-            <select type="text" id="selectCollection" v-model="requestData.collectionIndex">
-              <option :key="undefined" :value="undefined" hidden disabled selected>{{
-                $t("select_collection")
-              }}</option>
-              <option
-                v-for="(collection, index) in $store.state.postwoman.collections"
-                :key="index"
-                :value="index"
-              >
-                {{ collection.name }}
-              </option>
-            </select>
-          </span>
-          <label for="selectFolder">{{ $t("folder") }}</label>
-          <span class="select-wrapper">
-            <select type="text" id="selectFolder" v-model="requestData.folderIndex">
-              <option :key="undefined" :value="undefined">/</option>
-              <option v-for="(folder, index) in folders" :key="index" :value="index">
-                {{ folder.name }}
-              </option>
-            </select>
-          </span>
-          <label for="selectRequest">{{ $t("request") }}</label>
-          <span class="select-wrapper">
-            <select type="text" id="selectRequest" v-model="requestData.requestIndex">
-              <option :key="undefined" :value="undefined">/</option>
-              <option v-for="(folder, index) in requests" :key="index" :value="index">
-                {{ folder.name }}
-              </option>
-            </select>
-          </span>
-        </li>
-      </ul>
+      <md-field>
+        <label for="selectLabel">{{ $t("label") }}</label>
+        <md-input
+          type="text"
+          id="selectLabel"
+          v-model="requestData.name"
+          :placeholder="defaultRequestName"
+          @keyup.enter="saveRequestAs"
+        />
+      </md-field>
+      <md-field>
+        <label for="selectCollection">{{ $t("collection") }}</label>
+        <span class="select-wrapper">
+          <md-select type="text" id="selectCollection" v-model="requestData.collectionIndex">
+            <md-option :key="undefined" :value="undefined" hidden disabled selected>{{
+              $t("select_collection")
+            }}</md-option>
+            <md-option
+              v-for="(collection, index) in $store.state.postwoman.collections"
+              :key="index"
+              :value="index"
+            >
+              {{ collection.name }}
+            </md-option>
+          </md-select>
+        </span>
+      </md-field>
+      <md-field>
+        <label for="selectFolder">{{ $t("folder") }}</label>
+        <span class="select-wrapper">
+          <md-select type="text" id="selectFolder" v-model="requestData.folderIndex">
+            <md-option :key="undefined" :value="undefined">/</md-option>
+            <md-option v-for="(folder, index) in folders" :key="index" :value="index">
+              {{ folder.name }}
+            </md-option>
+          </md-select>
+        </span>
+      </md-field>
+      <md-field>
+        <label for="selectRequest">{{ $t("request") }}</label>
+        <span class="select-wrapper">
+          <md-select id="selectRequest" v-model="requestData.requestIndex">
+            <md-option :key="undefined" :value="undefined">/</md-option>
+            <md-option v-for="(folder, index) in requests" :key="index" :value="index">
+              {{ folder.name }}
+            </md-option>
+          </md-select>
+        </span>
+      </md-field>
     </div>
     <div slot="footer">
-      <div class="flex-wrap">
-        <span></span>
-        <span>
-          <button class="icon" @click="hideModal">
-            {{ $t("cancel") }}
-          </button>
-          <button class="icon primary" @click="saveRequestAs">
-            {{ $t("save") }}
-          </button>
-        </span>
-      </div>
+      <md-button class="icon" @click="hideModal">
+        {{ $t("cancel") }}
+      </md-button>
+      <md-button class="icon primary" @click="saveRequestAs">
+        {{ $t("save") }}
+      </md-button>
     </div>
   </modal>
 </template>

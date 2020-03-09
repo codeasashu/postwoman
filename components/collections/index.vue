@@ -4,7 +4,7 @@ TODO:
 -->
 
 <template>
-  <pw-section class="yellow" :label="$t('collections')" ref="collections">
+  <div class="md-layout" :label="$t('collections')" ref="collections">
     <addCollection :show="showModalAdd" @hide-modal="displayModalAdd(false)" />
     <editCollection
       :show="showModalEdit"
@@ -39,60 +39,65 @@ TODO:
       @hide-modal="displayModalImportExport(false)"
     />
 
-    <div class="flex-wrap">
-      <div>
-        <button class="icon" @click="displayModalAdd(true)">
-          <i class="material-icons">add</i>
-          <span>{{ $t("new") }}</span>
-        </button>
+    <div class="md-layout-item md-size-100">
+      <div class="collection-header md-layout">
+        <div class="md-layout md-gutter">
+          <div class="md-layout-item md-size-50 center">
+            <md-button
+              class="md-dense md-raised md-primary md-layout-item md-alignment-center-right"
+              @click="displayModalAdd(true)"
+            >
+              <span>{{ $t("create_collection") }}</span>
+            </md-button>
+          </div>
+          <div class="md-layout-item md-size-50 center">
+            <md-button
+              class="md-dense md-raised md-primary md-layout-item md-alignment-center-right"
+              @click="displayModalImportExport(true)"
+            >
+              <span>{{ $t("import_export") }}</span>
+            </md-button>
+          </div>
+        </div>
       </div>
-      <div>
-        <button class="icon" @click="displayModalImportExport(true)">
-          {{ $t("import_export") }}
-        </button>
-        <!-- <a
-          href="https://github.com/liyasthomas/postwoman/wiki/Collections"
-          target="_blank"
-          rel="noopener"
-        >
-          <button class="icon" v-tooltip="'Wiki'">
-            <i class="material-icons">help</i>
-          </button>
-        </a> -->
-      </div>
+      <md-divider></md-divider>
     </div>
-    <p v-if="collections.length === 0" class="info">
-      Create new collection
-    </p>
+
     <virtual-list
-      class="virtual-list"
+      class="virtual-list md-layout-item md-size-100"
       :class="{ filled: collections.length }"
       :size="152"
       :remain="Math.min(5, collections.length)"
     >
-      <ul>
-        <li v-for="(collection, index) in collections" :key="collection.name">
-          <collection
-            :collection-index="index"
-            :collection="collection"
-            @edit-collection="editCollection(collection, index)"
-            @add-folder="addFolder(collection, index)"
-            @edit-folder="editFolder($event)"
-            @edit-request="editRequest($event)"
-          />
-        </li>
-        <li v-if="collections.length === 0">
+      <md-list>
+        <md-list-item
+          class="bordered-bottom"
+          v-for="(collection, index) in collections"
+          :key="collection.name"
+        >
+          <div class="md-layout md-size-100">
+            <collection
+              :collection-index="index"
+              :collection="collection"
+              @edit-collection="editCollection(collection, index)"
+              @add-folder="addFolder(collection, index)"
+              @edit-folder="editFolder($event)"
+              @edit-request="editRequest($event)"
+            />
+          </div>
+        </md-list-item>
+        <md-list-item v-if="collections.length === 0">
           <label>Collections are empty</label>
-        </li>
-      </ul>
+        </md-list-item>
+      </md-list>
     </virtual-list>
-    <nuxt-link :to="localePath('doc')" :aria-label="$t('documentation')">
+    <!-- <nuxt-link :to="localePath('doc')" :aria-label="$t('documentation')">
       <button class="icon">
         <i class="material-icons">books</i>
         <span>{{ $t("generate_docs") }}</span>
       </button>
-    </nuxt-link>
-  </pw-section>
+    </nuxt-link> -->
+  </div>
 </template>
 
 <style scoped lang="scss">
@@ -104,6 +109,10 @@ ul {
   display: flex;
   flex-direction: column;
 }
+
+.bordered-bottom {
+  border-bottom: 1px #ccc solid;
+}
 </style>
 
 <script>
@@ -114,8 +123,8 @@ export default {
   components: {
     collection,
     "pw-section": () => import("../layout/section"),
-    addCollection: () => import("./addCollection"),
     addFolder: () => import("./addFolder"),
+    addCollection: () => import("./addCollection"),
     editCollection: () => import("./editCollection"),
     editFolder: () => import("./editFolder"),
     editRequest: () => import("./editRequest"),
