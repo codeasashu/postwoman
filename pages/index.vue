@@ -1,7 +1,6 @@
 <template>
   <div class="page">
     <div class="content v-layout v-gutter">
-      
       <div class="v-layout-item v-size-100">
         <v-row>
           <v-col>
@@ -15,115 +14,139 @@
             />
           </v-col>
         </v-row>
-        <v-row>
-            <v-col col="2">
-              <v-input>
-                <v-select :label='$t("method")' :items="requestMethods" v-model="method"></v-select>
-              </v-input>
-            </v-col>
-            <v-col col="6">
-              <v-input>
-                <v-text-field
-                  name="url" id="url"
-                  :label='$t("url")'
-                  :class="{ error: !isValidURL }"
-                  @keyup.enter="isValidURL ? sendRequest() : null"
-                  v-model="uri" spellcheck="false" />
-              </v-input>
-            </v-col>
-            <v-col col="4">
-              <v-btn color="primary" raised
-                :disabled="!isValidURL"
-                @click="sendRequest"
-                id="send" ref="sendButton"
+        <v-row ref="request-input">
+          <v-col col="2">
+            <v-input>
+              <v-select :label="$t('method')" :items="requestMethods" v-model="method"></v-select>
+            </v-input>
+          </v-col>
+          <v-col col="6">
+            <v-input>
+              <v-text-field
+                name="url"
+                id="url"
+                :label="$t('url')"
+                :class="{ error: !isValidURL }"
+                @keyup.enter="isValidURL ? sendRequest() : null"
+                v-model="uri"
+                spellcheck="false"
+              />
+            </v-input>
+          </v-col>
+          <v-col col="4">
+            <v-btn
+              color="primary"
+              raised
+              :disabled="!isValidURL"
+              @click="sendRequest"
+              id="send"
+              ref="sendButton"
               >{{ $t("send") }}
-                <v-icon>send</v-icon>
-              </v-btn>
-              <v-btn class="v-primary v-raised v-icon-button"
-                :disabled="!isValidURL"
-                @click="copyRequest"
-                v-tooltip.bottom="$t('copy_request_link')"
-                id="copyRequest" ref="copyRequest"
-              >
-                <v-icon v-if="navigatorShare">share</v-icon>
-                <v-icon v-else>file_copy</v-icon>
-              </v-btn>
-              <v-btn class="v-primary v-raised v-icon-button"
-                :disabled="!isValidURL"
-                @click="saveRequest"
-                id="saveRequest" ref="saveRequest"
-                v-tooltip.bottom="$t('save_to_collections')"
-              >
-                <v-icon>save</v-icon>
-              </v-btn>
-              <v-btn class="v-primary v-raised v-icon-button"
-                @click="clearContent('', $event)"
-                id="clearAll" ref="clearAll"
-                v-tooltip.bottom="$t('clear_all')"
-              >
-                <v-icon>clear_all</v-icon>
-              </v-btn>
-              <v-menu
-                class="v-layout v-alignment-center-right"
-                :mdCloseOnClick="true" 
-                :mdCloseOnSelect="true"
-                v-tooltip="$t('more')">
-                <v-icon v-menu-trigger>more_vert</v-icon>
-                <v-menu-content>
-                  <v-menu-item>
-                    <v-btn @click="showModal = true">
-                      <span><v-icon>import_export</v-icon>{{ $t("import_curl") }}</span>
-                    </v-btn>
-                  </v-menu-item>
-                  <v-menu-item>
-                    <v-btn @click="showModal = true">
-                      <span><v-icon>code</v-icon>{{ isHidden ? $t('show_code') : $t('hide_code') }}</span>
-                    </v-btn>
-                  </v-menu-item>
-                  <v-menu-item>
-                    <v-btn @click="isHidden = !isHidden" :disabled="!isValidURL">
-                      <span><v-icon>import_export</v-icon>{{ $t("import_curl") }}</span>
-                    </v-btn>
-                  </v-menu-item>
-                </v-menu-content>
-              </v-menu>
-            </v-col>
+              <v-icon>send</v-icon>
+            </v-btn>
+            <v-btn
+              class="v-primary v-raised v-icon-button"
+              :disabled="!isValidURL"
+              @click="copyRequest"
+              v-tooltip.bottom="$t('copy_request_link')"
+              id="copyRequest"
+              ref="copyRequest"
+            >
+              <v-icon v-if="navigatorShare">share</v-icon>
+              <v-icon v-else>file_copy</v-icon>
+            </v-btn>
+            <v-btn
+              class="v-primary v-raised v-icon-button"
+              :disabled="!isValidURL"
+              @click="saveRequest"
+              id="saveRequest"
+              ref="saveRequest"
+              v-tooltip.bottom="$t('save_to_collections')"
+            >
+              <v-icon>save</v-icon>
+            </v-btn>
+            <v-btn
+              class="v-primary v-raised v-icon-button"
+              @click="clearContent('', $event)"
+              id="clearAll"
+              ref="clearAll"
+              v-tooltip.bottom="$t('clear_all')"
+            >
+              <v-icon>clear_all</v-icon>
+            </v-btn>
+            <v-menu
+              class="v-layout v-alignment-center-right"
+              :mdCloseOnClick="true"
+              :mdCloseOnSelect="true"
+              v-tooltip="$t('more')"
+            >
+              <v-icon v-menu-trigger>more_vert</v-icon>
+              <v-menu-content>
+                <v-menu-item>
+                  <v-btn @click="showModal = true">
+                    <span><v-icon>import_export</v-icon>{{ $t("import_curl") }}</span>
+                  </v-btn>
+                </v-menu-item>
+                <v-menu-item>
+                  <v-btn @click="showModal = true">
+                    <span
+                      ><v-icon>code</v-icon>{{ isHidden ? $t("show_code") : $t("hide_code") }}</span
+                    >
+                  </v-btn>
+                </v-menu-item>
+                <v-menu-item>
+                  <v-btn @click="isHidden = !isHidden" :disabled="!isValidURL">
+                    <span><v-icon>import_export</v-icon>{{ $t("import_curl") }}</span>
+                  </v-btn>
+                </v-menu-item>
+              </v-menu-content>
+            </v-menu>
+          </v-col>
         </v-row>
       </div>
 
       <div class="v-layout-item v-size-100">
-        <v-tabs>
-          <v-tab id="tab-params" :v-label="$t('parameters')">
+        <v-tabs v-model="tab">
+          <v-tab id="tab-query-params">{{ $t("query_parameters") }}</v-tab>
+          <v-tab id="tab-auth">{{ $t("auth") }}</v-tab>
+          <v-tab id="tab-headers">{{ $t("headers") }}</v-tab>
+          <v-tab id="tab-body">{{ $t("body") }}</v-tab>
+        </v-tabs>
+        <v-tabs-items v-model="tab">
+          <v-tab-item>
             <query-params
               :params="params"
-              @set_key="(event) => $store.commit('setKeyParams', ...event)"
-              @set_value="(event) => $store.commit('setValueParams', ...event)"
+              @set_key="event => $store.commit('setKeyParams', ...event)"
+              @set_value="event => $store.commit('setValueParams', ...event)"
               @clear_all="clearContent('parameters', $event)"
               @delete="index => removeRequestParam(index)"
               @add_new="addRequestParam"
-            >
-            </query-params>
-          </v-tab>
-          <v-tab id="tab-auth" :v-label="$t('auth')">
+            />
+          </v-tab-item>
+          <v-tab-item>
             <authentication
               :auth="auth"
-              @set_select="(val) => {auth=val}"
+              @set_select="
+                val => {
+                  auth = val
+                }
+              "
               @clear_all="clearContent('auth', $event)"
             />
-          </v-tab>
-          <v-tab id="tab-headers" :v-label="$t('headers')">
+          </v-tab-item>
+          <v-tab-item>
             <headers
               :headers="headers"
               :commonHeaders="commonHeaders"
               @set_route_query="setRouteQueryState"
-              @set_key="(event) => $store.commit('setKeyHeader', ...event)"
-              @set_value="(event) => $store.commit('setValueHeader', ...event)"
+              @set_key="event => $store.commit('setKeyHeader', ...event)"
+              @set_value="event => $store.commit('setValueHeader', ...event)"
               @delete="index => removeRequestHeader(index)"
               @add_new="addRequestHeader"
               @clear_all="clearContent('headers', $event)"
             />
-          </v-tab>
-          <v-tab id="tab-requestbody" label="Body">
+          </v-tab-item>
+          <v-tab-item>
             <request-body
               v-if="['POST', 'PUT', 'PATCH'].includes(method)"
               :method="method"
@@ -131,24 +154,36 @@
               :rawParams="rawParams"
               :bodyParams="bodyParams"
               :contentType="contentType"
-              @raw-params="val => { rawParams = val }"
-              @raw-input="hasRawInput => { rawInput = hasRawInput }"
-              @set_content_type="(val) => { contentType = val }"
-              @set_key="(event) => $store.commit('setKeyBodyParams', ...event)"
-              @set_value="(event) => $store.commit('setValueBodyParams', ...event)"
+              @raw-params="
+                val => {
+                  rawParams = val
+                }
+              "
+              @raw-input="
+                hasRawInput => {
+                  rawInput = hasRawInput
+                }
+              "
+              @set_content_type="
+                val => {
+                  contentType = val
+                }
+              "
+              @set_key="event => $store.commit('setKeyBodyParams', ...event)"
+              @set_value="event => $store.commit('setValueBodyParams', ...event)"
               @delete="index => removeRequestBodyParam(index)"
               @add_new="addRequestBodyParam"
             />
-          </v-tab>
-        </v-tabs>
+          </v-tab-item>
+        </v-tabs-items>
       </div>
 
       <v-divider class="v-layout" />
-<!-- Response -->
+      <!-- Response -->
       <div class="v-layout-item v-size-100">
         <response ref="response" :response="response" />
       </div>
-<!-- END Response -->
+      <!-- END Response -->
 
       <save-request-as
         :show="showRequestModal"
@@ -519,7 +554,7 @@ export default {
         headers: "",
         body: "",
       },
-      requestMethods: ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'PATCH'],
+      requestMethods: ["GET", "POST", "PUT", "DELETE", "HEAD", "PATCH"],
       previewEnabled: false,
       paramsWatchEnabled: true,
       expandResponse: false,
@@ -551,6 +586,7 @@ export default {
             ? this.$store.state.postwoman.settings.SCROLL_INTO_ENABLED
             : true,
       },
+      tab: null,
     }
   },
   watch: {
@@ -1288,7 +1324,7 @@ export default {
       return false
     },
     removeRequestHeader(index) {
-      console.log('idx', index)
+      console.log("idx", index)
       // .slice() gives us an entirely new array rather than giving us just the reference
       const oldHeaders = this.headers.slice()
       this.$store.commit("removeHeaders", index)
