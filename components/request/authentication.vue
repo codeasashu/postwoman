@@ -1,78 +1,78 @@
 <template>
   <div>
-    <div class="md-layout">
-      <div class="md-layout-item md-size-80">
+    <div class="v-layout">
+      <div class="v-layout-item v-size-80">
         <h3>{{ $t("authentication") }}</h3>
       </div>
-      <div class="md-layout-item md-size-20">
-        <md-button
-          class="md-icon-button"
+      <div class="v-layout-item v-size-20">
+        <v-btn
+          class="v-icon-button"
           @click="$emit('clear_all', $event)"
           v-tooltip.bottom="$t('clear')"
-          ><md-icon>clear_all</md-icon></md-button
+          ><v-icon>clear_all</v-icon></v-btn
         >
       </div>
     </div>
-    <div class="md-layout md-gutter">
-      <div class="md-layout-item md-size-30">
+    <div class="v-layout v-gutter">
+      <div class="v-layout-item v-size-30">
         <span class="select-wrapper">
-          <md-field>
-            <md-select id="auth" v-model="reauth">
-              <md-option value="None">None</md-option>
-              <md-option value="Basic Auth">Basic Auth</md-option>
-              <md-option value="Bearer Token">Bearer Token</md-option>
-              <md-option value="OAuth 2.0">OAuth 2.0</md-option>
-            </md-select>
-          </md-field>
+          <v-input>
+            <v-select id="auth" v-model="reauth">
+              <v-option value="None">None</v-option>
+              <v-option value="Basic Auth">Basic Auth</v-option>
+              <v-option value="Bearer Token">Bearer Token</v-option>
+              <v-option value="OAuth 2.0">OAuth 2.0</v-option>
+            </v-select>
+          </v-input>
         </span>
       </div>
-      <div class="md-layout-item md-size-70">
+      <div class="v-layout-item v-size-70">
         <!-- Basic auth -->
-        <div class="basic-auth md-layout" v-if="reauth === 'Basic Auth'">
-          <div class="md-layout-item md-size-100">
-            <md-field>
-              <md-input placeholder="User" name="http_basic_user" v-model="httpUser" />
-            </md-field>
+        <div class="basic-auth v-layout" v-if="reauth === 'Basic Auth'">
+          <div class="v-layout-item v-size-100">
+            <v-input>
+              <v-text-field placeholder="User" name="http_basic_user" v-model="httpUser" />
+            </v-input>
           </div>
-          <div class="md-layout-item md-size-100">
-            <md-field>
-              <md-input
+          <div class="v-layout-item v-size-100">
+            <v-input>
+              <v-text-field
                 placeholder="Password"
                 name="http_basic_passwd"
                 :type="passwordFieldType"
                 v-model="httpPassword"
               />
-            </md-field>
+            </v-input>
           </div>
         </div>
 
         <!-- Bearer/OAuth -->
         <div
-          class="bearer-auth md-layout"
+          class="bearer-auth v-layout"
           v-if="reauth === 'Bearer Token' || reauth === 'OAuth 2.0'"
         >
-          <div class="md-layout-item md-size-70">
-            <md-field>
-              <md-input placeholder="Token" name="bearer_token" v-model="bearerToken" />
-            </md-field>
+          <div class="v-layout-item v-size-70">
+            <v-input>
+              <v-text-field placeholder="Token" name="bearer_token" v-model="bearerToken" />
+            </v-input>
           </div>
-          <div class="md-layout-item md-size-30">
-            <md-button
+          <div class="v-layout-item v-size-30">
+            <v-btn
               v-if="auth === 'OAuth 2.0'"
-              class="md-raised md-icon-button"
+              class="v-raised v-icon-button"
               @click="showTokenList = !showTokenList"
               v-tooltip.bottom="$t('use_token')"
             >
-              <md-icon>open_in_new</md-icon>
-            </md-button>
-            <md-button
+              <v-icon>open_in_new</v-icon>
+            </v-btn>
+            <v-btn
               v-if="auth === 'OAuth 2.0'"
-              class="md-raised md-icon-button"
+              class="v-raised v-icon-button"
               @click="showTokenRequest = !showTokenRequest"
               v-tooltip.bottom="$t('get_token')"
             >
-              <md-icon>vpn_key</md-icon>
-            </md-button>
+              <v-icon>vpn_key</v-icon>
+            </v-btn>
           </div>
         </div>
       </div>

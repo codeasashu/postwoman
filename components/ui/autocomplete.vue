@@ -1,6 +1,6 @@
 <template>
   <div class="autocomplete-wrapper">
-      <md-input
+      <v-text-field
         type="text"
         :placeholder="placeholder"
         v-model="text"

@@ -1,38 +1,16 @@
 <template>
-  <modal v-if="show" @close="show = false">
+  <modal :show="show" @close="show = false">
     <div slot="header">
-      <ul>
-        <li>
-          <div class="flex-wrap">
-            <h3 class="title">{{ $t("edit_folder") }}</h3>
-            <div>
-              <button class="icon" @click="hideModal">
-                <i class="material-icons">close</i>
-              </button>
-            </div>
-          </div>
-        </li>
-      </ul>
+      <h3 class="title">{{ $t("edit_folder") }}</h3>
     </div>
     <div slot="body">
-      <ul>
-        <li>
-          <input type="text" v-model="name" :placeholder="folder.name" @keyup.enter="editFolder" />
-        </li>
-      </ul>
+      <v-input v-if="folder">
+        <v-text-field type="text" v-model="name" :placeholder="folder.name" @keyup.enter="editFolder" />
+      </v-input>
     </div>
     <div slot="footer">
-      <div class="flex-wrap">
-        <span></span>
-        <span>
-          <button class="icon" @click="hideModal">
-            {{ $t("cancel") }}
-          </button>
-          <button class="icon primary" @click="editFolder">
-            {{ $t("save") }}
-          </button>
-        </span>
-      </div>
+      <v-btn class="v-primary" @click="hideModal">{{ $t("cancel") }}</v-btn>
+      <v-btn class="v-primary" @click="editFolder">{{ $t("save") }}</v-btn>
     </div>
   </modal>
 </template>
@@ -48,6 +26,13 @@ export default {
   },
   components: {
     modal: () => import("../../components/ui/modal"),
+  },
+  watch: {
+    show(shown) {
+      if (shown) {
+        this.name = this.$props.folder.name
+      }
+    },
   },
   data() {
     return {

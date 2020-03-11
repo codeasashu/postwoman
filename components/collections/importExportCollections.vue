@@ -4,16 +4,15 @@
       <h3 class="title">Import / Export Collections</h3>
     </div>
     <div slot="body">
-      <md-field>
-        <label>Export</label>
-        <md-textarea v-model="collectionJson"></md-textarea>
-      </md-field>
+      <v-input>
+        <v-textarea label='Export' v-model="collectionJson"></v-textarea>
+      </v-input>
     </div>
     <div slot="footer">
-      <md-button class="md-primary" @click="hideModal">{{ $t("cancel") }}</md-button>
-      <md-button class="md-primary" @click="exportJSON" v-tooltip="$t('download_file')">{{
+      <v-btn @click="hideModal">{{ $t("cancel") }}</v-btn>
+      <v-btn color="primary" @click="exportJSON" v-tooltip="$t('download_file')">{{
         $t("export")
-      }}</md-button>
+      }}</v-btn>
     </div>
   </modal>
 </template>

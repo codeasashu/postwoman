@@ -6,18 +6,22 @@
       </div>
     </div>
     <div slot="body">
-      <md-field>
-        <label>{{ $t("my_new_collection") }}</label>
-        <md-input
-          :placeholder="$t('my_new_collection')"
-          v-model="name"
-          @keyup.enter="addNewCollection"
-        ></md-input>
-      </md-field>
+      <v-row>
+        <v-col cols="12">
+        <v-input>
+          <v-text-field
+            :label='$t("collection_name")'
+            :placeholder="$t('my_new_collection')"
+            v-model="name"
+            @keyup.enter="addNewCollection"
+          ></v-text-field>
+        </v-input>
+        </v-col>
+      </v-row>
     </div>
     <div slot="footer">
-      <md-button class="md-primary" @click="hideModal">{{ $t("cancel") }}</md-button>
-      <md-button class="md-primary" @click="addNewCollection">{{ $t("save") }}</md-button>
+      <v-btn @click="hideModal">{{ $t("cancel") }}</v-btn>
+      <v-btn color="primary" @click="addNewCollection">{{ $t("save") }}</v-btn>
     </div>
   </modal>
 </template>

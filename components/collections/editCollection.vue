@@ -4,18 +4,18 @@
       <h3 class="title">{{ $t("edit_collection") }}</h3>
     </div>
     <div slot="body">
-      <md-field>
-        <md-input
+      <v-input>
+        <v-text-field
           v-if="editingCollection"
           :placeholder="editingCollection.name"
           v-model="name"
           @keyup.enter="saveCollection"
-        ></md-input>
-      </md-field>
+        ></v-text-field>
+      </v-input>
     </div>
     <div slot="footer">
-      <md-button class="md-primary" @click="hideModal">{{ $t("cancel") }}</md-button>
-      <md-button class="md-primary" @click="saveCollection">{{ $t("save") }}</md-button>
+      <v-btn class="v-primary" @click="hideModal">{{ $t("cancel") }}</v-btn>
+      <v-btn class="v-primary" @click="saveCollection">{{ $t("save") }}</v-btn>
     </div>
   </modal>
 </template>

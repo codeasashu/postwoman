@@ -4,18 +4,18 @@
       <h3>{{ $t("new_folder") }}</h3>
     </div>
     <div slot="body">
-      <md-field>
+      <v-input>
         <label>Folder name</label>
-        <md-input
+        <v-text-field
           :placeholder="$t('my_new_folder')"
           v-model="name"
           @keyup.enter="addNewFolder"
-        ></md-input>
-      </md-field>
+        ></v-text-field>
+      </v-input>
     </div>
     <div slot="footer">
-      <md-button class="md-primary" @click="hideModal">{{ $t("cancel") }}</md-button>
-      <md-button class="md-primary" @click="addNewFolder">{{ $t("save") }}</md-button>
+      <v-btn class="v-primary" @click="hideModal">{{ $t("cancel") }}</v-btn>
+      <v-btn class="v-primary" @click="addNewFolder">{{ $t("save") }}</v-btn>
     </div>
   </modal>
 </template>

@@ -1,106 +1,99 @@
 <template>
   <div class="page">
-    <div class="content md-layout md-gutter">
+    <div class="content v-layout v-gutter">
       
-      <div class="md-layout-item md-size-100">
-        <div class="md-layout">
-          <div class="blue">
-            <label for="label">{{ $t("label") }}</label>
-            <input
+      <div class="v-layout-item v-size-100">
+        <v-row>
+          <v-col>
+            <v-text-field
               id="label"
               name="label"
               type="text"
               v-model="label"
+              :label="$t('label')"
               :placeholder="$t('optional')"
             />
-          </div>
-        </div>
-        <div class="md-layout">
-            <div class="md-layout-item md-size-20">
-              <md-field>
-                <label for="method">{{ $t("method") }}</label>
-                <md-select v-model="method" name="method" id="method">
-                    <md-option value="GET">GET</md-option>
-                    <md-option value="POST">POST</md-option>
-                    <md-option value="PUT">PUT</md-option>
-                    <md-option value="DELETE">DELETE</md-option>
-                </md-select>
-              </md-field>
-            </div>
-            <div class="md-layout-item md-size-50">
-              <md-field>
-                <label for="url">{{ $t("url") }}</label>
-                <md-input
+          </v-col>
+        </v-row>
+        <v-row>
+            <v-col col="2">
+              <v-input>
+                <v-select :label='$t("method")' :items="requestMethods" v-model="method"></v-select>
+              </v-input>
+            </v-col>
+            <v-col col="6">
+              <v-input>
+                <v-text-field
                   name="url" id="url"
+                  :label='$t("url")'
                   :class="{ error: !isValidURL }"
                   @keyup.enter="isValidURL ? sendRequest() : null"
                   v-model="uri" spellcheck="false" />
-              </md-field>
-            </div>
-            <div class="md-layout-item md-size-30">
-              <md-button class="md-primary md-raised"
+              </v-input>
+            </v-col>
+            <v-col col="4">
+              <v-btn color="primary" raised
                 :disabled="!isValidURL"
                 @click="sendRequest"
                 id="send" ref="sendButton"
               >{{ $t("send") }}
-                <md-icon>send</md-icon>
-              </md-button>
-              <md-button class="md-primary md-raised md-icon-button"
+                <v-icon>send</v-icon>
+              </v-btn>
+              <v-btn class="v-primary v-raised v-icon-button"
                 :disabled="!isValidURL"
                 @click="copyRequest"
                 v-tooltip.bottom="$t('copy_request_link')"
                 id="copyRequest" ref="copyRequest"
               >
-                <md-icon v-if="navigatorShare">share</md-icon>
-                <md-icon v-else>file_copy</md-icon>
-              </md-button>
-              <md-button class="md-primary md-raised md-icon-button"
+                <v-icon v-if="navigatorShare">share</v-icon>
+                <v-icon v-else>file_copy</v-icon>
+              </v-btn>
+              <v-btn class="v-primary v-raised v-icon-button"
                 :disabled="!isValidURL"
                 @click="saveRequest"
                 id="saveRequest" ref="saveRequest"
                 v-tooltip.bottom="$t('save_to_collections')"
               >
-                <md-icon>save</md-icon>
-              </md-button>
-              <md-button class="md-primary md-raised md-icon-button"
+                <v-icon>save</v-icon>
+              </v-btn>
+              <v-btn class="v-primary v-raised v-icon-button"
                 @click="clearContent('', $event)"
                 id="clearAll" ref="clearAll"
                 v-tooltip.bottom="$t('clear_all')"
               >
-                <md-icon>clear_all</md-icon>
-              </md-button>
-              <md-menu
-                class="md-layout md-alignment-center-right"
+                <v-icon>clear_all</v-icon>
+              </v-btn>
+              <v-menu
+                class="v-layout v-alignment-center-right"
                 :mdCloseOnClick="true" 
                 :mdCloseOnSelect="true"
-                md-direction="bottom-start"
                 v-tooltip="$t('more')">
-                <md-icon md-menu-trigger>more_vert</md-icon>
-                <md-menu-content>
-                  <md-menu-item>
-                    <md-button @click="showModal = true">
-                      <span><md-icon>import_export</md-icon>{{ $t("import_curl") }}</span>
-                    </md-button>
-                  </md-menu-item>
-                  <md-menu-item>
-                    <md-button @click="showModal = true">
-                      <span><md-icon>code</md-icon>{{ isHidden ? $t('show_code') : $t('hide_code') }}</span>
-                    </md-button>
-                  </md-menu-item>
-                  <md-menu-item>
-                    <md-button @click="isHidden = !isHidden" :disabled="!isValidURL">
-                      <span><md-icon>import_export</md-icon>{{ $t("import_curl") }}</span>
-                    </md-button>
-                  </md-menu-item>
-                </md-menu-content>
-              </md-menu>
-            </div>
-        </div>
+                <v-icon v-menu-trigger>more_vert</v-icon>
+                <v-menu-content>
+                  <v-menu-item>
+                    <v-btn @click="showModal = true">
+                      <span><v-icon>import_export</v-icon>{{ $t("import_curl") }}</span>
+                    </v-btn>
+                  </v-menu-item>
+                  <v-menu-item>
+                    <v-btn @click="showModal = true">
+                      <span><v-icon>code</v-icon>{{ isHidden ? $t('show_code') : $t('hide_code') }}</span>
+                    </v-btn>
+                  </v-menu-item>
+                  <v-menu-item>
+                    <v-btn @click="isHidden = !isHidden" :disabled="!isValidURL">
+                      <span><v-icon>import_export</v-icon>{{ $t("import_curl") }}</span>
+                    </v-btn>
+                  </v-menu-item>
+                </v-menu-content>
+              </v-menu>
+            </v-col>
+        </v-row>
       </div>
 
-      <div class="md-layout-item md-size-100">
-        <md-tabs>
-          <md-tab id="tab-params" :md-label="$t('parameters')">
+      <div class="v-layout-item v-size-100">
+        <v-tabs>
+          <v-tab id="tab-params" :v-label="$t('parameters')">
             <query-params
               :params="params"
               @set_key="(event) => $store.commit('setKeyParams', ...event)"
@@ -110,15 +103,15 @@
               @add_new="addRequestParam"
             >
             </query-params>
-          </md-tab>
-          <md-tab id="tab-auth" :md-label="$t('auth')">
+          </v-tab>
+          <v-tab id="tab-auth" :v-label="$t('auth')">
             <authentication
               :auth="auth"
               @set_select="(val) => {auth=val}"
               @clear_all="clearContent('auth', $event)"
             />
-          </md-tab>
-          <md-tab id="tab-headers" :md-label="$t('headers')">
+          </v-tab>
+          <v-tab id="tab-headers" :v-label="$t('headers')">
             <headers
               :headers="headers"
               :commonHeaders="commonHeaders"
@@ -129,8 +122,8 @@
               @add_new="addRequestHeader"
               @clear_all="clearContent('headers', $event)"
             />
-          </md-tab>
-          <md-tab id="tab-requestbody" md-label="Body">
+          </v-tab>
+          <v-tab id="tab-requestbody" label="Body">
             <request-body
               v-if="['POST', 'PUT', 'PATCH'].includes(method)"
               :method="method"
@@ -146,55 +139,16 @@
               @delete="index => removeRequestBodyParam(index)"
               @add_new="addRequestBodyParam"
             />
-          </md-tab>
-        </md-tabs>
+          </v-tab>
+        </v-tabs>
       </div>
 
-      <md-divider class="md-layout" />
+      <v-divider class="v-layout" />
 <!-- Response -->
-      <div class="md-layout-item md-size-100">
+      <div class="v-layout-item v-size-100">
         <response ref="response" :response="response" />
       </div>
 <!-- END Response -->
-      <aside v-if="activeSidebar" class="sticky-inner inner-right">
-        <section>
-          <input id="history-tab" type="radio" name="side" checked="checked" />
-          <label for="history-tab">{{ $t("history") }}</label>
-          <div class="tab">
-            <history @useHistory="handleUseHistory" ref="historyComponent" />
-          </div>
-
-          <input id="collection-tab" type="radio" name="side" />
-          <label for="collection-tab">{{ $t("collections") }}</label>
-          <div class="tab">
-            <collections />
-          </div>
-
-          <input id="environment-tab" type="radio" name="side" />
-          <label for="environment-tab">{{ $t("environment") }}</label>
-          <div class="tab">
-            <environments @use-environment="useSelectedEnvironment($event)" />
-          </div>
-
-          <input id="sync-tab" type="radio" name="side" />
-          <label for="sync-tab">{{ $t("notes") }}</label>
-          <div class="tab">
-            <pw-section class="pink" :label="$t('notes')" ref="sync">
-              <div v-if="fb.currentUser">
-                <inputform />
-                <notes />
-              </div>
-              <div v-else>
-                <ul>
-                  <li>
-                    <label>{{ $t("login_first") }}</label>
-                  </li>
-                </ul>
-              </div>
-            </pw-section>
-          </div>
-        </section>
-      </aside>
 
       <save-request-as
         :show="showRequestModal"
@@ -536,9 +490,7 @@ export default {
     "pw-section": section,
     "pw-toggle": () => import("../components/ui/toggle"),
     "pw-modal": () => import("../components/ui/modal"),
-    history: () => import("../components/layout/history"),
     autocomplete: () => import("../components/ui/autocomplete"),
-    collections: () => import("../components/collections"),
     saveRequestAs: () => import("../components/collections/saveRequestAs"),
     Editor: AceEditor,
     inputform: () => import("../components/firebase/inputform"),
@@ -567,6 +519,7 @@ export default {
         headers: "",
         body: "",
       },
+      requestMethods: ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'PATCH'],
       previewEnabled: false,
       paramsWatchEnabled: true,
       expandResponse: false,
@@ -687,7 +640,7 @@ export default {
           this.url = url.origin
           this.path = url.pathname
         } catch (error) {
-          console.log(error)
+          console.log(error, value)
           let uriRegex = value.match(/^((http[s]?:\/\/)?(<<[^\/]+>>)?[^\/]*|)(\/?.*)$/)
           this.url = uriRegex[1]
           this.path = uriRegex[4]
@@ -1113,16 +1066,6 @@ export default {
         behavior: "smooth",
       })
     },
-    handleUseHistory({ label, method, url, path, usesScripts, preRequestScript }) {
-      this.label = label
-      this.method = method
-      this.uri = url + path
-      this.url = url
-      this.path = path
-      this.showPreRequestScript = usesScripts
-      this.preRequestScript = preRequestScript
-      if (this.settings.SCROLL_INTO_ENABLED) this.scrollInto("request")
-    },
     getVariablesFromPreRequestScript() {
       if (!this.preRequestScript) {
         return {}
@@ -1254,7 +1197,8 @@ export default {
             duration,
             star: false,
           }
-          this.$refs.historyComponent.addEntry(entry)
+          this.$store.commit("postwoman/addHistory", entry)
+          //this.$refs.historyComponent.addEntry(entry)
           if (fb.currentUser !== null) {
             if (fb.currentSettings[2].value) {
               fb.writeHistory(entry)
@@ -1289,7 +1233,8 @@ export default {
             usesScripts: Boolean(this.preRequestScript),
             preRequestScript: this.preRequestScript,
           }
-          this.$refs.historyComponent.addEntry(entry)
+          this.$store.commit("postwoman/addHistory", entry)
+          //this.$refs.historyComponent.addEntry(entry)
           if (fb.currentUser !== null) {
             if (fb.currentSettings[2].value) {
               fb.writeHistory(entry)

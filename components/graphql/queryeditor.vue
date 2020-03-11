@@ -142,7 +142,7 @@ export default {
       name: "runGQLQuery",
       exec: () => this.onRunGQLQuery(this.editor.getValue()),
       bindKey: {
-        mac: "cmd-enter",
+        mac: "cv-enter",
         win: "ctrl-enter",
       },
     })

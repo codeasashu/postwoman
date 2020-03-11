@@ -1,19 +1,19 @@
 <template>
   <div>
-    <div class="md-layout md-gutter" v-if="['POST', 'PUT', 'PATCH'].includes(method)">
-        <div class="md-layout-item md-size-40">
+    <div class="v-layout v-gutter" v-if="['POST', 'PUT', 'PATCH'].includes(method)">
+        <div class="v-layout-item v-size-40">
             <h3>{{ $t("request") }}</h3>
-            <md-field class="md-layout-item md-size-90">
+            <v-input class="v-layout-item v-size-90">
                 <autocomplete
                     @input="changeContentType"
-                    class="md-layout"
+                    class="v-layout"
                     :source="validContentTypes"
                     :spellcheck="false"
                 >Content Type</autocomplete>
-            </md-field>
-            <md-switch v-model="_rawInput">{{ $t("raw_input") }}</md-switch>
+            </v-input>
+            <v-switch v-model="_rawInput">{{ $t("raw_input") }}</v-switch>
         </div>
-        <div class="md-layout-item md-size-60">
+        <div class="v-layout-item v-size-60">
             <div v-if="!rawInput">
                 <body-params
                     :bodyParams="bodyParams"

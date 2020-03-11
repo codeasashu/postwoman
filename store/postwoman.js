@@ -69,10 +69,17 @@ export const SETTINGS_KEYS = [
    * to run the requests
    */
   "EXTENSIONS_ENABLED",
+
+  /**
+   * Max history length
+   */
+  "HISTORY_MAX_LENGTH"
 ]
 
 export const state = () => ({
-  settings: {},
+  settings: {
+    "HISTORY_MAX_LENGTH": 20
+  },
   collections: [
     {
       name: "My Collection",
@@ -86,6 +93,7 @@ export const state = () => ({
       variables: [],
     },
   ],
+  history: [],
   editingEnvironment: {},
   selectedRequest: {},
   editingRequest: {},
@@ -373,6 +381,12 @@ export const mutations = {
   selectRequest(state, { request }) {
     state.selectedRequest = Object.assign({}, request)
   },
+
+  addHistory(state, history) {
+    if(state.history.length > SETTINGS_KEYS["HISTORY_MAX_LENGTH"])
+      state.history.pop()
+    state.history.push(history)
+  }
 }
 
 function testValue(myValue) {

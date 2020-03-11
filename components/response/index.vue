@@ -1,46 +1,44 @@
 <template>
-    <div>
-        <div class="md-layout">
-            <div class="md-layout-item md-size-100">
-                <h3>{{ $t("response") }}</h3>
-            </div>
-            <div class="md-layout-item md-size-100">
-                <md-toolbar class="md-transparent">
-                    <md-tabs class="md-layout-item md-size-70" @md-changed="changeTab">
-                        <md-tab id="tab-response-body" :md-label="$t('body')">
-                        </md-tab>
-                        <md-tab id="tab-response-headers" :md-label="$t('headers')">
-                        </md-tab>
-                    </md-tabs>
-                    <div class="md-layout md-size-30 md-alignment-right">
-                    <div class="md-layout-item md-alignment-center-right right">
-                        <p>{{ getStatusCode }}</p>
-                    </div>
-                    <div class="md-layout-item md-alignment-center-right right" v-if="response.body">
-                        <md-button
-                            class="md-icon-button"
-                            @click="downloadResponse"
-                            ref="downloadResponse"
-                            v-if="response.body"
-                            v-tooltip="$t('download_file')"
-                        >
-                            <md-icon>get_app</md-icon>
-                        </md-button>
-                        <md-button
-                            class="md-icon-button"
-                            @click="copyResponse"
-                            ref="copyResponse"
-                            v-if="response.body"
-                            v-tooltip="$t('copy_response')"
-                        >
-                            <md-icon>file_copy</md-icon>
-                        </md-button>
-                    </div>
-                    </div>
-                </md-toolbar>
-                <div class="md-layout">
-                    <div class="md-layout-item md-size-100">
-                        <div class="tab-body" v-show="currentTabId == 'tab-response-body'">
+    <v-row>
+        <v-col>
+            <h3>{{ $t("response") }}</h3>
+            <v-toolbar>
+                <v-col cols=8>
+                    <v-tabs v-model="tab">
+                        <v-tab id="tab-response-body">{{ $t('body') }}</v-tab>
+                        <v-tab id="tab-response-headers">{{ $t('headers') }}</v-tab>
+                    </v-tabs>
+                </v-col>
+                
+                <v-col cols=2>
+                    <p>{{ getStatusCode }}</p>
+                </v-col>
+                <v-col cols=2>
+                    <v-btn
+                        class="v-icon-button"
+                        @click="downloadResponse"
+                        ref="downloadResponse"
+                        v-if="response.body"
+                        v-tooltip="$t('download_file')"
+                    >
+                        <v-icon>get_app</v-icon>
+                    </v-btn>
+                    <v-btn
+                        class="v-icon-button"
+                        @click="copyResponse"
+                        ref="copyResponse"
+                        v-if="response.body"
+                        v-tooltip="$t('copy_response')"
+                    >
+                        <v-icon>file_copy</v-icon>
+                    </v-btn>
+                </v-col>
+            </v-toolbar>
+            
+            <v-row>
+                <v-col col=12>
+                    <v-tabs-items v-model="tab">
+                        <v-tab-item>
                             <div id="response-details-wrapper">
                                 <Editor
                                 :value="responseBodyText"
@@ -64,33 +62,37 @@
                             </div>
                             <div class="align-right"
                                 v-if="response.body && responseType === 'text/html'">
-                                <md-button class="md-raised" @click.prevent="togglePreview">
-                                    <md-icon>
+                                <v-btn class="v-raised" @click.prevent="togglePreview">
+                                    <v-icon>
                                         {{ !previewEnabled ? "visibility" : "visibility_off" }}
-                                    </md-icon>
+                                    </v-icon>
                                     <span>
                                         {{ previewEnabled ? $t("hide_preview") : $t("preview_html") }}
                                     </span>
-                                </md-button>
+                                </v-btn>
                             </div>
-                        </div>
-                        <div class="tab-header" v-show="currentTabId == 'tab-response-headers'">
-                            <md-table v-if="response.headers">
-                                <md-table-row>
-                                    <md-table-head>{{ $t('key') }}</md-table-head>
-                                    <md-table-head>{{ $t('value') }}</md-table-head>
-                                </md-table-row>
-                                <md-table-row v-for="(value, key) in response.headers" :key="key">
-                                    <md-table-cell>{{ key }}</md-table-cell>
-                                    <md-table-cell>{{ value }}</md-table-cell>
-                                </md-table-row>
-                            </md-table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+                        </v-tab-item>
+                        <v-tab-item>
+                            <v-simple-table v-if="response.headers">
+                                <template v-slot:default>
+                                <thead>
+                                    <tr>
+                                    <th>{{ $t('key') }}</th>
+                                    <th>{{ $t('value') }}</th>
+                                    </tr>
+                                </thead>
+                                <tr v-for="(value, key) in response.headers" :key="key">
+                                    <td>{{ key }}</td>
+                                    <td>{{ value }}</td>
+                                </tr>
+                                </template>
+                            </v-simple-table>
+                        </v-tab-item>
+                    </v-tabs-items>
+                </v-col>
+            </v-row>
+        </v-col>
+    </v-row>
 </template>
 <script>
 import AceEditor from "../../components/ui/ace-editor"
@@ -132,7 +134,8 @@ export default {
             responseBodyMaxLines: 16,
             previewEnabled: false,
             responseBodyText: null,
-            responseBodyType: null
+            responseBodyType: null,
+            tab: null
         }
     },
     computed: {

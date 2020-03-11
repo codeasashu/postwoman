@@ -1,24 +1,24 @@
 <template>
   <div>
-    <div class="md-layout">
-      <div class="md-layout-item md-size-80">
-        <md-button class="md-primary md-raised" @click="$emit('add_new')">
-          <md-icon>add</md-icon>
+    <div class="v-layout">
+      <div class="v-layout-item v-size-80">
+        <v-btn class="v-primary v-raised" @click="$emit('add_new')">
+          <v-icon>add</v-icon>
           <span>{{ $t("add_new") }}</span>
-        </md-button>
+        </v-btn>
       </div>
-      <div class="md-layout-item md-size-20">
-        <md-button
-          class="md-icon-button"
+      <div class="v-layout-item v-size-20">
+        <v-btn
+          class="v-icon-button"
           @click="$emit('clear_all', $event)"
           v-tooltip.bottom="$t('clear')"
-          ><md-icon>clear_all</md-icon></md-button
+          ><v-icon>clear_all</v-icon></v-btn
         >
       </div>
     </div>
-    <div class="md-layout md-gutter" v-for="(header, index) in headers" :key="index">
-      <div class="md-layout-item md-size-40">
-        <md-field>
+    <div class="v-layout v-gutter" v-for="(header, index) in headers" :key="index">
+      <div class="v-layout-item v-size-40">
+        <v-input>
           <autocomplete
             :placeholder="$t('header_count', { count: index + 1 })"
             :source="commonHeaders"
@@ -28,25 +28,25 @@
             @keyup.prevent="$emit('set_route_query')"
             autofocus
           />
-        </md-field>
+        </v-input>
       </div>
-      <div class="md-layout-item md-size-40">
-        <md-field>
-          <md-input
+      <div class="v-layout-item v-size-40">
+        <v-input>
+          <v-text-field
             :placeholder="$t('value_count', { count: index + 1 })"
             :name="'value' + index"
             :value="header.value"
             @change="$emit('set_value', { index: index, value: $event.target.value })"
             @keyup.prevent="$emit('set_route_query')"
           />
-        </md-field>
+        </v-input>
       </div>
-      <div class="md-layout-item md-size-20">
-        <md-button
-          class="md-raised md-icon-button"
+      <div class="v-layout-item v-size-20">
+        <v-btn
+          class="v-raised v-icon-button"
           @click="$emit('delete', index)"
           v-tooltip="$t('delete')"
-          ><md-icon>delete</md-icon></md-button
+          ><v-icon>delete</v-icon></v-btn
         >
       </div>
     </div>

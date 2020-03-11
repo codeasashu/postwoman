@@ -1,59 +1,54 @@
 <template>
   <div class="wrapper page-container">
-    <md-app>
-      <md-app-toolbar class="md-primary">
-        <md-tabs class="md-primary">
-          <md-tab
+    <v-app>
+      <v-app-bar app class="v-primary">
+        <v-tabs class="v-primary">
+          <v-tab
             id="tab-home"
-            md-label="Home"
             :to="localePath('index')"
             v-tooltip.right="$t('home')"
             :aria-label="$t('home')"
-            md-icon="home"
-          ></md-tab>
-          <md-tab
+          >Home <v-icon>home</v-icon></v-tab>
+          <v-tab
             id="tab-realtime"
-            md-label="Realtime"
             :to="localePath('realtime')"
             :class="linkActive('/realtime')"
             v-tooltip.right="$t('realtime')"
-            md-icon="settings_input_hdmi"
-          ></md-tab>
-          <md-tab
+          >Realtime <v-icon>settings_input_hdmi</v-icon></v-tab>
+          <v-tab
             id="tab-settings"
-            md-label="Settings"
             :to="localePath('settings')"
             :class="linkActive('/settings')"
             v-tooltip.right="$t('settings')"
             :aria-label="$t('settings')"
-            md-icon="settings"
-          ></md-tab>
-          <md-tab
+          >Settings <v-icon>settings</v-icon></v-tab>
+          <v-tab
             id="tab-doc"
-            md-label="Documentation"
             :to="localePath('doc')"
             :class="linkActive('/doc')"
             v-tooltip.right="$t('documentation')"
             :aria-label="$t('documentation')"
-            md-icon="books"
-          ></md-tab>
-        </md-tabs>
-      </md-app-toolbar>
-      <md-app-drawer md-permanent="full">
-        <h3>{{ $t("collection") }}</h3>
-        <collections />
-      </md-app-drawer>
-      <md-app-content>
-        <div class="content">
-          <div class="columns">
+          >Documentation <v-icon>books</v-icon></v-tab>
+        </v-tabs>
+      </v-app-bar>
+      <v-navigation-drawer app width="30%">
+        <v-tabs v-model="tab">
+          <v-tab id="tab-side-collection">{{ $t('collection') }}</v-tab>
+          <v-tab id="tab-side-history">{{ $t('history') }}</v-tab>
+        </v-tabs>
+        <v-tabs-items v-model="tab">
+          <v-tab-item><collections /></v-tab-item>
+          <v-tab-item><history @useHistory="handleUseHistory" ref="historyComponent" /></v-tab-item>
+        </v-tabs-items>
+      </v-navigation-drawer>
+      <v-content>
+        <v-container fluid>
             <div class="main" id="main">
               <nuxt />
             </div>
-            <aside class="nav-second"></aside>
-          </div>
-        </div>
-      </md-app-content>
-    </md-app>
+        </v-container>
+      </v-content>
+    </v-app>
     <modal v-if="showShortcuts" @close="showShortcuts = false">
       <div slot="header">
         <ul>
@@ -114,10 +109,24 @@ export default {
     login: () => import("../components/firebase/login"),
     contributors: () => import("../components/layout/contributors"),
     collections: () => import("../components/collections"),
+    history: () => import("../components/history"),
   },
 
   methods: {
     getSpecialKey: getPlatformSpecialKey,
+    handleUseHistory({ label, method, url, path, usesScripts, preRequestScript }) {
+      this.$store.commit("postwoman/selectRequest", { request: {
+        label, method, url, path, usesScripts, preRequestScript
+      } })
+      // this.label = label
+      // this.method = method
+      // this.uri = url + path
+      // this.url = url
+      // this.path = path
+      // this.showPreRequestScript = usesScripts
+      // this.preRequestScript = preRequestScript
+      // if (this.settings.SCROLL_INTO_ENABLED) this.scrollInto("request")
+    },
     linkActive(path) {
       return {
         "nuxt-link-exact-active": this.$route.path === path,
@@ -166,6 +175,7 @@ export default {
       showShortcuts: false,
       showSupport: false,
       fb,
+      tab: null,
       navigatorShare: navigator.share,
     }
   },

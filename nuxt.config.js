@@ -218,9 +218,9 @@ export default {
    */
   // css: ["~/assets/css/styles.scss", "~/assets/css/themes.scss", "~/assets/css/fonts.scss"],
   css: [
-    { src: "vue-material/dist/vue-material.min.css", lang: "css" },
-    { src: "~/assets/theme.scss", lang: "scss" }, // include vue-material theme engine
-    { src: "~/assets/style.scss", lang: "scss" },
+    // { src: "vue-material/dist/vue-material.min.css", lang: "css" },
+    // { src: "~/assets/theme.scss", lang: "scss" }, // include vue-material theme engine
+    // { src: "~/assets/style.scss", lang: "scss" },
   ],
   /*
    ** Plugins to load before mounting the App
@@ -246,6 +246,7 @@ export default {
   modules: [
     // See https://goo.gl/OOhYW5
     ["@nuxtjs/pwa"],
+    ['@nuxtjs/vuetify'],
     ["@nuxtjs/axios"],
     ["@nuxtjs/toast"],
     ["@nuxtjs/google-analytics"],

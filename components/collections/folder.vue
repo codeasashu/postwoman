@@ -1,73 +1,20 @@
 <template>
-  <div>
-    <div class="flex-wrap">
-      <div>
-        <button class="icon" @click="toggleShowChildren">
-          <i class="material-icons" v-show="!showChildren">arrow_right</i>
-          <i class="material-icons" v-show="showChildren">arrow_drop_down</i>
-          <i class="material-icons">folder_open</i>
+  <v-row @click="showChildren = !showChildren">
+    <v-col>
+      <v-row>
+      <div class="v-gutter v-layout-item">
+          <v-icon v-show="!showChildren">arrow_right</v-icon>
+          <v-icon v-show="showChildren">arrow_drop_down</v-icon>
+          <v-icon>folder</v-icon>
           <span>{{ folder.name }}</span>
-        </button>
-      </div>
-      <v-popover>
-        <button class="tooltip-target icon" v-tooltip="$t('more')">
-          <i class="material-icons">more_vert</i>
-        </button>
-        <template slot="popover">
-          <div>
-            <button class="icon" @click="editFolder" v-close-popover>
-              <i class="material-icons">edit</i>
-              <span>{{ $t("edit") }}</span>
-            </button>
-          </div>
-          <div>
-            <button class="icon" @click="removeFolder" v-close-popover>
-              <i class="material-icons">delete</i>
-              <span>{{ $t("delete") }}</span>
-            </button>
-          </div>
-        </template>
-      </v-popover>
-    </div>
-
-    <div v-show="showChildren">
-      <ul>
-        <li v-for="(request, index) in folder.requests" :key="index">
-          <request
-            :request="request"
-            :collection-index="collectionIndex"
-            :folder-index="folderIndex"
-            :request-index="index"
-            @edit-request="
-              $emit('edit-request', {
-                request,
-                collectionIndex,
-                folderIndex,
-                requestIndex: index,
-              })
-            "
-          />
-        </li>
-        <li v-if="folder.requests.length === 0">
-          <label>{{ $t("folder_empty") }}</label>
-        </li>
-      </ul>
-    </div>
-  </div>
+        </div>
+        <div class="v-gutter v-layout-item">
+          
+        </div>
+        </v-row>
+    </v-col>
+  </v-row>
 </template>
-
-<style scoped lang="scss">
-ul {
-  display: flex;
-  flex-direction: column;
-}
-
-ul li {
-  display: flex;
-  margin-left: 32px;
-  border-left: 1px solid var(--brd-color);
-}
-</style>
 
 <script>
 export default {
@@ -85,9 +32,6 @@ export default {
     }
   },
   methods: {
-    toggleShowChildren() {
-      this.showChildren = !this.showChildren
-    },
     selectRequest(request) {
       this.$store.commit("postwoman/selectRequest", { request })
     },
