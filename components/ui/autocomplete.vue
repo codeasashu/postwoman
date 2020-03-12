@@ -1,6 +1,15 @@
 <template>
   <div class="autocomplete-wrapper">
-      <v-text-field
+    <v-autocomplete
+      :items="source"
+      :placeholder="placeholder"
+      v-model="text"
+      return-object
+      :spellcheck="spellcheck"
+      :autocapitalize="spellcheck"
+      :autocorrect="spellcheck"
+    />
+    <!-- <v-text-field
         type="text"
         :placeholder="placeholder"
         v-model="text"
@@ -26,7 +35,7 @@
       >
         {{ suggestion }}
       </li>
-    </ul>
+    </ul> -->
   </div>
 </template>
 
@@ -209,9 +218,9 @@ export default {
   },
 
   mounted() {
-    this.updateSuggestions({
-      target: this.$refs.acInput,
-    })
+    // this.updateSuggestions({
+    //   target: this.$refs.acInput,
+    // })
   },
 }
 </script>

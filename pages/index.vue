@@ -15,12 +15,12 @@
           </v-col>
         </v-row>
         <v-row ref="request-input">
-          <v-col col="2">
+          <v-col cols="2">
             <v-input>
               <v-select :label="$t('method')" :items="requestMethods" v-model="method"></v-select>
             </v-input>
           </v-col>
-          <v-col col="6">
+          <v-col cols="6">
             <v-input>
               <v-text-field
                 name="url"
@@ -33,7 +33,7 @@
               />
             </v-input>
           </v-col>
-          <v-col col="4">
+          <v-col cols="4">
             <v-btn
               color="primary"
               raised
@@ -676,7 +676,6 @@ export default {
           this.url = url.origin
           this.path = url.pathname
         } catch (error) {
-          console.log(error, value)
           let uriRegex = value.match(/^((http[s]?:\/\/)?(<<[^\/]+>>)?[^\/]*|)(\/?.*)$/)
           this.url = uriRegex[1]
           this.path = uriRegex[4]

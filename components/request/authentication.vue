@@ -1,40 +1,35 @@
 <template>
   <div>
-    <div class="v-layout">
-      <div class="v-layout-item v-size-80">
+    <v-row>
+      <v-col cols="10">
         <h3>{{ $t("authentication") }}</h3>
-      </div>
-      <div class="v-layout-item v-size-20">
+      </v-col>
+      <v-col cols="2">
         <v-btn
           class="v-icon-button"
           @click="$emit('clear_all', $event)"
           v-tooltip.bottom="$t('clear')"
           ><v-icon>clear_all</v-icon></v-btn
         >
-      </div>
-    </div>
-    <div class="v-layout v-gutter">
-      <div class="v-layout-item v-size-30">
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="3">
         <span class="select-wrapper">
           <v-input>
-            <v-select id="auth" v-model="reauth">
-              <v-option value="None">None</v-option>
-              <v-option value="Basic Auth">Basic Auth</v-option>
-              <v-option value="Bearer Token">Bearer Token</v-option>
-              <v-option value="OAuth 2.0">OAuth 2.0</v-option>
-            </v-select>
+            <v-select id="auth" v-model="reauth" :items="auths"> </v-select>
           </v-input>
         </span>
-      </div>
-      <div class="v-layout-item v-size-70">
+      </v-col>
+      <v-col cols="9">
         <!-- Basic auth -->
-        <div class="basic-auth v-layout" v-if="reauth === 'Basic Auth'">
-          <div class="v-layout-item v-size-100">
+        <v-row class="basic-auth" v-if="reauth === 'Basic Auth'">
+          <v-col cols="6">
             <v-input>
               <v-text-field placeholder="User" name="http_basic_user" v-model="httpUser" />
             </v-input>
-          </div>
-          <div class="v-layout-item v-size-100">
+          </v-col>
+          <v-col cols="6">
             <v-input>
               <v-text-field
                 placeholder="Password"
@@ -43,20 +38,17 @@
                 v-model="httpPassword"
               />
             </v-input>
-          </div>
-        </div>
+          </v-col>
+        </v-row>
 
         <!-- Bearer/OAuth -->
-        <div
-          class="bearer-auth v-layout"
-          v-if="reauth === 'Bearer Token' || reauth === 'OAuth 2.0'"
-        >
-          <div class="v-layout-item v-size-70">
+        <v-row class="bearer-auth" v-if="reauth === 'Bearer Token' || reauth === 'OAuth 2.0'">
+          <v-col cols="9">
             <v-input>
               <v-text-field placeholder="Token" name="bearer_token" v-model="bearerToken" />
             </v-input>
-          </div>
-          <div class="v-layout-item v-size-30">
+          </v-col>
+          <v-col cols="3">
             <v-btn
               v-if="auth === 'OAuth 2.0'"
               class="v-raised v-icon-button"
@@ -73,10 +65,10 @@
             >
               <v-icon>vpn_key</v-icon>
             </v-btn>
-          </div>
-        </div>
-      </div>
-    </div>
+          </v-col>
+        </v-row>
+      </v-col>
+    </v-row>
   </div>
 </template>
 <script>
@@ -92,6 +84,7 @@ export default {
       showTokenList: false,
       showTokenRequest: false,
       bearerToken: "",
+      auths: ["None", "Basic Auth", "Bearer Token", "OAuth 2.0"],
     }
   },
   computed: {
