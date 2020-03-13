@@ -1165,7 +1165,21 @@ export default {
           getEnvironmentVariablesFromScript(preRequestScript),
           this.$data._selectedEnvironment ? this.$data._selectedEnvironment["mapped"] : {}
         )
-        requestOptions.url = parseTemplateString(requestOptions.url, environmentVariables)
+        console.log("url", this.url, parseTemplateString(this.url, environmentVariables))
+        requestOptions.url =
+          parseTemplateString(this.url, environmentVariables) +
+          parseTemplateString(this.pathName, environmentVariables) +
+          (this.queryString
+            ? "?" +
+              encodeURIComponent(
+                // decode query string before
+                parseTemplateString(
+                  decodeURIComponent(this.queryString.slice(1)),
+                  environmentVariables
+                )
+              )
+            : "")
+        console.log("url", this.url, parseTemplateString(this.url, environmentVariables))
         requestOptions.data = parseTemplateString(requestOptions.data, environmentVariables)
         for (let k in requestOptions.headers) {
           const kParsed = parseTemplateString(k, environmentVariables)
