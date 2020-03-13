@@ -13,6 +13,18 @@
               :placeholder="$t('optional')"
             />
           </v-col>
+          <v-col>
+            <v-select
+              v-model="selectedEnvironment"
+              :items="environments"
+              item-text="name"
+              item-value="name"
+              persistent-hint
+              return-object
+              single-line
+              label="Select environment"
+            ></v-select>
+          </v-col>
         </v-row>
         <v-row ref="request-input">
           <v-col cols="2">
@@ -555,6 +567,7 @@ export default {
       downloadButton: '<i class="material-icons">get_app</i>',
       doneButton: '<i class="material-icons">done</i>',
       isHidden: true,
+      _selectedEnvironment: undefined,
       response: {
         status: "",
         headers: "",
@@ -596,6 +609,11 @@ export default {
     }
   },
   watch: {
+    selectedEnvironment(val) {
+      this.$nextTick().then(function() {
+        console.log("selected Env", val)
+      })
+    },
     urlExcludes: {
       deep: true,
       handler() {
@@ -666,6 +684,22 @@ export default {
     },
   },
   computed: {
+    selectedEnvironment: {
+      get() {
+        return this.$data._selectedEnvironment || null
+      },
+      set(val) {
+        this.$data._selectedEnvironment = Object.assign({}, val)
+        let _mappedEnvVars = {}
+        val.variables.forEach(item => {
+          _mappedEnvVars[item["key"]] = item["value"]
+        })
+        this.$data._selectedEnvironment["mapped"] = _mappedEnvVars
+      },
+    },
+    environments() {
+      return this.$store.state.postwoman.environments
+    },
     uri: {
       get() {
         if (this.url && this.path) {
@@ -1125,8 +1159,12 @@ export default {
         data: requestBody,
         credentials: true,
       }
-      if (preRequestScript) {
-        const environmentVariables = getEnvironmentVariablesFromScript(preRequestScript)
+      if (preRequestScript || this.$data._selectedEnvironment) {
+        const environmentVariables = Object.assign(
+          {},
+          getEnvironmentVariablesFromScript(preRequestScript),
+          this.$data._selectedEnvironment ? this.$data._selectedEnvironment["mapped"] : {}
+        )
         requestOptions.url = parseTemplateString(requestOptions.url, environmentVariables)
         requestOptions.data = parseTemplateString(requestOptions.data, environmentVariables)
         for (let k in requestOptions.headers) {
