@@ -1,51 +1,36 @@
 <template>
-  <div class="flex-wrap">
-    <div>
-      <button class="icon" @click="$emit('select-environment')" v-tooltip="$t('use_environment')">
-        <i class="material-icons">insert_drive_file</i>
-        <span>{{ environment.name }}</span>
-      </button>
-    </div>
-    <v-popover>
-      <button class="tooltip-target icon" v-tooltip="$t('more')">
-        <i class="material-icons">more_vert</i>
-      </button>
-      <template slot="popover">
-        <div>
-          <button class="icon" @click="$emit('edit-environment')" v-close-popover>
-            <i class="material-icons">create</i>
-            <span>{{ $t("edit") }}</span>
-          </button>
-        </div>
-        <div>
-          <button class="icon" @click="removeEnvironment" v-close-popover>
-            <i class="material-icons">delete</i>
-            <span>{{ $t("delete") }}</span>
-          </button>
-        </div>
-      </template>
-    </v-popover>
-  </div>
+  <v-row @click="$emit('select-environment')">
+    <v-col cols="1">
+      <v-icon>insert_drive_file</v-icon>
+    </v-col>
+    <v-col cols="9">
+      <span>{{ environment.name }}</span>
+    </v-col>
+    <v-col cols="2">
+      <kebob-menu float="right">
+        <template slot="menu">
+          <v-list>
+            <v-list-item @click="$emit('edit-environment')">
+              <v-list-item-title><v-icon>edit</v-icon>{{ $t("edit") }}</v-list-item-title>
+            </v-list-item>
+            <v-list-item @click="removeEnvironment">
+              <v-list-item-title><v-icon>delete</v-icon>{{ $t("delete") }}</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </template>
+      </kebob-menu>
+    </v-col>
+  </v-row>
 </template>
-
-<style scoped lang="scss">
-ul {
-  display: flex;
-  flex-direction: column;
-}
-
-ul li {
-  display: flex;
-  padding-left: 16px;
-  border-left: 1px solid var(--brd-color);
-}
-</style>
 
 <script>
 export default {
   props: {
     environment: Object,
     environmentIndex: Number,
+  },
+  components: {
+    kebobMenu: () => import("../ui/kebobMenu"),
   },
   methods: {
     removeEnvironment() {

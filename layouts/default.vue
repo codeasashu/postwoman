@@ -8,44 +8,50 @@
             :to="localePath('index')"
             v-tooltip.right="$t('home')"
             :aria-label="$t('home')"
-          >Home <v-icon>home</v-icon></v-tab>
+            >Home <v-icon>home</v-icon></v-tab
+          >
           <v-tab
             id="tab-realtime"
             :to="localePath('realtime')"
             :class="linkActive('/realtime')"
             v-tooltip.right="$t('realtime')"
-          >Realtime <v-icon>settings_input_hdmi</v-icon></v-tab>
+            >Realtime <v-icon>settings_input_hdmi</v-icon></v-tab
+          >
           <v-tab
             id="tab-settings"
             :to="localePath('settings')"
             :class="linkActive('/settings')"
             v-tooltip.right="$t('settings')"
             :aria-label="$t('settings')"
-          >Settings <v-icon>settings</v-icon></v-tab>
+            >Settings <v-icon>settings</v-icon></v-tab
+          >
           <v-tab
             id="tab-doc"
             :to="localePath('doc')"
             :class="linkActive('/doc')"
             v-tooltip.right="$t('documentation')"
             :aria-label="$t('documentation')"
-          >Documentation <v-icon>books</v-icon></v-tab>
+            >Documentation <v-icon>books</v-icon></v-tab
+          >
         </v-tabs>
       </v-app-bar>
       <v-navigation-drawer app width="30%">
         <v-tabs v-model="tab">
-          <v-tab id="tab-side-collection">{{ $t('collection') }}</v-tab>
-          <v-tab id="tab-side-history">{{ $t('history') }}</v-tab>
+          <v-tab id="tab-side-collection">{{ $t("collection") }}</v-tab>
+          <v-tab id="tab-side-history">{{ $t("history") }}</v-tab>
+          <v-tab id="tab-side-environment">{{ $t("environment") }}</v-tab>
         </v-tabs>
         <v-tabs-items v-model="tab">
           <v-tab-item><collections /></v-tab-item>
-          <v-tab-item><history @useHistory="handleUseHistory" ref="historyComponent" /></v-tab-item>
+          <v-tab-item><history @useHistory="handleUseHistory" ref="historyComponent"/></v-tab-item>
+          <v-tab-item><environments /></v-tab-item>
         </v-tabs-items>
       </v-navigation-drawer>
       <v-content>
         <v-container fluid>
-            <div class="main" id="main">
-              <nuxt />
-            </div>
+          <div class="main" id="main">
+            <nuxt />
+          </div>
         </v-container>
       </v-content>
     </v-app>
@@ -110,14 +116,22 @@ export default {
     contributors: () => import("../components/layout/contributors"),
     collections: () => import("../components/collections"),
     history: () => import("../components/history"),
+    environments: () => import("../components/environments"),
   },
 
   methods: {
     getSpecialKey: getPlatformSpecialKey,
     handleUseHistory({ label, method, url, path, usesScripts, preRequestScript }) {
-      this.$store.commit("postwoman/selectRequest", { request: {
-        label, method, url, path, usesScripts, preRequestScript
-      } })
+      this.$store.commit("postwoman/selectRequest", {
+        request: {
+          label,
+          method,
+          url,
+          path,
+          usesScripts,
+          preRequestScript,
+        },
+      })
       // this.label = label
       // this.method = method
       // this.uri = url + path

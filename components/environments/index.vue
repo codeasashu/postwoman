@@ -1,5 +1,5 @@
 <template>
-  <pw-section class="green" icon="history" :label="$t('environment')" ref="environment">
+  <div :label="$t('environment')" ref="environment">
     <addEnvironment :show="showModalAdd" @hide-modal="displayModalAdd(false)" />
     <editEnvironment
       :show="showModalEdit"
@@ -11,21 +11,22 @@
       :show="showModalImportExport"
       @hide-modal="displayModalImportExport(false)"
     />
-    <div class="flex-wrap">
-      <div>
-        <button class="icon" @click="displayModalAdd(true)">
-          <i class="material-icons">add</i>
+    <v-row>
+      <v-col cols="6">
+        <v-btn class="icon" @click="displayModalAdd(true)">
+          <v-icon>add</v-icon>
           <span>{{ $t("new") }}</span>
-        </button>
-      </div>
-      <div>
-        <button class="icon" @click="displayModalImportExport(true)">
-          {{ $t("import_export") }}
-        </button>
-      </div>
-    </div>
+        </v-btn>
+      </v-col>
+      <v-col cols="6" class="float-right">
+        <v-btn class="icon" @click="displayModalImportExport(true)">
+          <v-icon>add</v-icon>
+          <span>{{ $t("import_export") }}</span>
+        </v-btn>
+      </v-col>
+    </v-row>
     <p v-if="environments.length === 0" class="info">
-      Create new environment
+      {{ $t("add") }} {{ $t("new") }} {{ $t("environment") }}
     </p>
     <virtual-list
       class="virtual-list"
@@ -33,21 +34,21 @@
       :size="152"
       :remain="Math.min(5, environments.length)"
     >
-      <ul>
-        <li v-for="(environment, index) in environments" :key="environment.name">
+      <v-list>
+        <v-list-item v-for="(environment, index) in environments" :key="environment.name">
           <environment
             :environmentIndex="index"
             :environment="environment"
             @edit-environment="editEnvironment(environment, index)"
             @select-environment="$emit('use-environment', environment)"
           />
-        </li>
-        <li v-if="environments.length === 0">
+        </v-list-item>
+        <v-list-item v-if="environments.length === 0">
           <label>Environments are empty</label>
-        </li>
-      </ul>
+        </v-list-item>
+      </v-list>
     </virtual-list>
-  </pw-section>
+  </div>
 </template>
 
 <style scoped lang="scss">

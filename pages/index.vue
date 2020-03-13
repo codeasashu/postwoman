@@ -473,32 +473,38 @@ const statusCategories = [
     name: "informational",
     statusCodeRegex: new RegExp(/[1][0-9]+/),
     className: "info-response",
+    colorCode: "primary",
   },
   {
     name: "successful",
     statusCodeRegex: new RegExp(/[2][0-9]+/),
     className: "success-response",
+    colorCode: "green",
   },
   {
     name: "redirection",
     statusCodeRegex: new RegExp(/[3][0-9]+/),
     className: "redir-response",
+    colorCode: "primary",
   },
   {
     name: "client error",
     statusCodeRegex: new RegExp(/[4][0-9]+/),
     className: "cl-error-response",
+    colorCode: "red",
   },
   {
     name: "server error",
     statusCodeRegex: new RegExp(/[5][0-9]+/),
     className: "sv-error-response",
+    colorCode: "red",
   },
   {
     // this object is a catch-all for when no other objects match and should always be last
     name: "unknown",
     statusCodeRegex: new RegExp(/.*/),
     className: "missing-data-response",
+    colorCode: "white",
   },
 ]
 const parseHeaders = xhr => {
@@ -662,7 +668,10 @@ export default {
   computed: {
     uri: {
       get() {
-        return this.$store.state.request.uri ? this.$store.state.request.uri : this.url + this.path
+        if (this.url && this.path) {
+          return this.url + this.path
+        }
+        return this.$store.state.request.uri || this.url
       },
       set(value) {
         this.$store.commit("setState", { value, attribute: "uri" })
@@ -1509,9 +1518,6 @@ export default {
           icon: "error",
         })
       }
-    },
-    switchVisibility() {
-      this.passwordFieldType = this.passwordFieldType === "password" ? "text" : "password"
     },
     clearContent(name, { target }) {
       switch (name) {

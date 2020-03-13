@@ -1,74 +1,81 @@
 <template>
-  <modal v-if="show" @close="hideModal">
+  <modal :show="show" @close="hideModal">
     <div slot="header">
-      <ul>
-        <li>
-          <div class="flex-wrap">
-            <h3 class="title">Import / Export Environment</h3>
-            <div>
-              <button class="icon" @click="hideModal">
-                <i class="material-icons">close</i>
-              </button>
-            </div>
-          </div>
-          <div class="flex-wrap">
-            <span
-              v-tooltip="{
-                content: !fb.currentUser ? $t('login_first') : $t('replace_current'),
-              }"
-            >
-              <button :disabled="!fb.currentUser" class="icon" @click="syncEnvironments">
-                <i class="material-icons">folder_shared</i>
-                <span>{{ $t("import_from_sync") }}</span>
-              </button>
-            </span>
-            <button
-              class="icon"
-              @click="openDialogChooseFileToReplaceWith"
-              v-tooltip="$t('replace_current')"
-            >
-              <i class="material-icons">create_new_folder</i>
-              <span>{{ $t("replace_json") }}</span>
-              <input
-                type="file"
-                @change="replaceWithJSON"
-                style="display: none;"
-                ref="inputChooseFileToReplaceWith"
-                accept="application/json"
-              />
-            </button>
-            <button
-              class="icon"
-              @click="openDialogChooseFileToImportFrom"
-              v-tooltip="$t('preserve_current')"
-            >
-              <i class="material-icons">folder_special</i>
-              <span>{{ $t("import_json") }}</span>
-              <input
-                type="file"
-                @change="importFromJSON"
-                style="display: none;"
-                ref="inputChooseFileToImportFrom"
-                accept="application/json"
-              />
-            </button>
-          </div>
-        </li>
-      </ul>
+      <div class="flex-wrap">
+        <h3 class="title">Import / Export Environment</h3>
+      </div>
     </div>
     <div slot="body">
-      <textarea v-model="environmentJson" rows="8"></textarea>
+      <v-row>
+        <v-col cols="4">
+          <span
+            v-tooltip="{
+              content: !fb.currentUser ? $t('login_first') : $t('replace_current'),
+            }"
+          >
+            <v-btn
+              depressed
+              small
+              :disabled="!fb.currentUser"
+              class="icon"
+              @click="syncEnvironments"
+            >
+              <i class="material-icons">folder_shared</i>
+              <span>{{ $t("import_from_sync") }}</span>
+            </v-btn>
+          </span>
+        </v-col>
+        <v-col cols="4">
+          <v-btn
+            depressed
+            small
+            class="icon"
+            @click="openDialogChooseFileToReplaceWith"
+            v-tooltip="$t('replace_current')"
+          >
+            <i class="material-icons">create_new_folder</i>
+            <span>{{ $t("replace_json") }}</span>
+            <input
+              type="file"
+              @change="replaceWithJSON"
+              style="display: none;"
+              ref="inputChooseFileToReplaceWith"
+              accept="application/json"
+            />
+          </v-btn>
+        </v-col>
+        <v-col cols="4">
+          <v-btn
+            depressed
+            small
+            class="icon"
+            @click="openDialogChooseFileToImportFrom"
+            v-tooltip="$t('preserve_current')"
+          >
+            <i class="material-icons">folder_special</i>
+            <span>{{ $t("import_json") }}</span>
+            <input
+              type="file"
+              @change="importFromJSON"
+              style="display: none;"
+              ref="inputChooseFileToImportFrom"
+              accept="application/json"
+            />
+          </v-btn>
+        </v-col>
+      </v-row>
+      <v-textarea v-model="environmentJson" rows="8"></v-textarea>
     </div>
     <div slot="footer">
       <div class="flex-wrap">
         <span></span>
         <span>
-          <button class="icon" @click="hideModal">
+          <v-btn class="icon" @click="hideModal">
             {{ $t("cancel") }}
-          </button>
-          <button class="icon primary" @click="exportJSON" v-tooltip="$t('download_file')">
+          </v-btn>
+          <v-btn class="icon primary" @click="exportJSON" v-tooltip="$t('download_file')">
             {{ $t("export") }}
-          </button>
+          </v-btn>
         </span>
       </div>
     </div>

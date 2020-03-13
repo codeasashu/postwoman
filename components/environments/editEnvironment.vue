@@ -1,67 +1,54 @@
 <template>
-  <modal v-if="show" @close="hideModal">
+  <modal :show="show" @close="hideModal">
     <div slot="header">
-      <ul>
-        <li>
-          <div class="flex-wrap">
-            <h3 class="title">{{ $t("edit_environment") }}</h3>
-            <div>
-              <button class="icon" @click="hideModal">
-                <i class="material-icons">close</i>
-              </button>
-            </div>
-          </div>
-        </li>
-      </ul>
+      <h3 class="title">{{ $t("edit_environment") }}</h3>
     </div>
     <div slot="body">
-      <ul>
-        <li>
-          <input
-            type="text"
-            v-model="name"
-            :placeholder="editingEnvironment.name"
-            @keyup.enter="saveEnvironment"
-          />
-        </li>
-      </ul>
-      <ul>
+      <div v-if="editingEnvironment">
+        <v-text-field
+          type="text"
+          v-model="name"
+          :placeholder="editingEnvironment.name"
+          @keyup.enter="saveEnvironment"
+        />
+      </div>
+      <!-- <ul>
         <li>
           <div class="flex-wrap">
             <label for="variableList">{{ $t("env_variable_list") }}</label>
             <div>
-              <button class="icon" @click="clearContent($event)" v-tooltip.bottom="$t('clear')">
-                <i class="material-icons">clear_all</i>
-              </button>
+              <v-btn class="icon" @click="clearContent($event)" v-tooltip.bottom="$t('clear')">
+                <v-icon>clear_all</v-icon>
+              </v-btn>
             </div>
           </div>
-          <textarea
+          <v-textarea
             id="variableList"
             readonly
             v-textarea-auto-height="variableString"
             v-model="variableString"
             :placeholder="$t('add_one_variable')"
             rows="1"
-          ></textarea>
+          ></v-textarea>
         </li>
-      </ul>
-      <ul v-for="(variable, index) in this.editingEnvCopy.variables" :key="index">
-        <li>
-          <input
+      </ul> -->
+      <v-row v-for="(variable, index) in this.editingEnvCopy.variables" :key="index">
+        <v-col>
+          <v-text-field
             :placeholder="$t('parameter_count', { count: index + 1 })"
             :name="'param' + index"
             :value="variable.key"
             @change="
               $store.commit('postwoman/setVariableKey', {
                 index,
-                value: $event.target.value,
+                value: $event,
               })
             "
             autofocus
           />
-        </li>
-        <li>
-          <input
+        </v-col>
+        <v-col>
+          <v-text-field
             :placeholder="$t('value_count', { count: index + 1 })"
             :name="'value' + index"
             :value="
@@ -70,43 +57,41 @@
             @change="
               $store.commit('postwoman/setVariableValue', {
                 index,
-                value: $event.target.value,
+                value: $event,
               })
             "
           />
-        </li>
+        </v-col>
         <div>
-          <li>
-            <button
-              class="icon"
-              @click="removeEnvironmentVariable(index)"
-              v-tooltip.bottom="$t('delete')"
-              id="variable"
-            >
-              <i class="material-icons">delete</i>
-            </button>
-          </li>
+          <v-btn
+            class="icon"
+            @click="removeEnvironmentVariable(index)"
+            v-tooltip.bottom="$t('delete')"
+            id="variable"
+          >
+            <v-icon>delete</v-icon>
+          </v-btn>
         </div>
-      </ul>
-      <ul>
-        <li>
-          <button class="icon" @click="addEnvironmentVariable">
-            <i class="material-icons">add</i>
+      </v-row>
+      <v-row>
+        <v-col
+          ><v-btn class="icon" @click="addEnvironmentVariable">
+            <v-icon>add</v-icon>
             <span>{{ $t("add_new") }}</span>
-          </button>
-        </li>
-      </ul>
+          </v-btn></v-col
+        >
+      </v-row>
     </div>
     <div slot="footer">
       <div class="flex-wrap">
         <span></span>
         <span>
-          <button class="icon" @click="hideModal">
+          <v-btn class="icon" @click="hideModal">
             {{ $t("cancel") }}
-          </button>
-          <button class="icon primary" @click="saveEnvironment">
+          </v-btn>
+          <v-btn class="icon primary" @click="saveEnvironment">
             {{ $t("save") }}
-          </button>
+          </v-btn>
         </span>
       </div>
     </div>

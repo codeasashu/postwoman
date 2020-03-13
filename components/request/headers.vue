@@ -24,7 +24,7 @@
             :source="commonHeaders"
             :spellcheck="false"
             :value="header.key"
-            @input="getInput(index, $event)"
+            @input="setHeaderKey(index, $event)"
             @keyup.prevent="$emit('set_route_query')"
             autofocus
           />
@@ -36,7 +36,7 @@
             :placeholder="$t('value_count', { count: index + 1 })"
             :name="'value' + index"
             :value="header.value"
-            @change="$emit('set_value', { index: index, value: $event })"
+            @change="setHeaderValue(index, $event)"
             @keyup.prevent="$emit('set_route_query')"
           />
         </v-input>
@@ -63,8 +63,11 @@ export default {
     headers: Array[Object],
   },
   methods: {
-    getInput(index, event) {
-      console.log(index, event)
+    setHeaderKey(index, event) {
+      this.$store.commit("setKeyHeader", { index: index, value: event })
+    },
+    setHeaderValue(index, event) {
+      this.$store.commit("setValueHeader", { index: index, value: event })
     },
   },
 }

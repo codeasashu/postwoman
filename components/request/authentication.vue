@@ -17,13 +17,13 @@
       <v-col cols="3">
         <span class="select-wrapper">
           <v-input>
-            <v-select id="auth" v-model="reauth" :items="auths"> </v-select>
+            <v-select id="auth" v-model="auth" :items="auths"> </v-select>
           </v-input>
         </span>
       </v-col>
       <v-col cols="9">
         <!-- Basic auth -->
-        <v-row class="basic-auth" v-if="reauth === 'Basic Auth'">
+        <v-row class="basic-auth" v-if="auth === 'Basic Auth'">
           <v-col cols="6">
             <v-input>
               <v-text-field placeholder="User" name="http_basic_user" v-model="httpUser" />
@@ -34,15 +34,17 @@
               <v-text-field
                 placeholder="Password"
                 name="http_basic_passwd"
+                :append-icon="passwordFieldType === 'text' ? 'visibility' : 'visibility_off'"
                 :type="passwordFieldType"
                 v-model="httpPassword"
+                @click:append="switchVisibility"
               />
             </v-input>
           </v-col>
         </v-row>
 
         <!-- Bearer/OAuth -->
-        <v-row class="bearer-auth" v-if="reauth === 'Bearer Token' || reauth === 'OAuth 2.0'">
+        <v-row class="bearer-auth" v-if="auth === 'Bearer Token' || auth === 'OAuth 2.0'">
           <v-col cols="9">
             <v-input>
               <v-text-field placeholder="Token" name="bearer_token" v-model="bearerToken" />
@@ -74,26 +76,52 @@
 <script>
 export default {
   props: {
-    auth: String,
+    //  auth: String,
   },
   data() {
     return {
-      httpUser: "",
-      httpPassword: "",
       passwordFieldType: "password",
       showTokenList: false,
       showTokenRequest: false,
-      bearerToken: "",
       auths: ["None", "Basic Auth", "Bearer Token", "OAuth 2.0"],
     }
   },
+  methods: {
+    switchVisibility() {
+      this.passwordFieldType = this.passwordFieldType === "password" ? "text" : "password"
+    },
+  },
   computed: {
-    reauth: {
+    auth: {
       get() {
-        return this.$props.auth
+        return this.$store.state.request.auth
       },
-      set(val) {
-        this.$emit("set_select", val)
+      set(value) {
+        this.$store.commit("setState", { value, attribute: "auth" })
+      },
+    },
+    httpUser: {
+      get() {
+        return this.$store.state.request.httpUser
+      },
+      set(value) {
+        this.$store.commit("setState", { value, attribute: "httpUser" })
+      },
+    },
+    httpPassword: {
+      get() {
+        return this.$store.state.request.httpPassword
+      },
+      set(value) {
+        this.$store.commit("setState", { value, attribute: "httpPassword" })
+      },
+    },
+    bearerToken: {
+      get() {
+        return this.$store.state.request.bearerToken
+      },
+      set(value) {
+        this.$store.commit("setState", { value, attribute: "bearerToken" })
       },
     },
   },
