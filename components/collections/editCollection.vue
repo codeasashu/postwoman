@@ -9,6 +9,7 @@
           v-if="editingCollection"
           :placeholder="editingCollection.name"
           v-model="name"
+          :rules="[v => !!v || 'Name is required']"
           @keyup.enter="saveCollection"
         ></v-text-field>
       </v-input>
@@ -52,6 +53,7 @@ export default {
         ...this.$props.editingCollection,
         name: this.$data.name,
       }
+      console.log("collection", collectionUpdated)
       this.$store.commit("postwoman/editCollection", {
         collection: collectionUpdated,
         collectionIndex: this.$props.editingCollectionIndex,

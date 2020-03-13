@@ -73,12 +73,12 @@ export const SETTINGS_KEYS = [
   /**
    * Max history length
    */
-  "HISTORY_MAX_LENGTH"
+  "HISTORY_MAX_LENGTH",
 ]
 
 export const state = () => ({
   settings: {
-    "HISTORY_MAX_LENGTH": 20
+    HISTORY_MAX_LENGTH: 20,
   },
   collections: [
     {
@@ -226,10 +226,8 @@ export const mutations = {
   },
 
   editCollection({ collections }, payload) {
-    const {
-      collection: { name },
-      collectionIndex,
-    } = payload
+    const { collection, collectionIndex } = payload
+    console.log("edit coll", payload, collectionIndex, collection)
     const duplicateCollection = collections.some(
       item => item.name.toLowerCase() === name.toLowerCase()
     )
@@ -383,10 +381,9 @@ export const mutations = {
   },
 
   addHistory(state, history) {
-    if(state.history.length > SETTINGS_KEYS["HISTORY_MAX_LENGTH"])
-      state.history.pop()
+    if (state.history.length > SETTINGS_KEYS["HISTORY_MAX_LENGTH"]) state.history.pop()
     state.history.push(history)
-  }
+  },
 }
 
 function testValue(myValue) {

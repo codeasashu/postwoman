@@ -40,23 +40,19 @@ TODO:
     />
 
     <v-row>
-        <v-col class="collection-header">
-          <div class="v-layout-item v-size-50 center">
-            <v-btn small color="primary"
-              @click="displayModalAdd(true)"
-            >
-              <span>{{ $t("create_collection") }}</span>
-            </v-btn>
-          </div>
-        </v-col>
-        <v-col>
-          <div class="v-layout-item v-size-50 center">
-            <v-btn small color="primary"
-              @click="displayModalImportExport(true)"
-            >
-              <span>{{ $t("import_export") }}</span>
-            </v-btn>
-          </div>
+      <v-col class="collection-header">
+        <div class="v-layout-item v-size-50 center">
+          <v-btn small color="primary" @click="displayModalAdd(true)">
+            <span>{{ $t("create_collection") }}</span>
+          </v-btn>
+        </div>
+      </v-col>
+      <v-col>
+        <div class="v-layout-item v-size-50 center">
+          <v-btn small color="primary" @click="displayModalImportExport(true)">
+            <span>{{ $t("import_export") }}</span>
+          </v-btn>
+        </div>
       </v-col>
     </v-row>
 
@@ -69,67 +65,71 @@ TODO:
       :remain="Math.min(5, collections.length)"
     >
       <v-expansion-panels :accordion="true" focusable tile>
-        <v-expansion-panel v-for="(collection, index) in collections"
-          :key="collection.name" class="v-list-item-expand">
+        <v-expansion-panel
+          v-for="(collection, index) in collections"
+          :key="collection.name"
+          class="v-list-item-expand"
+        >
           <v-expansion-panel-header disable-icon-rotate>
-            <collection
-                :collection-index="index"
-                :collection="collection"
-                @edit-collection="editCollection(collection, index)"
-                @add-folder="addFolder(collection, index)"
-                @edit-folder="editFolder($event)"
-                @edit-request="editRequest($event)"
-              />
+            <collection :collection-index="index" :collection="collection" />
             <template v-slot:actions>
               <kebob-menu>
-                    <template slot="menu">
-                      <v-list>
-                        <v-list-item @click="addFolder(collection, index)">
-                        <v-list-item-title>{{ $t("new_folder") }}</v-list-item-title>
-                        </v-list-item>
-                        <v-list-item @click="editCollection(collection, index)">
-                        <v-list-item-title>{{ $t("edit") }}</v-list-item-title>
-                        </v-list-item>
-                        <v-list-item @click="removeCollection(index)">
-                        <v-list-item-title>{{ $t("delete") }}</v-list-item-title>
-                        </v-list-item>
-                      </v-list>
-                    </template>
+                <template slot="menu">
+                  <v-list>
+                    <v-list-item @click="addFolder(collection, index)">
+                      <v-list-item-title>{{ $t("new_folder") }}</v-list-item-title>
+                    </v-list-item>
+                    <v-list-item @click="editCollection(collection, index)">
+                      <v-list-item-title>{{ $t("edit") }}</v-list-item-title>
+                    </v-list-item>
+                    <v-list-item @click="removeCollection(index)">
+                      <v-list-item-title>{{ $t("delete") }}</v-list-item-title>
+                    </v-list-item>
+                  </v-list>
+                </template>
               </kebob-menu>
             </template>
           </v-expansion-panel-header>
           <v-expansion-panel-content>
             <p v-if="collection.folders.length === 0 && collection.requests.length === 0">
-                <label>{{ $t("collection_empty") }}</label>
+              <label>{{ $t("collection_empty") }}</label>
             </p>
             <!-- <v-subheader>Folders</v-subheader> -->
             <v-expansion-panels flat :focusable="false">
-              <v-expansion-panel v-for="(folder, folderIndex) in collection.folders" :key="folder.name">
+              <v-expansion-panel
+                v-for="(folder, folderIndex) in collection.folders"
+                :key="folder.name"
+              >
                 <v-expansion-panel-header disable-icon-rotate>
-                <folder
-                  :folder="folder"
-                  :folderIndex="folderIndex"
-                  :collection-index="index"
-                  @edit-request="$emit('edit-request', $event)"
-                />
-                <template v-slot:actions>
-                  <kebob-menu>
-                    <template slot="menu">
-                      <v-list>
-                        <v-list-item @click="editFolder(index, folder, folderIndex)">
-                        <v-list-item-title>{{ $t("edit") }}</v-list-item-title>
-                        </v-list-item>
-                        <v-list-item @click="removeFolder(index, folderIndex)">
-                        <v-list-item-title>{{ $t("delete") }}</v-list-item-title>
-                        </v-list-item>
-                      </v-list>
-                    </template>
-                  </kebob-menu>
-                </template>
+                  <folder
+                    :folder="folder"
+                    :folderIndex="folderIndex"
+                    :collection-index="index"
+                    @edit-request="$emit('edit-request', $event)"
+                  />
+                  <template v-slot:actions>
+                    <kebob-menu>
+                      <template slot="menu">
+                        <v-list>
+                          <v-list-item
+                            @click="editFolder({ collectionIndex: index, folder, folderIndex })"
+                          >
+                            <v-list-item-title>{{ $t("edit") }}</v-list-item-title>
+                          </v-list-item>
+                          <v-list-item @click="removeFolder(index, folderIndex)">
+                            <v-list-item-title>{{ $t("delete") }}</v-list-item-title>
+                          </v-list-item>
+                        </v-list>
+                      </template>
+                    </kebob-menu>
+                  </template>
                 </v-expansion-panel-header>
                 <v-expansion-panel-content>
                   <v-list shaped two-line>
-                    <v-list-item v-for="(request, requestIndex) in folder.requests" :key="request.name">
+                    <v-list-item
+                      v-for="(request, requestIndex) in folder.requests"
+                      :key="request.name"
+                    >
                       <request
                         :request="request"
                         :collection-index="index"
@@ -151,7 +151,10 @@ TODO:
             </v-expansion-panels>
             <!-- <v-subheader>Requests</v-subheader> -->
             <v-list shaped two-line>
-              <v-list-item v-for="(request, requestIndex) in collection.requests" :key="request.name">
+              <v-list-item
+                v-for="(request, requestIndex) in collection.requests"
+                :key="request.name"
+              >
                 <request
                   :request="request"
                   :collection-index="index"
@@ -172,13 +175,12 @@ TODO:
         </v-expansion-panel>
       </v-expansion-panels>
     </virtual-list>
-    <v-empty-state
+    <v-btn
       v-if="collections.length == 0"
-      v-icon="devices_other"
-      v-label="'No collection'"
-      v-description="'Creating a collection would be awesome'">
-      <v-btn class="v-primary v-raised" @click.prevent="displayModalAdd(true)">Create first collection</v-btn>
-    </v-empty-state>
+      class="v-primary v-raised"
+      @click.prevent="displayModalAdd(true)"
+      >Create first collection</v-btn
+    >
     <!-- <nuxt-link :to="localePath('doc')" :aria-label="$t('documentation')">
       <button class="icon">
         <i class="material-icons">books</i>
@@ -310,6 +312,7 @@ export default {
       this.$data.editingCollectionIndex = collectionIndex
       this.$data.editingFolder = folder
       this.$data.editingFolderIndex = folderIndex
+      console.log(payload, collectionIndex, "b")
       this.displayModalEditFolder(true)
       this.syncCollections()
     },

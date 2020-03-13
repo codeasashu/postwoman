@@ -126,9 +126,9 @@
         <label>{{ $t("nothing_found") }} "{{ filterText }}"</label>
       </li>
     </ul>
-    <p v-if="history.length === 0" class="info">
+    <v-alert v-if="history.length === 0" type="info">
       {{ $t("history_empty") }}
-    </p>
+    </v-alert>
     <div v-if="history.length !== 0">
       <div class="flex-wrap" v-if="!isClearingHistory">
         <v-btn
