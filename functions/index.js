@@ -6,3 +6,10 @@
 // exports.helloWorld = functions.https.onRequest((request, response) => {
 //  response.send("Hello from Firebase!");
 // });
+export const mapEnvironmentVariable = function(environment) {
+  let mappedEnvVars = {}
+  environment.variables.forEach(item => {
+    mappedEnvVars[item["key"]] = item["value"]
+  })
+  return mappedEnvVars
+}

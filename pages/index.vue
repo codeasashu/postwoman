@@ -14,16 +14,18 @@
             />
           </v-col>
           <v-col>
-            <v-select
-              v-model="selectedEnvironment"
-              :items="environments"
-              item-text="name"
-              item-value="name"
-              persistent-hint
-              return-object
-              single-line
-              label="Select environment"
-            ></v-select>
+            <v-input append-icon="close" @click:append="selectedEnvironment = undefined">
+              <v-select
+                v-model="selectedEnvironment"
+                :items="environments"
+                item-text="name"
+                item-value="name"
+                persistent-hint
+                return-object
+                single-line
+                label="Select environment"
+              ></v-select>
+            </v-input>
           </v-col>
         </v-row>
         <v-row ref="request-input">
@@ -480,6 +482,8 @@ import AceEditor from "../components/ui/ace-editor"
 import { tokenRequest, oauthRedirect } from "../assets/js/oauth"
 import { sendNetworkRequest } from "../functions/network"
 import { fb } from "../functions/fb"
+import { mapEnvironmentVariable } from "../functions"
+
 const statusCategories = [
   {
     name: "informational",
@@ -567,7 +571,7 @@ export default {
       downloadButton: '<i class="material-icons">get_app</i>',
       doneButton: '<i class="material-icons">done</i>',
       isHidden: true,
-      _selectedEnvironment: undefined,
+      selectedEnvironment: undefined,
       response: {
         status: "",
         headers: "",
@@ -609,11 +613,6 @@ export default {
     }
   },
   watch: {
-    selectedEnvironment(val) {
-      this.$nextTick().then(function() {
-        console.log("selected Env", val)
-      })
-    },
     urlExcludes: {
       deep: true,
       handler() {
@@ -684,19 +683,6 @@ export default {
     },
   },
   computed: {
-    selectedEnvironment: {
-      get() {
-        return this.$data._selectedEnvironment || null
-      },
-      set(val) {
-        this.$data._selectedEnvironment = Object.assign({}, val)
-        let _mappedEnvVars = {}
-        val.variables.forEach(item => {
-          _mappedEnvVars[item["key"]] = item["value"]
-        })
-        this.$data._selectedEnvironment["mapped"] = _mappedEnvVars
-      },
-    },
     environments() {
       return this.$store.state.postwoman.environments
     },
@@ -1159,13 +1145,12 @@ export default {
         data: requestBody,
         credentials: true,
       }
-      if (preRequestScript || this.$data._selectedEnvironment) {
+      if (preRequestScript || this.$data.selectedEnvironment) {
         const environmentVariables = Object.assign(
           {},
           getEnvironmentVariablesFromScript(preRequestScript),
-          this.$data._selectedEnvironment ? this.$data._selectedEnvironment["mapped"] : {}
+          mapEnvironmentVariable(this.$data.selectedEnvironment)
         )
-        console.log("url", this.url, parseTemplateString(this.url, environmentVariables))
         requestOptions.url =
           parseTemplateString(this.url, environmentVariables) +
           parseTemplateString(this.pathName, environmentVariables) +
@@ -1179,7 +1164,6 @@ export default {
                 )
               )
             : "")
-        console.log("url", this.url, parseTemplateString(this.url, environmentVariables))
         requestOptions.data = parseTemplateString(requestOptions.data, environmentVariables)
         for (let k in requestOptions.headers) {
           const kParsed = parseTemplateString(k, environmentVariables)
@@ -1499,16 +1483,16 @@ export default {
         .map(item => flat(item))
       const deeps = ["headers", "params"].map(item => deep(item))
       const bodyParams = this.rawInput ? [flat("rawParams")] : [deep("bodyParams")]
-      history.replaceState(
-        window.location.href,
-        "",
-        `/?${encodeURI(
-          flats
-            .concat(deeps, bodyParams)
-            .join("")
-            .slice(0, -1)
-        )}`
-      )
+      // history.replaceState(
+      //   window.location.href,
+      //   "",
+      //   `/?${encodeURI(
+      //     flats
+      //       .concat(deeps, bodyParams)
+      //       .join("")
+      //       .slice(0, -1)
+      //   )}`
+      // )
     },
     setRouteQueries(queries) {
       if (typeof queries !== "object") throw new Error("Route query parameters must be a Object")

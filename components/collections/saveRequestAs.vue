@@ -5,60 +5,63 @@
     </div>
     <div slot="body">
       <v-input>
-        <label for="selectLabel">{{ $t("label") }}</label>
         <v-text-field
           type="text"
           id="selectLabel"
+          :label="$t('label')"
           v-model="requestData.name"
           :placeholder="defaultRequestName"
           @keyup.enter="saveRequestAs"
+          :rules="[v => !!v || `${$t('label')} is required`]"
         />
       </v-input>
-      <v-input>
-        <label for="selectCollection">{{ $t("collection") }}</label>
-        <span class="select-wrapper">
-          <v-select type="text" id="selectCollection" v-model="requestData.collectionIndex">
-            <v-option :key="null" :value="null" hidden disabled selected>{{
-              $t("select_collection")
-            }}</v-option>
-            <v-option
-              v-for="(collection, index) in $store.state.postwoman.collections"
-              :key="index"
-              :value="index"
-            >
-              {{ collection.name }}
-            </v-option>
-          </v-select>
-        </span>
-      </v-input>
-      <v-input>
-        <label for="selectFolder">{{ $t("folder") }}</label>
-        <span class="select-wrapper">
-          <v-select type="text" id="selectFolder" v-model="requestData.folderIndex">
-            <v-option :key="null" :value="null">/</v-option>
-            <v-option v-for="(folder, index) in folders" :key="index" :value="index">
-              {{ folder.name }}
-            </v-option>
-          </v-select>
-        </span>
-      </v-input>
-      <v-input>
-        <label for="selectRequest">{{ $t("request") }}</label>
-        <span class="select-wrapper">
-          <v-select id="selectRequest" v-model="requestData.requestIndex">
-            <v-option :key="null" :value="null">/</v-option>
-            <v-option v-for="(folder, index) in requests" :key="index" :value="index">
-              {{ folder.name }}
-            </v-option>
-          </v-select>
-        </span>
-      </v-input>
+      <span class="select-wrapper">
+        <v-select
+          v-model="requestData.collectionIndex"
+          :label="$t('select_collection')"
+          :items="$store.state.postwoman.collections"
+          item-text="name"
+          item-value="name"
+          persistent-hint
+          single-line
+          clearable
+          return-object
+        ></v-select>
+      </span>
+      <span class="select-wrapper">
+        <v-select
+          v-model="requestData.folderIndex"
+          :label="$t('folder')"
+          :items="folders"
+          item-text="name"
+          item-value="index"
+          persistent-hint
+          single-line
+          clearable
+        ></v-select>
+      </span>
+      <span class="select-wrapper">
+        <v-select
+          v-model="requestData.requestIndex"
+          :label="$t('request')"
+          :items="requests"
+          item-text="name"
+          item-value="index"
+          persistent-hint
+          single-line
+          clearable
+        ></v-select>
+      </span>
     </div>
     <div slot="footer">
       <v-btn class="icon" @click="hideModal">
         {{ $t("cancel") }}
       </v-btn>
-      <v-btn class="icon primary" @click="saveRequestAs">
+      <v-btn
+        class="icon primary"
+        @click="saveRequestAs"
+        :disabled="requestData.name && requestData.name.length == 0"
+      >
         {{ $t("save") }}
       </v-btn>
     </div>
@@ -103,12 +106,7 @@ export default {
       const userSelectedAnyCollection = this.$data.requestData.collectionIndex !== undefined
       if (!userSelectedAnyCollection) return []
 
-      const noCollectionAvailable =
-        this.$store.state.postwoman.collections[this.$data.requestData.collectionIndex] !==
-        undefined
-      if (!noCollectionAvailable) return []
-
-      return this.$store.state.postwoman.collections[this.$data.requestData.collectionIndex].folders
+      return this.$data.requestData.collectionIndex.folders
     },
     requests() {
       const userSelectedAnyCollection = this.$data.requestData.collectionIndex !== undefined
@@ -116,21 +114,12 @@ export default {
 
       const userSelectedAnyFolder = this.$data.requestData.folderIndex !== undefined
       if (userSelectedAnyFolder) {
-        const collection = this.$store.state.postwoman.collections[
-          this.$data.requestData.collectionIndex
-        ]
-        const folder = collection.folders[this.$data.requestData.folderIndex]
+        const collection = this.$data.requestData.collectionIndex
+        const folder = this.$data.requestData.folderIndex
         const requests = folder.requests
         return requests
       } else {
-        const collection = this.$store.state.postwoman.collections[
-          this.$data.requestData.collectionIndex
-        ]
-        const noCollectionAvailable =
-          this.$store.state.postwoman.collections[this.$data.requestData.collectionIndex] !==
-          undefined
-        if (!noCollectionAvailable) return []
-
+        const collection = this.$data.requestData.collectionIndex
         const requests = collection.requests
         return requests
       }
