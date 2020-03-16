@@ -133,7 +133,7 @@ TODO:
                       <request
                         :request="request"
                         :collection-index="index"
-                        :folder-index="-1"
+                        :folder-index="folderIndex"
                         :request-index="requestIndex"
                         @edit-request="
                           editRequest({
