@@ -67,7 +67,7 @@ TODO:
       <v-expansion-panels :accordion="true" focusable tile>
         <v-expansion-panel
           v-for="(collection, index) in collections"
-          :key="collection.name"
+          :key="collection.id"
           class="v-list-item-expand"
         >
           <v-expansion-panel-header disable-icon-rotate>
@@ -98,7 +98,7 @@ TODO:
             <v-expansion-panels flat :focusable="false">
               <v-expansion-panel
                 v-for="(folder, folderIndex) in collection.folders"
-                :key="folder.name"
+                :key="folder.id"
               >
                 <v-expansion-panel-header disable-icon-rotate>
                   <folder
@@ -128,7 +128,7 @@ TODO:
                   <v-list shaped two-line>
                     <v-list-item
                       v-for="(request, requestIndex) in folder.requests"
-                      :key="request.name"
+                      :key="request.id"
                     >
                       <request
                         :request="request"
@@ -136,11 +136,11 @@ TODO:
                         :folder-index="-1"
                         :request-index="requestIndex"
                         @edit-request="
-                          $emit('edit-request', {
+                          editRequest({
                             request,
-                            index,
-                            folderIndex: folderIndex,
-                            requestIndex: requestIndex,
+                            collectionIndex: index,
+                            folderIndex,
+                            requestIndex,
                           })
                         "
                       />
@@ -151,21 +151,18 @@ TODO:
             </v-expansion-panels>
             <!-- <v-subheader>Requests</v-subheader> -->
             <v-list shaped two-line>
-              <v-list-item
-                v-for="(request, requestIndex) in collection.requests"
-                :key="request.name"
-              >
+              <v-list-item v-for="(request, requestIndex) in collection.requests" :key="request.id">
                 <request
                   :request="request"
                   :collection-index="index"
                   :folder-index="-1"
                   :request-index="requestIndex"
                   @edit-request="
-                    $emit('edit-request', {
+                    editRequest({
                       request,
-                      index,
+                      collectionIndex: index,
                       folderIndex: undefined,
-                      requestIndex: requestIndex,
+                      requestIndex,
                     })
                   "
                 />
@@ -189,21 +186,6 @@ TODO:
     </nuxt-link> -->
   </div>
 </template>
-
-<style scoped lang="scss">
-.virtual-list {
-  max-height: calc(100vh - 276px);
-}
-
-ul {
-  display: flex;
-  flex-direction: column;
-}
-
-.bordered-bottom {
-  border-bottom: 1px #ccc solid;
-}
-</style>
 
 <script>
 import collection from "./collection"

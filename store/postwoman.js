@@ -1,4 +1,6 @@
 import Vue from "vue"
+import { findIndex } from "lodash"
+import { createUUID } from "../functions"
 
 export const SETTINGS_KEYS = [
   /**
@@ -82,6 +84,7 @@ export const state = () => ({
   },
   collections: [
     {
+      id: createUUID(),
       name: "My Collection",
       folders: [],
       requests: [],
@@ -89,6 +92,7 @@ export const state = () => ({
   ],
   environments: [
     {
+      id: createUUID(),
       name: "My Environment Variables",
       variables: [],
     },
@@ -159,6 +163,9 @@ export const mutations = {
 
     let index = 0
     for (let environment of state.environments) {
+      if (!environment.hasOwnProperty("id")) {
+        environment.id = createUUID()
+      }
       environment.environmentIndex = index
       index += 1
     }
@@ -186,7 +193,7 @@ export const mutations = {
       this.$toast.info("Duplicate environment")
       return
     }
-    environments[environmentIndex] = environment
+    environments[environmentIndex] = Object.assign({}, environment, { id: createUUID() })
   },
 
   replaceCollections(state, collections) {
@@ -213,6 +220,7 @@ export const mutations = {
       return
     }
     collections.push({
+      id: createUUID(),
       name: "",
       folders: [],
       requests: [],
@@ -241,6 +249,7 @@ export const mutations = {
   addNewFolder({ collections }, payload) {
     const { collectionIndex, folder } = payload
     collections[collectionIndex].folders.push({
+      id: createUUID(),
       name: "",
       requests: [],
       ...folder,
@@ -308,25 +317,46 @@ export const mutations = {
   },
 
   saveRequestAs({ collections }, payload) {
-    const { request, collectionIndex, folderIndex, requestIndex } = payload
+    const { request, collection, folder, oldRequest } = payload
 
-    const specifiedCollection = collectionIndex !== undefined
-    const specifiedFolder = folderIndex !== undefined
-    const specifiedRequest = requestIndex !== undefined
+    const specifiedCollection = collection !== undefined
+    const specifiedFolder = folder !== undefined
+    const specifiedRequest = oldRequest !== undefined
+
+    let collectionIndex,
+      folderIndex,
+      requestIndex = -1
+
+    let newRequest = Object.assign(request, { id: createUUID() })
+
+    if (specifiedCollection) collectionIndex = findIndex(collections, c => c.id === collection.id)
+
+    if (specifiedFolder && collectionIndex > -1)
+      folderIndex = findIndex(collections[collectionIndex].folders, f => f.id === folder.id)
+
+    if (specifiedRequest && collectionIndex > -1)
+      if (folderIndex > -1) {
+        requestIndex = findIndex(
+          collections[collectionIndex].folders[folderIndex].requests,
+          r => r.id === oldRequest.id
+        )
+      } else {
+        requestIndex = findIndex(collections[collectionIndex].requests, r => r.id === oldRequest.id)
+      }
 
     if (specifiedCollection && specifiedFolder && specifiedRequest) {
-      Vue.set(collections[collectionIndex].folders[folderIndex].requests, requestIndex, request)
+      Vue.set(collections[collectionIndex].folders[folderIndex].requests, requestIndex, newRequest)
     } else if (specifiedCollection && specifiedFolder && !specifiedRequest) {
       const requests = collections[collectionIndex].folders[folderIndex].requests
       const lastRequestIndex = requests.length - 1
-      Vue.set(requests, lastRequestIndex + 1, request)
+      Vue.set(requests, lastRequestIndex + 1, newRequest)
     } else if (specifiedCollection && !specifiedFolder && specifiedRequest) {
       const requests = collections[collectionIndex].requests
-      Vue.set(requests, requestIndex, request)
+      Vue.set(requests, requestIndex, newRequest)
     } else if (specifiedCollection && !specifiedFolder && !specifiedRequest) {
       const requests = collections[collectionIndex].requests
       const lastRequestIndex = requests.length - 1
-      Vue.set(requests, lastRequestIndex + 1, request)
+      Vue.set(requests, lastRequestIndex + 1, newRequest)
     }
   },
 

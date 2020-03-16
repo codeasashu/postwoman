@@ -5,7 +5,7 @@
     </div>
     <div slot="body">
       <v-input>
-        <v-textarea label='Export' v-model="collectionJson"></v-textarea>
+        <v-textarea label="Export" v-model="collectionJson"></v-textarea>
       </v-input>
     </div>
     <div slot="footer">
@@ -34,6 +34,7 @@ export default {
   },
   computed: {
     collectionJson() {
+      console.log("p", this.$store.state.postwoman.collections)
       return JSON.stringify(this.$store.state.postwoman.collections, null, 2)
     },
   },

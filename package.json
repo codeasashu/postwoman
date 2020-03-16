@@ -41,6 +41,7 @@
     "firebase": "^7.9.3",
     "graphql": "^14.6.0",
     "graphql-language-service-interface": "^2.3.3",
+    "lodash": "^4.17.15",
     "nuxt": "^2.11.0",
     "nuxt-i18n": "^6.6.0",
     "v-tooltip": "^2.0.3",

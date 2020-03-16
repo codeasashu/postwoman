@@ -14,7 +14,7 @@
             />
           </v-col>
           <v-col>
-            <v-input append-icon="close" @click:append="selectedEnvironment = undefined">
+            <v-input append-icon="visibility" @click:append="displayModalEdit(true)">
               <v-select
                 v-model="selectedEnvironment"
                 :items="environments"
@@ -24,6 +24,7 @@
                 return-object
                 single-line
                 label="Select environment"
+                clearable
               ></v-select>
             </v-input>
           </v-col>
@@ -203,6 +204,13 @@
         :show="showRequestModal"
         @hide-model="hideRequestModal"
         :editing-request="editRequest"
+      />
+
+      <editEnvironment
+        :show="showModalEditEnvironment"
+        :editingEnvironment="editingEnvironment"
+        :editingEnvironmentIndex="editingEnvironmentIndex"
+        @hide-modal="displayModalEdit(false)"
       />
 
       <pw-modal v-if="showModal" @close="showModal = false">
@@ -483,6 +491,7 @@ import { tokenRequest, oauthRedirect } from "../assets/js/oauth"
 import { sendNetworkRequest } from "../functions/network"
 import { fb } from "../functions/fb"
 import { mapEnvironmentVariable } from "../functions"
+import { findIndex } from "lodash"
 
 const statusCategories = [
   {
@@ -558,10 +567,12 @@ export default {
     headers: () => import("../components/request/headers"),
     requestBody: () => import("../components/request/requestBody"),
     response: () => import("../components/response"),
+    editEnvironment: () => import("../components/environments/editEnvironment"),
   },
   data() {
     return {
       showModal: false,
+      showModalEditEnvironment: false,
       showPreRequestScript: false,
       testsEnabled: false,
       testScript: "// pw.expect('variable').toBe('value');",
@@ -572,6 +583,8 @@ export default {
       doneButton: '<i class="material-icons">done</i>',
       isHidden: true,
       selectedEnvironment: undefined,
+      editingEnvironment: undefined,
+      editingEnvironmentIndex: -1,
       response: {
         status: "",
         headers: "",
@@ -655,6 +668,7 @@ export default {
     },
     selectedRequest(newValue, oldValue) {
       // @TODO: Convert all variables to single request variable
+      console.log("rr", newValue, oldValue)
       if (!newValue) return
       this.uri = newValue.url + newValue.path
       this.url = newValue.url
@@ -672,6 +686,7 @@ export default {
       this.rawInput = newValue.rawInput
       this.contentType = newValue.contentType
       this.requestType = newValue.requestType
+      this.label = newValue.name
     },
     editingRequest(newValue) {
       this.editRequest = newValue
@@ -1110,6 +1125,26 @@ export default {
     },
   },
   methods: {
+    displayModalEdit(shouldDisplay) {
+      if (!this.selectedEnvironment) {
+        return
+      }
+
+      if (shouldDisplay) {
+        this.$data.editingEnvironment = this.selectedEnvironment
+        this.$data.editingEnvironmentIndex = findIndex(
+          this.environments,
+          e => e.id === this.selectedEnvironment.id
+        )
+      }
+
+      if (!shouldDisplay) {
+        this.$data.editingEnvironment = undefined
+        this.$data.editingEnvironmentIndex = undefined
+      }
+
+      this.$data.showModalEditEnvironment = shouldDisplay
+    },
     useSelectedEnvironment(environment) {
       let preRequestScriptString = ""
       for (let variable of environment.variables) {
