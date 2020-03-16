@@ -83,44 +83,46 @@ export default {
   data() {
     return {
       defaultRequestName: "My Request",
-      requestData: {
-        name: undefined,
-        collection: undefined,
-        folder: undefined,
-        request: undefined,
-      },
     }
   },
   watch: {
     "requestData.collection": function resetFolderAndrequest() {
       // if user choosen some folder, than selected other collection, which doesn't have any folders
       // than `requestUpdateData.folder` won't be reseted
-      this.$data.requestData.folder = undefined
-      this.$data.requestData.request = undefined
+      this.requestData.folder = undefined
+      this.requestData.request = undefined
     },
     "requestData.folder": function resetrequest() {
-      this.$data.requestData.request = undefined
+      this.requestData.request = undefined
     },
   },
   computed: {
+    requestData() {
+      return {
+        name: this.$props.editingRequest.name,
+        collection: undefined,
+        folder: undefined,
+        request: undefined,
+      }
+    },
     folders() {
-      const userSelectedAnyCollection = this.$data.requestData.collection !== undefined
+      const userSelectedAnyCollection = this.requestData.collection !== undefined
       if (!userSelectedAnyCollection) return []
 
-      return this.$data.requestData.collection.folders
+      return this.requestData.collection.folders
     },
     requests() {
-      const userSelectedAnyCollection = this.$data.requestData.collection !== undefined
+      const userSelectedAnyCollection = this.requestData.collection !== undefined
       if (!userSelectedAnyCollection) return []
 
-      const userSelectedAnyFolder = this.$data.requestData.folder !== undefined
+      const userSelectedAnyFolder = this.requestData.folder !== undefined
       if (userSelectedAnyFolder) {
-        const collection = this.$data.requestData.collection
-        const folder = this.$data.requestData.folder
+        const collection = this.requestData.collection
+        const folder = this.requestData.folder
         const requests = folder.requests
         return requests
       } else {
-        const collection = this.$data.requestData.collection
+        const collection = this.requestData.collection
         const requests = collection.requests
         return requests
       }
@@ -135,7 +137,7 @@ export default {
       }
     },
     saveRequestAs() {
-      const userDidntSpecifyCollection = this.$data.requestData.collection === undefined
+      const userDidntSpecifyCollection = this.requestData.collection === undefined
       if (userDidntSpecifyCollection) {
         this.$toast.error(this.$t("select_collection"), {
           icon: "error",
@@ -145,20 +147,20 @@ export default {
 
       let collectionIndex = findIndex(
         this.$store.state.postwoman.collections,
-        c => c.id === this.$data.requestData.collection.id
+        c => c.id === this.requestData.collection.id
       )
 
       const requestUpdated = {
         ...this.$props.editingRequest,
-        name: this.$data.requestData.name || this.$data.defaultRequestName,
+        name: this.requestData.name || this.$data.defaultRequestName,
         collection: collectionIndex,
       }
 
       this.$store.commit("postwoman/saveRequestAs", {
         request: requestUpdated,
-        collection: this.$data.requestData.collection,
-        folder: this.$data.requestData.folder,
-        oldRequest: this.$data.requestData.request,
+        collection: this.requestData.collection,
+        folder: this.requestData.folder,
+        oldRequest: this.requestData.request,
       })
 
       this.hideModal()
