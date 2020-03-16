@@ -1,23 +1,6 @@
+import { httpbinRequest } from "../functions"
 export default () => ({
-  request: {
-    method: "GET",
-    uri: "",
-    url: "https://httpbin.org",
-    path: "/get",
-    label: "",
-    auth: "None",
-    httpUser: "",
-    httpPassword: "",
-    passwordFieldType: "password",
-    bearerToken: "",
-    headers: [],
-    params: [],
-    bodyParams: [],
-    rawParams: "",
-    rawInput: false,
-    requestType: "",
-    contentType: "",
-  },
+  request: httpbinRequest,
   gql: {
     url: "https://rickandmortyapi.com/graphql",
     headers: [],

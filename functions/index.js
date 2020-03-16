@@ -23,3 +23,29 @@ export const createUUID = function() {
   })
   return uuid
 }
+
+export const basicRequestSchema = {
+  uri: "",
+  url: undefined,
+  path: undefined,
+  method: undefined,
+  auth: "None",
+  label: "",
+  httpUser: "",
+  httpPassword: "",
+  passwordFieldType: "password",
+  bearerToken: "",
+  headers: [],
+  params: [],
+  bodyParams: [],
+  rawParams: "",
+  rawInput: false,
+  contentType: "",
+  requestType: "",
+}
+
+export const httpbinRequest = Object.assign({}, basicRequestSchema, {
+  method: "GET",
+  url: "https://httpbin.org",
+  path: "/get",
+})

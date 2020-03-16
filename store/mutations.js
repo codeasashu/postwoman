@@ -1,4 +1,8 @@
 export default {
+  setRequest({ request }, newRequest) {
+    request = Object.assign({}, request, newRequest)
+  },
+
   setState({ request }, { attribute, value }) {
     request[attribute] = value
   },

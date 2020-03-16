@@ -1,124 +1,23 @@
 <template>
   <div class="page">
     <div class="content v-layout v-gutter">
-      <div class="v-layout-item v-size-100">
-        <v-row>
-          <v-col>
-            <v-text-field
-              id="label"
-              name="label"
-              type="text"
-              v-model="label"
-              :label="$t('label')"
-              :placeholder="$t('optional')"
-            />
-          </v-col>
-          <v-col>
-            <v-input append-icon="visibility" @click:append="displayModalEdit(true)">
-              <v-select
-                v-model="selectedEnvironment"
-                :items="environments"
-                item-text="name"
-                item-value="name"
-                persistent-hint
-                return-object
-                single-line
-                label="Select environment"
-                clearable
-              ></v-select>
-            </v-input>
-          </v-col>
-        </v-row>
-        <v-row ref="request-input">
-          <v-col cols="2">
-            <v-input>
-              <v-select :label="$t('method')" :items="requestMethods" v-model="method"></v-select>
-            </v-input>
-          </v-col>
-          <v-col cols="6">
-            <v-input>
-              <v-text-field
-                name="url"
-                id="url"
-                :label="$t('url')"
-                :class="{ error: !isValidURL }"
-                @keyup.enter="isValidURL ? sendRequest() : null"
-                v-model="uri"
-                spellcheck="false"
-              />
-            </v-input>
-          </v-col>
-          <v-col cols="4">
-            <v-btn
-              color="primary"
-              raised
-              :disabled="!isValidURL"
-              @click="sendRequest"
-              id="send"
-              ref="sendButton"
-              >{{ $t("send") }}
-              <v-icon>send</v-icon>
-            </v-btn>
-            <v-btn
-              class="v-primary v-raised v-icon-button"
-              :disabled="!isValidURL"
-              @click="copyRequest"
-              v-tooltip.bottom="$t('copy_request_link')"
-              id="copyRequest"
-              ref="copyRequest"
-            >
-              <v-icon v-if="navigatorShare">share</v-icon>
-              <v-icon v-else>file_copy</v-icon>
-            </v-btn>
-            <v-btn
-              class="v-primary v-raised v-icon-button"
-              :disabled="!isValidURL"
-              @click="saveRequest"
-              id="saveRequest"
-              ref="saveRequest"
-              v-tooltip.bottom="$t('save_to_collections')"
-            >
-              <v-icon>save</v-icon>
-            </v-btn>
-            <v-btn
-              class="v-primary v-raised v-icon-button"
-              @click="clearContent('', $event)"
-              id="clearAll"
-              ref="clearAll"
-              v-tooltip.bottom="$t('clear_all')"
-            >
-              <v-icon>clear_all</v-icon>
-            </v-btn>
-            <v-menu
-              class="v-layout v-alignment-center-right"
-              :mdCloseOnClick="true"
-              :mdCloseOnSelect="true"
-              v-tooltip="$t('more')"
-            >
-              <v-icon v-menu-trigger>more_vert</v-icon>
-              <v-menu-content>
-                <v-menu-item>
-                  <v-btn @click="showModal = true">
-                    <span><v-icon>import_export</v-icon>{{ $t("import_curl") }}</span>
-                  </v-btn>
-                </v-menu-item>
-                <v-menu-item>
-                  <v-btn @click="showModal = true">
-                    <span
-                      ><v-icon>code</v-icon>{{ isHidden ? $t("show_code") : $t("hide_code") }}</span
-                    >
-                  </v-btn>
-                </v-menu-item>
-                <v-menu-item>
-                  <v-btn @click="isHidden = !isHidden" :disabled="!isValidURL">
-                    <span><v-icon>import_export</v-icon>{{ $t("import_curl") }}</span>
-                  </v-btn>
-                </v-menu-item>
-              </v-menu-content>
-            </v-menu>
-          </v-col>
-        </v-row>
-      </div>
+      <request-input :request="selectedRequest" @send="prepareRequest" @clear="clearContent">
+        <div slot="requestHeader">
+          <v-input append-icon="visibility" @click:append="displayModalEdit(true)">
+            <v-select
+              v-model="selectedEnvironment"
+              :items="environments"
+              item-text="name"
+              item-value="name"
+              persistent-hint
+              return-object
+              single-line
+              label="Select environment"
+              clearable
+            ></v-select>
+          </v-input>
+        </div>
+      </request-input>
 
       <div class="v-layout-item v-size-100">
         <v-tabs v-model="tab">
@@ -130,7 +29,7 @@
         <v-tabs-items v-model="tab">
           <v-tab-item>
             <query-params
-              :params="params"
+              :params="selectedRequest.params"
               @set_key="event => $store.commit('setKeyParams', ...event)"
               @set_value="event => $store.commit('setValueParams', ...event)"
               @clear_all="clearContent('parameters', $event)"
@@ -151,7 +50,7 @@
           </v-tab-item>
           <v-tab-item>
             <headers
-              :headers="headers"
+              :headers="selectedRequest.headers"
               :commonHeaders="commonHeaders"
               @set_route_query="setRouteQueryState"
               @set_key="event => $store.commit('setKeyHeader', ...event)"
@@ -163,8 +62,8 @@
           </v-tab-item>
           <v-tab-item>
             <request-body
-              v-if="['POST', 'PUT', 'PATCH'].includes(method)"
-              :method="method"
+              v-if="['POST', 'PUT', 'PATCH'].includes(selectedRequest.method)"
+              :method="selectedRequest.method"
               :rawInput="rawInput"
               :rawParams="rawParams"
               :bodyParams="bodyParams"
@@ -199,12 +98,6 @@
         <response ref="response" :response="response" />
       </div>
       <!-- END Response -->
-
-      <save-request-as
-        :show="showRequestModal"
-        @hide-model="hideRequestModal"
-        :editing-request="editRequest"
-      />
 
       <editEnvironment
         :show="showModalEditEnvironment"
@@ -557,7 +450,6 @@ export default {
     "pw-toggle": () => import("../components/ui/toggle"),
     "pw-modal": () => import("../components/ui/modal"),
     autocomplete: () => import("../components/ui/autocomplete"),
-    saveRequestAs: () => import("../components/collections/saveRequestAs"),
     Editor: AceEditor,
     inputform: () => import("../components/firebase/inputform"),
     notes: () => import("../components/firebase/feeds"),
@@ -568,6 +460,7 @@ export default {
     requestBody: () => import("../components/request/requestBody"),
     response: () => import("../components/response"),
     editEnvironment: () => import("../components/environments/editEnvironment"),
+    requestInput: () => import("../components/request"),
   },
   data() {
     return {
@@ -590,7 +483,6 @@ export default {
         headers: "",
         body: "",
       },
-      requestMethods: ["GET", "POST", "PUT", "DELETE", "HEAD", "PATCH"],
       previewEnabled: false,
       paramsWatchEnabled: true,
       expandResponse: false,
@@ -606,8 +498,6 @@ export default {
        * These are a list of Content Types known to Postwoman.
        */
       commonHeaders,
-      showRequestModal: false,
-      editRequest: {},
       urlExcludes: {},
       activeSidebar: true,
       fb,
@@ -668,7 +558,6 @@ export default {
     },
     selectedRequest(newValue, oldValue) {
       // @TODO: Convert all variables to single request variable
-      console.log("rr", newValue, oldValue)
       if (!newValue) return
       this.uri = newValue.url + newValue.path
       this.url = newValue.url
@@ -688,10 +577,6 @@ export default {
       this.requestType = newValue.requestType
       this.label = newValue.name
     },
-    editingRequest(newValue) {
-      this.editRequest = newValue
-      this.showRequestModal = true
-    },
     method() {
       // this.$store.commit('setState', { 'value': ["POST", "PUT", "PATCH"].includes(this.method) ? 'application/json' : '', 'attribute': 'contentType' })
       this.contentType = ["POST", "PUT", "PATCH"].includes(this.method) ? "application/json" : ""
@@ -700,63 +585,6 @@ export default {
   computed: {
     environments() {
       return this.$store.state.postwoman.environments
-    },
-    uri: {
-      get() {
-        if (this.url && this.path) {
-          return this.url + this.path
-        }
-        return this.$store.state.request.uri || this.url
-      },
-      set(value) {
-        this.$store.commit("setState", { value, attribute: "uri" })
-        let url
-        if (this.preRequestScript && this.showPreRequestScript) {
-          const environmentVariables = getEnvironmentVariablesFromScript(this.preRequestScript)
-          url = parseTemplateString(value, environmentVariables)
-        }
-        try {
-          url = new URL(url)
-          this.url = url.origin
-          this.path = url.pathname
-        } catch (error) {
-          let uriRegex = value.match(/^((http[s]?:\/\/)?(<<[^\/]+>>)?[^\/]*|)(\/?.*)$/)
-          this.url = uriRegex[1]
-          this.path = uriRegex[4]
-        }
-      },
-    },
-    url: {
-      get() {
-        return this.$store.state.request.url
-      },
-      set(value) {
-        this.$store.commit("setState", { value, attribute: "url" })
-      },
-    },
-    method: {
-      get() {
-        return this.$store.state.request.method
-      },
-      set(value) {
-        this.$store.commit("setState", { value, attribute: "method" })
-      },
-    },
-    path: {
-      get() {
-        return this.$store.state.request.path
-      },
-      set(value) {
-        this.$store.commit("setState", { value, attribute: "path" })
-      },
-    },
-    label: {
-      get() {
-        return this.$store.state.request.label
-      },
-      set(value) {
-        this.$store.commit("setState", { value, attribute: "label" })
-      },
     },
     auth: {
       get() {
@@ -954,28 +782,11 @@ export default {
     selectedRequest() {
       return this.$store.state.postwoman.selectedRequest
     },
-    editingRequest() {
-      return this.$store.state.postwoman.editingRequest
-    },
     requestName() {
       return this.label
     },
     statusCategory() {
       return findStatusGroup(this.response.status)
-    },
-    isValidURL() {
-      if (this.showPreRequestScript) {
-        // we cannot determine if a URL is valid because the full string is not known ahead of time
-        return true
-      }
-      const protocol = "^(https?:\\/\\/)?"
-      const validIP = new RegExp(
-        `${protocol}(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]).){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$`
-      )
-      const validHostname = new RegExp(
-        `${protocol}(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]).)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9-]*[A-Za-z0-9/])$`
-      )
-      return validIP.test(this.url) || validHostname.test(this.url)
     },
     hasRequestBody() {
       return ["POST", "PUT", "PATCH"].includes(this.method)
@@ -1145,21 +956,6 @@ export default {
 
       this.$data.showModalEditEnvironment = shouldDisplay
     },
-    useSelectedEnvironment(environment) {
-      let preRequestScriptString = ""
-      for (let variable of environment.variables) {
-        preRequestScriptString =
-          preRequestScriptString + `pw.env.set('${variable.key}', '${variable.value}');\n`
-      }
-      this.preRequestScript = preRequestScriptString
-      this.showPreRequestScript = true
-    },
-    checkCollections() {
-      const checkCollectionAvailability =
-        this.$store.state.postwoman.collections &&
-        this.$store.state.postwoman.collections.length > 0
-      return checkCollectionAvailability
-    },
     scrollInto(view) {
       this.$refs[view].$el.scrollIntoView({
         behavior: "smooth",
@@ -1212,15 +1008,31 @@ export default {
       }
       return await sendNetworkRequest(requestOptions, this.$store)
     },
+    prepareRequest(request) {
+      if (!request) return
+      this.uri = request.url + request.path
+      this.url = request.url
+      this.path = request.path
+      this.method = request.method
+      this.auth = request.auth
+      this.httpUser = request.httpUser
+      this.httpPassword = request.httpPassword
+      this.passwordFieldType = request.passwordFieldType
+      this.bearerToken = request.bearerToken
+      this.headers = request.headers
+      this.params = request.params
+      this.bodyParams = request.bodyParams
+      this.rawParams = request.rawParams
+      this.rawInput = request.rawInput
+      this.contentType = request.contentType
+      this.requestType = request.requestType
+      this.label = request.name
+
+      this.sendRequest()
+    },
     async sendRequest() {
       this.$toast.clear()
       if (this.settings.SCROLL_INTO_ENABLED) this.scrollInto("response")
-      if (!this.isValidURL) {
-        this.$toast.error(this.$t("url_invalid_format"), {
-          icon: "error",
-        })
-        return
-      }
       // Start showing the loading bar as soon as possible.
       // The nuxt axios module will hide it when the request is made.
       this.$nuxt.$loading.start()
@@ -1456,32 +1268,6 @@ export default {
         },
       })
     },
-    copyRequest() {
-      if (navigator.share) {
-        const time = new Date().toLocaleTimeString()
-        const date = new Date().toLocaleDateString()
-        navigator
-          .share({
-            title: "Postwoman",
-            text: `Postwoman • API request builder at ${time} on ${date}`,
-            url: window.location.href,
-          })
-          .then(() => {})
-          .catch(console.error)
-      } else {
-        const dummy = document.createElement("input")
-        document.body.appendChild(dummy)
-        dummy.value = window.location.href
-        dummy.select()
-        document.execCommand("copy")
-        document.body.removeChild(dummy)
-        this.$refs.copyRequest.innerHTML = this.doneButton
-        this.$toast.info(this.$t("copied_to_clipboard"), {
-          icon: "done",
-        })
-        setTimeout(() => (this.$refs.copyRequest.innerHTML = this.copyButton), 1000)
-      }
-    },
     copyRequestCode() {
       this.$refs.copyRequestCode.innerHTML = this.doneButton
       this.$toast.success(this.$t("copied_to_clipboard"), {
@@ -1624,19 +1410,6 @@ export default {
           this.testReports = null
           break
         default:
-          this.method = "GET"
-          this.url = "https://httpbin.org"
-          this.path = "/get"
-          this.uri = this.url + this.path
-          this.label = ""
-          this.auth = "None"
-          this.httpUser = ""
-          this.httpPassword = ""
-          this.bearerToken = ""
-          this.headers = []
-          this.params = []
-          this.bodyParams = []
-          this.rawParams = ""
           this.showTokenRequest = false
           this.tokens = []
           this.tokenReqs = []
@@ -1653,39 +1426,6 @@ export default {
         icon: "clear_all",
       })
       setTimeout(() => (target.innerHTML = '<i class="material-icons">clear_all</i>'), 1000)
-    },
-    saveRequest() {
-      if (!this.checkCollections()) {
-        this.$toast.error(this.$t("create_collection"), {
-          icon: "error",
-        })
-        return
-      }
-      this.editRequest = {
-        url: this.url,
-        path: this.path,
-        method: this.method,
-        auth: this.auth,
-        httpUser: this.httpUser,
-        httpPassword: this.httpPassword,
-        passwordFieldType: this.passwordFieldType,
-        bearerToken: this.bearerToken,
-        headers: this.headers,
-        params: this.params,
-        bodyParams: this.bodyParams,
-        rawParams: this.rawParams,
-        rawInput: this.rawInput,
-        contentType: this.contentType,
-        requestType: this.requestType,
-      }
-      if (this.selectedRequest.url) {
-        this.editRequest = Object.assign({}, this.selectedRequest, this.editRequest)
-      }
-      this.showRequestModal = true
-    },
-    hideRequestModal() {
-      this.showRequestModal = false
-      this.editRequest = {}
     },
     setExclude(excludedField, excluded) {
       if (excludedField === "auth") {
@@ -1832,32 +1572,26 @@ export default {
       this.clientId = clientId
       this.scope = scope
     },
-  },
-  async mounted() {
-    // this.observeRequestButton()
-    this._keyListener = function(e) {
+    keyListener(e) {
       if (e.key === "g" && (e.ctrlKey || e.metaKey)) {
         e.preventDefault()
         this.sendRequest()
-      } else if (e.key === "s" && (e.ctrlKey || e.metaKey)) {
-        e.preventDefault()
-        this.saveRequest()
-      } else if (e.key === "k" && (e.ctrlKey || e.metaKey)) {
-        e.preventDefault()
-        this.copyRequest()
       } else if (e.key === "j" && (e.ctrlKey || e.metaKey)) {
         e.preventDefault()
         this.$refs.clearAll.click()
       } else if (e.key === "Escape") {
         e.preventDefault()
-        this.showModal = this.showTokenList = this.showTokenRequestList = this.showRequestModal = false
+        this.showModal = this.showTokenList = this.showTokenRequestList = false
         this.isHidden = true
       }
-    }
-    document.addEventListener("keydown", this._keyListener.bind(this))
+    },
+  },
+  async mounted() {
+    // this.observeRequestButton()
     await this.oauthRedirectReq()
   },
   created() {
+    document.addEventListener("keydown", this.keyListener)
     this.urlExcludes = this.$store.state.postwoman.settings.URL_EXCLUDES || {
       // Exclude authentication by default for security reasons.
       auth: true,
@@ -1888,7 +1622,7 @@ export default {
     )
   },
   beforeDestroy() {
-    document.removeEventListener("keydown", this._keyListener)
+    document.removeEventListener("keydown", this.keyListener)
   },
 }
 </script>
