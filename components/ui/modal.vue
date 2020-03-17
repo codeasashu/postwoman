@@ -1,5 +1,11 @@
 <template>
-  <v-dialog v-model="show" width="600" :v-click-outside-to-close="false" @v-closed="closed">
+  <v-dialog
+    v-model="show"
+    width="600"
+    :v-click-outside-to-close="false"
+    @v-closed="closed"
+    :persistent="persistent"
+  >
     <v-card>
       <v-card-title class="headline grey lighten-2"><slot name="header"></slot></v-card-title>
       <v-card-text><slot name="body"></slot></v-card-text>
@@ -14,6 +20,7 @@
 export default {
   props: {
     show: Boolean,
+    persistent: Boolean,
   },
   methods: {
     closed() {

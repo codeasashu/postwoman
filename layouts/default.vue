@@ -40,11 +40,13 @@
           <v-tab id="tab-side-collection">{{ $t("collection") }}</v-tab>
           <v-tab id="tab-side-history">{{ $t("history") }}</v-tab>
           <v-tab id="tab-side-environment">{{ $t("environment") }}</v-tab>
+          <v-tab id="tab-side-oas">{{ $t("oas") }}</v-tab>
         </v-tabs>
         <v-tabs-items v-model="tab">
           <v-tab-item><collections /></v-tab-item>
           <v-tab-item><history @useHistory="handleUseHistory" ref="historyComponent"/></v-tab-item>
           <v-tab-item><environments /></v-tab-item>
+          <v-tab-item><oas /></v-tab-item>
         </v-tabs-items>
       </v-navigation-drawer>
       <v-content>
@@ -117,6 +119,7 @@ export default {
     collections: () => import("../components/collections"),
     history: () => import("../components/history"),
     environments: () => import("../components/environments"),
+    oas: () => import("../components/oas"),
   },
 
   methods: {
