@@ -109,7 +109,7 @@
   </div>
 </template>
 <script>
-import { basicRequestSchema, httpbinRequest } from "../../functions"
+import { basicRequestSchema, httpbinRequest, urlParse } from "../../functions"
 export default {
   props: {
     request: Object,
@@ -151,11 +151,9 @@ export default {
           basicRequestSchema,
           this.$props.request
         )
-        console.log("s", _request, basicRequestSchema, this.$props.request)
         return _request
       },
       set(val) {
-        console.log("set", val)
         this.$store.commit("setRequest", val)
       },
     },
@@ -169,7 +167,6 @@ export default {
     },
     uri: {
       get() {
-        console.log("uri", this.selectedRequest)
         if (this.selectedRequest.url && this.selectedRequest.path) {
           return this.selectedRequest.url + this.selectedRequest.path
         }
@@ -177,16 +174,10 @@ export default {
       },
       set(value) {
         this.$store.commit("setState", { value, attribute: "uri" })
-        let url
-        try {
-          url = new URL(url)
-          this.$store.commit("setState", { attribute: "url", value: url.origin })
-          this.$store.commit("setState", { attribute: "path", value: url.pathname })
-        } catch (error) {
-          let uriRegex = value.match(/^((http[s]?:\/\/)?(<<[^\/]+>>)?[^\/]*|)(\/?.*)$/)
-          this.$store.commit("setState", { attribute: "url", value: uriRegex[1] })
-          this.$store.commit("setState", { attribute: "path", value: uriRegex[4] })
-        }
+        //@TODO replace value with env vars before parsing
+        let url = urlParse(value)
+        this.$store.commit("setState", { attribute: "url", value: url.origin })
+        this.$store.commit("setState", { attribute: "path", value: url.path })
       },
     },
     editingRequest() {

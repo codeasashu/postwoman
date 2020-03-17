@@ -49,3 +49,15 @@ export const httpbinRequest = Object.assign({}, basicRequestSchema, {
   url: "https://httpbin.org",
   path: "/get",
 })
+
+export const urlParse = uri => {
+  try {
+    //@TODO new URL(value), use replaceenvvar before substituting to URL
+    url = new URL(uri)
+    return { origin: url.origin, path: url.pathname, queryparams: url.search }
+  } catch (error) {
+    // console.log(error)
+    let uriRegex = uri.match(/^((http[s]?:\/\/)?(<<[^\/]+>>)?[^\/]*|)(\/?.*)$/)
+    return { origin: uriRegex[1], path: uriRegex[4], queryparams: undefined }
+  }
+}
