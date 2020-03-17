@@ -28,7 +28,7 @@ export const basicRequestSchema = {
   uri: "",
   url: undefined,
   path: undefined,
-  method: undefined,
+  method: "GET",
   auth: "None",
   label: "",
   httpUser: "",

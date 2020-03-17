@@ -75,9 +75,6 @@
 </template>
 <script>
 export default {
-  props: {
-    //  auth: String,
-  },
   data() {
     return {
       passwordFieldType: "password",

@@ -12,16 +12,16 @@
             >Content Type</autocomplete
           >
         </v-input>
-        <v-switch v-model="_rawInput" :label="$t('raw_input')"></v-switch>
+        <v-switch v-model="rawInput" :label="$t('raw_input')"></v-switch>
       </v-col>
       <v-col cols="7">
         <div v-if="!rawInput">
           <body-params
             :bodyParams="bodyParams"
-            @set_key="event => $emit('set_key', event)"
-            @set_value="event => $emit('set_value', event)"
-            @delete="index => $emit('delete', index)"
-            @add_new="$emit('add_new')"
+            @set_key="event => $store.commit('setKeyBodyParams', ...event)"
+            @set_value="event => $store.commit('setValueBodyParams', ...event)"
+            @delete="index => removeRequestBodyParam(index)"
+            @add_new="addRequestBodyParam"
           />
         </div>
         <div v-else>
@@ -52,35 +52,44 @@ export default {
     Editor: AceEditor,
     bodyParams: () => import("../../components/request/bodyParams"),
   },
-  props: {
-    method: String,
-    contentType: String,
-    rawInput: Boolean,
-    rawParams: String,
-    bodyParams: Array[Object],
-  },
   computed: {
-    _rawInput: {
+    method() {
+      return this.$store.state.request.method
+    },
+    bodyParams: {
       get() {
-        return this.$props.rawInput
+        return this.$store.state.request.bodyParams
       },
       set(value) {
-        return this.$emit("raw-input", value)
+        this.$store.commit("setState", { value, attribute: "bodyParams" })
       },
     },
-    _contentType: {
+    rawInput: {
       get() {
-        return this.$props.contentType
+        return this.$store.state.request.rawInput
       },
-      set(val) {
-        this.$emit("set_content_type", val)
+      set(value) {
+        this.$store.commit("setState", { value, attribute: "rawInput" })
       },
     },
-    _rawParams() {
-      return this.$props.rawParams
+    contentType: {
+      get() {
+        return this.$store.state.request.contentType
+      },
+      set(value) {
+        this.$store.commit("setState", { value, attribute: "contentType" })
+      },
+    },
+    rawParams: {
+      get() {
+        return this.$store.state.request.rawParams
+      },
+      set(value) {
+        this.$store.commit("setState", { value, attribute: "rawParams" })
+      },
     },
     rawInputEditorLang() {
-      return getEditorLangForMimeType(this._contentType)
+      return getEditorLangForMimeType(this.contentType)
     },
   },
   data() {
@@ -97,12 +106,29 @@ export default {
   },
   methods: {
     editorLeave(val) {
-      if (val) {
-        this.$emit("raw-params", val)
-      }
+      this.rawParams = val
     },
     changeContentType(val) {
-      this._contentType = val
+      this.contentType = val
+    },
+    addRequestBodyParam() {
+      this.$store.commit("addBodyParams", { key: "", value: "" })
+      return false
+    },
+    removeRequestBodyParam(index) {
+      // .slice() gives us an entirely new array rather than giving us just the reference
+      const oldBodyParams = this.bodyParams.slice()
+      this.$store.commit("removeBodyParams", index)
+      this.$toast.error(this.$t("deleted"), {
+        icon: "delete",
+        action: {
+          text: this.$t("undo"),
+          onClick: (e, toastObject) => {
+            this.bodyParams = oldBodyParams
+            toastObject.remove()
+          },
+        },
+      })
     },
   },
 }

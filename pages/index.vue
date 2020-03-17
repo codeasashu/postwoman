@@ -1,7 +1,11 @@
 <template>
   <div class="page">
     <div class="content v-layout v-gutter">
-      <request-input :request="selectedRequest" @send="prepareRequest" @clear="clearContent">
+      <request-input
+        :request="currentRequest"
+        @send="sendRequest()"
+        @clear="({ target, event }) => clearContent(target, event)"
+      >
         <div slot="requestHeader">
           <v-input append-icon="visibility" @click:append="displayModalEdit(true)">
             <v-select
@@ -28,66 +32,16 @@
         </v-tabs>
         <v-tabs-items v-model="tab">
           <v-tab-item>
-            <query-params
-              :params="selectedRequest.params"
-              @set_key="event => $store.commit('setKeyParams', ...event)"
-              @set_value="event => $store.commit('setValueParams', ...event)"
-              @clear_all="clearContent('parameters', $event)"
-              @delete="index => removeRequestParam(index)"
-              @add_new="addRequestParam"
-            />
+            <query-params @clear_all="clearContent('parameters', $event)" />
           </v-tab-item>
           <v-tab-item>
-            <authentication
-              :auth="auth"
-              @set_select="
-                val => {
-                  auth = val
-                }
-              "
-              @clear_all="clearContent('auth', $event)"
-            />
+            <authentication @clear_all="clearContent('auth', $event)" />
           </v-tab-item>
           <v-tab-item>
-            <headers
-              :headers="selectedRequest.headers"
-              :commonHeaders="commonHeaders"
-              @set_route_query="setRouteQueryState"
-              @set_key="event => $store.commit('setKeyHeader', ...event)"
-              @set_value="event => $store.commit('setValueHeader', ...event)"
-              @delete="index => removeRequestHeader(index)"
-              @add_new="addRequestHeader"
-              @clear_all="clearContent('headers', $event)"
-            />
+            <headers @clear_all="clearContent('headers', $event)" />
           </v-tab-item>
           <v-tab-item>
-            <request-body
-              v-if="['POST', 'PUT', 'PATCH'].includes(selectedRequest.method)"
-              :method="selectedRequest.method"
-              :rawInput="rawInput"
-              :rawParams="rawParams"
-              :bodyParams="bodyParams"
-              :contentType="contentType"
-              @raw-params="
-                val => {
-                  rawParams = val
-                }
-              "
-              @raw-input="
-                hasRawInput => {
-                  rawInput = hasRawInput
-                }
-              "
-              @set_content_type="
-                val => {
-                  contentType = val
-                }
-              "
-              @set_key="event => $store.commit('setKeyBodyParams', ...event)"
-              @set_value="event => $store.commit('setValueBodyParams', ...event)"
-              @delete="index => removeRequestBodyParam(index)"
-              @add_new="addRequestBodyParam"
-            />
+            <request-body v-if="['POST', 'PUT', 'PATCH'].includes(currentRequest.method)" />
           </v-tab-item>
         </v-tabs-items>
       </div>
@@ -105,266 +59,6 @@
         :editingEnvironmentIndex="editingEnvironmentIndex"
         @hide-modal="displayModalEdit(false)"
       />
-
-      <pw-modal v-if="showModal" @close="showModal = false">
-        <div slot="header">
-          <ul>
-            <li>
-              <div class="flex-wrap">
-                <h3 class="title">{{ $t("import_curl") }}</h3>
-                <div>
-                  <button class="icon" @click="showModal = false">
-                    <i class="material-icons">close</i>
-                  </button>
-                </div>
-              </div>
-            </li>
-          </ul>
-        </div>
-        <div slot="body">
-          <ul>
-            <li>
-              <textarea
-                id="import-text"
-                autofocus
-                rows="8"
-                :placeholder="$t('enter_curl')"
-              ></textarea>
-            </li>
-          </ul>
-        </div>
-        <div slot="footer">
-          <div class="flex-wrap">
-            <span></span>
-            <span>
-              <button class="icon" @click="showModal = false">
-                {{ $t("cancel") }}
-              </button>
-              <button class="icon primary" @click="handleImport">
-                {{ $t("import") }}
-              </button>
-            </span>
-          </div>
-        </div>
-      </pw-modal>
-
-      <pw-modal v-if="!isHidden" @close="isHidden = true">
-        <div slot="header">
-          <ul>
-            <li>
-              <div class="flex-wrap">
-                <h3 class="title">{{ $t("generate_code") }}</h3>
-                <div>
-                  <button class="icon" @click="isHidden = true">
-                    <i class="material-icons">close</i>
-                  </button>
-                </div>
-              </div>
-            </li>
-          </ul>
-        </div>
-        <div slot="body">
-          <ul>
-            <li>
-              <label for="requestType">{{ $t("request_type") }}</label>
-              <span class="select-wrapper">
-                <select id="requestType" v-model="requestType">
-                  <option>JavaScript XHR</option>
-                  <option>Fetch</option>
-                  <option>cURL</option>
-                </select>
-              </span>
-            </li>
-          </ul>
-          <ul>
-            <li>
-              <div class="flex-wrap">
-                <label for="generatedCode">{{ $t("generated_code") }}</label>
-                <div>
-                  <button
-                    class="icon"
-                    @click="copyRequestCode"
-                    id="copyRequestCode"
-                    ref="copyRequestCode"
-                    v-tooltip="$t('copy_code')"
-                  >
-                    <i class="material-icons">file_copy</i>
-                  </button>
-                </div>
-              </div>
-              <textarea
-                id="generatedCode"
-                ref="generatedCode"
-                name="generatedCode"
-                rows="8"
-                v-model="requestCode"
-              ></textarea>
-            </li>
-          </ul>
-        </div>
-        <div slot="footer"></div>
-      </pw-modal>
-
-      <pw-modal v-if="showTokenList" @close="showTokenList = false">
-        <div slot="header">
-          <ul>
-            <li>
-              <div class="flex-wrap">
-                <h3 class="title">{{ $t("manage_token") }}</h3>
-                <div>
-                  <button class="icon" @click="showTokenList = false">
-                    <i class="material-icons">close</i>
-                  </button>
-                </div>
-              </div>
-            </li>
-          </ul>
-        </div>
-        <div slot="body">
-          <ul>
-            <li>
-              <div class="flex-wrap">
-                <label for="token-list">{{ $t("token_list") }}</label>
-                <div v-if="tokens.length != 0">
-                  <button
-                    class="icon"
-                    @click="clearContent('tokens', $event)"
-                    v-tooltip.bottom="$t('clear')"
-                  >
-                    <i class="material-icons">clear_all</i>
-                  </button>
-                </div>
-              </div>
-            </li>
-          </ul>
-          <ul id="token-list" v-for="(token, index) in tokens" :key="index">
-            <li>
-              <input
-                :placeholder="'name ' + (index + 1)"
-                :value="token.name"
-                @change="
-                  $store.commit('setOAuthTokenName', {
-                    index,
-                    value: $event.target.value,
-                  })
-                "
-              />
-            </li>
-            <li>
-              <input :value="token.value" readonly />
-            </li>
-            <div class="flex-wrap">
-              <li>
-                <button
-                  class="icon"
-                  @click="useOAuthToken(token.value)"
-                  v-tooltip.bottom="$t('use_token')"
-                >
-                  <i class="material-icons">input</i>
-                </button>
-              </li>
-              <li>
-                <button
-                  class="icon"
-                  @click="removeOAuthToken(index)"
-                  v-tooltip.bottom="$t('delete')"
-                >
-                  <i class="material-icons">delete</i>
-                </button>
-              </li>
-            </div>
-          </ul>
-          <p v-if="tokens.length === 0" class="info">
-            {{ $t("empty") }}
-          </p>
-        </div>
-        <div slot="footer"></div>
-      </pw-modal>
-
-      <pw-modal v-if="showTokenRequestList" @close="showTokenRequestList = false">
-        <div slot="header">
-          <ul>
-            <li>
-              <div class="flex-wrap">
-                <h3 class="title">{{ $t("manage_token_req") }}</h3>
-                <div>
-                  <button class="icon" @click="showTokenRequestList = false">
-                    <i class="material-icons">close</i>
-                  </button>
-                </div>
-              </div>
-            </li>
-          </ul>
-        </div>
-        <div slot="body">
-          <ul>
-            <li>
-              <div class="flex-wrap">
-                <label for="token-req-list">{{ $t("token_req_list") }}</label>
-                <div>
-                  <button
-                    :disabled="this.tokenReqs.length === 0"
-                    class="icon"
-                    @click="showTokenRequestList = false"
-                    v-tooltip.bottom="$t('use_token_req')"
-                  >
-                    <i class="material-icons">input</i>
-                  </button>
-                  <button
-                    :disabled="this.tokenReqs.length === 0"
-                    class="icon"
-                    @click="removeOAuthTokenReq"
-                    v-tooltip.bottom="$t('delete')"
-                  >
-                    <i class="material-icons">delete</i>
-                  </button>
-                </div>
-              </div>
-              <span class="select-wrapper">
-                <select
-                  id="token-req-list"
-                  v-model="tokenReqSelect"
-                  :disabled="this.tokenReqs.length === 0"
-                  @change="tokenReqChange($event)"
-                >
-                  <option v-for="(req, index) in tokenReqs" :key="index" :value="req.name">
-                    {{ req.name }}
-                  </option>
-                </select>
-              </span>
-            </li>
-          </ul>
-          <ul>
-            <li>
-              <label for="token-req-name">{{ $t("token_req_name") }}</label>
-              <input v-model="tokenReqName" />
-            </li>
-          </ul>
-          <ul>
-            <li>
-              <label for="token-req-details">
-                {{ $t("token_req_details") }}
-              </label>
-              <textarea
-                id="token-req-details"
-                readonly
-                rows="7"
-                v-model="tokenReqDetails"
-              ></textarea>
-            </li>
-          </ul>
-        </div>
-        <div slot="footer">
-          <div class="flex-wrap">
-            <span></span>
-            <span>
-              <button class="icon primary" @click="addOAuthTokenReq">
-                {{ $t("save_token_req") }}
-              </button>
-            </span>
-          </div>
-        </div>
-      </pw-modal>
     </div>
   </div>
 </template>
@@ -373,18 +67,13 @@
 import section from "../components/layout/section"
 import url from "url"
 import querystring from "querystring"
-import { commonHeaders } from "../functions/headers"
 import textareaAutoHeight from "../directives/textareaAutoHeight"
-import parseCurlCommand from "../assets/js/curlparser.js"
-import getEnvironmentVariablesFromScript from "../functions/preRequest"
 import runTestScriptWithVariables from "../functions/postwomanTesting"
-import parseTemplateString from "../functions/templating"
 import AceEditor from "../components/ui/ace-editor"
-import { tokenRequest, oauthRedirect } from "../assets/js/oauth"
 import { sendNetworkRequest } from "../functions/network"
 import { fb } from "../functions/fb"
-import { mapEnvironmentVariable } from "../functions"
 import { findIndex } from "lodash"
+import { PWRequest } from "../functions/request"
 
 const statusCategories = [
   {
@@ -464,14 +153,12 @@ export default {
   },
   data() {
     return {
-      showModal: false,
       showModalEditEnvironment: false,
       showPreRequestScript: false,
       testsEnabled: false,
       testScript: "// pw.expect('variable').toBe('value');",
       preRequestScript: "// pw.env.set('variable', 'value');",
       testReports: null,
-      copyButton: '<i class="material-icons">file_copy</i>',
       downloadButton: '<i class="material-icons">get_app</i>',
       doneButton: '<i class="material-icons">done</i>',
       isHidden: true,
@@ -484,7 +171,6 @@ export default {
         body: "",
       },
       previewEnabled: false,
-      paramsWatchEnabled: true,
       expandResponse: false,
       showTokenList: false,
       showTokenRequest: false,
@@ -497,7 +183,6 @@ export default {
       /**
        * These are a list of Content Types known to Postwoman.
        */
-      commonHeaders,
       urlExcludes: {},
       activeSidebar: true,
       fb,
@@ -531,30 +216,7 @@ export default {
     rawInput(status) {
       if (status && this.rawParams === "") {
         this.rawParams = "{}"
-      } else {
-        this.setRouteQueryState()
       }
-    },
-    params: {
-      handler: function(newValue) {
-        if (!this.paramsWatchEnabled) {
-          this.paramsWatchEnabled = true
-          return
-        }
-        let path = this.path
-        let queryString = newValue
-          .filter(({ key }) => !!key)
-          .map(({ key, value }) => `${key}=${value}`)
-          .join("&")
-        queryString = queryString === "" ? "" : `?${queryString}`
-        if (path.includes("?")) {
-          path = path.slice(0, path.indexOf("?")) + queryString
-        } else {
-          path = path + queryString
-        }
-        this.path = path
-      },
-      deep: true,
     },
     selectedRequest(newValue, oldValue) {
       // @TODO: Convert all variables to single request variable
@@ -578,7 +240,6 @@ export default {
       this.label = newValue.name
     },
     method() {
-      // this.$store.commit('setState', { 'value': ["POST", "PUT", "PATCH"].includes(this.method) ? 'application/json' : '', 'attribute': 'contentType' })
       this.contentType = ["POST", "PUT", "PATCH"].includes(this.method) ? "application/json" : ""
     },
   },
@@ -782,148 +443,19 @@ export default {
     selectedRequest() {
       return this.$store.state.postwoman.selectedRequest
     },
+    currentRequest() {
+      return this.$store.state.request
+    },
     requestName() {
       return this.label
     },
     statusCategory() {
       return findStatusGroup(this.response.status)
     },
-    hasRequestBody() {
-      return ["POST", "PUT", "PATCH"].includes(this.method)
-    },
     pathName() {
       return this.path.match(/^([^?]*)\??/)[1]
     },
-    rawRequestBody() {
-      const { bodyParams, contentType } = this
-      if (contentType === "application/json") {
-        try {
-          const obj = JSON.parse(
-            `{${bodyParams
-              .filter(({ key }) => !!key)
-              .map(
-                ({ key, value }) => `
-              "${key}": "${value}"
-              `
-              )
-              .join()}}`
-          )
-          return JSON.stringify(obj, null, 2)
-        } catch (ex) {
-          return "invalid"
-        }
-      } else {
-        return bodyParams
-          .filter(({ key }) => !!key)
-          .map(({ key, value }) => `${key}=${encodeURIComponent(value)}`)
-          .join("&")
-      }
-    },
-    headerString() {
-      const result = this.headers
-        .filter(({ key }) => !!key)
-        .map(({ key, value }) => `${key}: ${value}`)
-        .join(",\n")
-      return result === "" ? "" : `${result}`
-    },
-    queryString() {
-      const result = this.params
-        .filter(({ key }) => !!key)
-        .map(({ key, value }) => `${key}=${encodeURIComponent(value)}`)
-        .join("&")
-      return result === "" ? "" : `?${result}`
-    },
-    requestCode() {
-      if (this.requestType === "JavaScript XHR") {
-        const requestString = []
-        requestString.push("const xhr = new XMLHttpRequest()")
-        const user = this.auth === "Basic Auth" ? `'${this.httpUser}'` : null
-        const password = this.auth === "Basic Auth" ? `'${this.httpPassword}'` : null
-        requestString.push(
-          `xhr.open('${this.method}', '${this.url}${this.pathName}${this.queryString}', true, ${user}, ${password})`
-        )
-        if (this.auth === "Bearer Token" || this.auth === "OAuth 2.0") {
-          requestString.push(`xhr.setRequestHeader('Authorization', 'Bearer ${this.bearerToken}')`)
-        }
-        if (this.headers) {
-          this.headers.forEach(({ key, value }) => {
-            requestString.push(`xhr.setRequestHeader('${key}', '${value}')`)
-          })
-        }
-        if (["POST", "PUT", "PATCH"].includes(this.method)) {
-          const requestBody = this.rawInput ? this.rawParams : this.rawRequestBody
-          requestString.push(`xhr.setRequestHeader('Content-Length', ${requestBody.length})`)
-          requestString.push(
-            `xhr.setRequestHeader('Content-Type', '${this.contentType}; charset=utf-8')`
-          )
-          requestString.push(`xhr.send(${requestBody})`)
-        } else {
-          requestString.push("xhr.send()")
-        }
-        return requestString.join("\n")
-      } else if (this.requestType === "Fetch") {
-        const requestString = []
-        let headers = []
-        requestString.push(`fetch("${this.url}${this.pathName}${this.queryString}", {\n`)
-        requestString.push(`  method: "${this.method}",\n`)
-        if (this.auth === "Basic Auth") {
-          const basic = `${this.httpUser}:${this.httpPassword}`
-          headers.push(
-            `    "Authorization": "Basic ${window.btoa(unescape(encodeURIComponent(basic)))}",\n`
-          )
-        } else if (this.auth === "Bearer Token" || this.auth === "OAuth 2.0") {
-          headers.push(`    "Authorization": "Bearer ${this.bearerToken}",\n`)
-        }
-        if (["POST", "PUT", "PATCH"].includes(this.method)) {
-          const requestBody = this.rawInput ? this.rawParams : this.rawRequestBody
-          requestString.push(`  body: ${requestBody},\n`)
-          headers.push(`    "Content-Length": ${requestBody.length},\n`)
-          headers.push(`    "Content-Type": "${this.contentType}; charset=utf-8",\n`)
-        }
-        if (this.headers) {
-          this.headers.forEach(({ key, value }) => {
-            headers.push(`    "${key}": "${value}",\n`)
-          })
-        }
-        headers = headers.join("").slice(0, -2)
-        requestString.push(`  headers: {\n${headers}\n  },\n`)
-        requestString.push('  credentials: "same-origin"\n')
-        requestString.push("}).then(function(response) {\n")
-        requestString.push("  response.status\n")
-        requestString.push("  response.statusText\n")
-        requestString.push("  response.headers\n")
-        requestString.push("  response.url\n\n")
-        requestString.push("  return response.text()\n")
-        requestString.push("}).catch(function(error) {\n")
-        requestString.push("  error.message\n")
-        requestString.push("})")
-        return requestString.join("")
-      } else if (this.requestType === "cURL") {
-        const requestString = []
-        requestString.push(`curl -X ${this.method} \n`)
-        requestString.push(`  '${this.url}${this.pathName}${this.queryString}' \n`)
-        if (this.auth === "Basic Auth") {
-          const basic = `${this.httpUser}:${this.httpPassword}`
-          requestString.push(
-            `  -H 'Authorization: Basic ${window.btoa(unescape(encodeURIComponent(basic)))}' \n`
-          )
-        } else if (this.auth === "Bearer Token" || this.auth === "OAuth 2.0") {
-          requestString.push(`  -H 'Authorization: Bearer ${this.bearerToken}' \n`)
-        }
-        if (this.headers) {
-          this.headers.forEach(({ key, value }) => {
-            requestString.push(`  -H '${key}: ${value}' \n`)
-          })
-        }
-        if (["POST", "PUT", "PATCH"].includes(this.method)) {
-          const requestBody = this.rawInput ? this.rawParams : this.rawRequestBody
-          requestString.push(`  -H 'Content-Length: ${requestBody.length}' \n`)
-          requestString.push(`  -H 'Content-Type: ${this.contentType}; charset=utf-8' \n`)
-          requestString.push(`  -d '${requestBody}' \n`)
-        }
-        return requestString.join("").slice(0, -2)
-      }
-    },
+
     tokenReqDetails() {
       const details = {
         oidcDiscoveryUrl: this.oidcDiscoveryUrl,
@@ -961,75 +493,7 @@ export default {
         behavior: "smooth",
       })
     },
-    getVariablesFromPreRequestScript() {
-      if (!this.preRequestScript) {
-        return {}
-      }
-      return getEnvironmentVariablesFromScript(this.preRequestScript)
-    },
-    async makeRequest(auth, headers, requestBody, preRequestScript) {
-      const requestOptions = {
-        method: this.method,
-        url: this.url + this.pathName + this.queryString,
-        auth,
-        headers,
-        data: requestBody,
-        credentials: true,
-      }
-      if (preRequestScript || this.$data.selectedEnvironment) {
-        const environmentVariables = Object.assign(
-          {},
-          getEnvironmentVariablesFromScript(preRequestScript),
-          mapEnvironmentVariable(this.$data.selectedEnvironment)
-        )
-        requestOptions.url =
-          parseTemplateString(this.url, environmentVariables) +
-          parseTemplateString(this.pathName, environmentVariables) +
-          (this.queryString
-            ? "?" +
-              encodeURIComponent(
-                // decode query string before
-                parseTemplateString(
-                  decodeURIComponent(this.queryString.slice(1)),
-                  environmentVariables
-                )
-              )
-            : "")
-        requestOptions.data = parseTemplateString(requestOptions.data, environmentVariables)
-        for (let k in requestOptions.headers) {
-          const kParsed = parseTemplateString(k, environmentVariables)
-          const valParsed = parseTemplateString(requestOptions.headers[k], environmentVariables)
-          delete requestOptions.headers[k]
-          requestOptions.headers[kParsed] = valParsed
-        }
-      }
-      if (typeof requestOptions.data === "string") {
-        requestOptions.data = parseTemplateString(requestOptions.data)
-      }
-      return await sendNetworkRequest(requestOptions, this.$store)
-    },
-    prepareRequest(request) {
-      if (!request) return
-      this.uri = request.url + request.path
-      this.url = request.url
-      this.path = request.path
-      this.method = request.method
-      this.auth = request.auth
-      this.httpUser = request.httpUser
-      this.httpPassword = request.httpPassword
-      this.passwordFieldType = request.passwordFieldType
-      this.bearerToken = request.bearerToken
-      this.headers = request.headers
-      this.params = request.params
-      this.bodyParams = request.bodyParams
-      this.rawParams = request.rawParams
-      this.rawInput = request.rawInput
-      this.contentType = request.contentType
-      this.requestType = request.requestType
-      this.label = request.name
 
-      this.sendRequest()
-    },
     async sendRequest() {
       this.$toast.clear()
       if (this.settings.SCROLL_INTO_ENABLED) this.scrollInto("response")
@@ -1042,63 +506,12 @@ export default {
       this.previewEnabled = false
       this.response.status = this.$t("fetching")
       this.response.body = this.$t("loading")
-      const auth =
-        this.auth === "Basic Auth"
-          ? {
-              username: this.httpUser,
-              password: this.httpPassword,
-            }
-          : null
-      let headers = {}
-      let headersObject = {}
-      Object.keys(headers).forEach(id => {
-        headersObject[headers[id].key] = headers[id].value
-      })
-      headers = headersObject
-      // If the request has a body, we want to ensure Content-Length and
-      // Content-Type are sent.
-      let requestBody
-      if (this.hasRequestBody) {
-        requestBody = this.rawInput ? this.rawParams : this.rawRequestBody
-        Object.assign(headers, {
-          //'Content-Length': requestBody.length,
-          "Content-Type": `${this.contentType}; charset=utf-8`,
-        })
-      }
-      requestBody = requestBody ? requestBody.toString() : null
-      if (this.files.length !== 0) {
-        const formData = new FormData()
-        for (let i = 0; i < this.files.length; i++) {
-          let file = this.files[i]
-          formData.append(i, file)
-        }
-        formData.append("data", requestBody)
-        requestBody = formData
-      }
-      // If the request uses a token for auth, we want to make sure it's sent here.
-      if (this.auth === "Bearer Token" || this.auth === "OAuth 2.0")
-        headers["Authorization"] = `Bearer ${this.bearerToken}`
-      headers = Object.assign(
-        // Clone the app headers object first, we don't want to
-        // mutate it with the request headers added by default.
-        Object.assign({}, this.headers)
-        // We make our temporary headers object the source so
-        // that you can override the added headers if you
-        // specify them.
-        // headers
-      )
-      Object.keys(headers).forEach(id => {
-        headersObject[headers[id].key] = headers[id].value
-      })
-      headers = headersObject
+
       try {
+        let requestObj = new PWRequest(this.currentRequest)
+        requestObj.setEnvironment(this.$data.selectedEnvironment)
         const startTime = Date.now()
-        const payload = await this.makeRequest(
-          auth,
-          headers,
-          requestBody,
-          this.showPreRequestScript && this.preRequestScript
-        )
+        const payload = await requestObj.send(this.$store)
         const duration = Date.now() - startTime
         this.$toast.info(this.$t("finished_in", { duration }), {
           icon: "done",
@@ -1116,6 +529,7 @@ export default {
             status,
             date,
             time,
+            body,
             method: this.method,
             url: this.url,
             path: this.path,
@@ -1155,6 +569,7 @@ export default {
             date: new Date().toLocaleDateString(),
             time: new Date().toLocaleTimeString(),
             method: this.method,
+            body: this.response.body,
             url: this.url,
             path: this.path,
             usesScripts: Boolean(this.preRequestScript),
@@ -1187,193 +602,6 @@ export default {
             })
           }
         }
-      }
-    },
-    getQueryStringFromPath() {
-      let queryString
-      const pathParsed = url.parse(this.path)
-      return (queryString = pathParsed.query ? pathParsed.query : "")
-    },
-    queryStringToArray(queryString) {
-      const queryParsed = querystring.parse(queryString)
-      return Object.keys(queryParsed).map(key => ({
-        key,
-        value: queryParsed[key],
-      }))
-    },
-    pathInputHandler() {
-      const queryString = this.getQueryStringFromPath()
-      const params = this.queryStringToArray(queryString)
-      this.paramsWatchEnabled = false
-      this.params = params
-    },
-    addRequestHeader() {
-      this.$store.commit("addHeaders", {
-        key: "",
-        value: "",
-      })
-      return false
-    },
-    removeRequestHeader(index) {
-      console.log("idx", index)
-      // .slice() gives us an entirely new array rather than giving us just the reference
-      const oldHeaders = this.headers.slice()
-      this.$store.commit("removeHeaders", index)
-      this.$toast.error(this.$t("deleted"), {
-        icon: "delete",
-        action: {
-          text: this.$t("undo"),
-          onClick: (e, toastObject) => {
-            this.headers = oldHeaders
-            toastObject.remove()
-          },
-        },
-      })
-    },
-    addRequestParam() {
-      this.$store.commit("addParams", { key: "", value: "" })
-      return false
-    },
-    removeRequestParam(index) {
-      // .slice() gives us an entirely new array rather than giving us just the reference
-      const oldParams = this.params.slice()
-      this.$store.commit("removeParams", index)
-      this.$toast.error(this.$t("deleted"), {
-        icon: "delete",
-        action: {
-          text: this.$t("undo"),
-          onClick: (e, toastObject) => {
-            this.params = oldParams
-            toastObject.remove()
-          },
-        },
-      })
-    },
-    addRequestBodyParam() {
-      this.$store.commit("addBodyParams", { key: "", value: "" })
-      return false
-    },
-    removeRequestBodyParam(index) {
-      // .slice() gives us an entirely new array rather than giving us just the reference
-      const oldBodyParams = this.bodyParams.slice()
-      this.$store.commit("removeBodyParams", index)
-      this.$toast.error(this.$t("deleted"), {
-        icon: "delete",
-        action: {
-          text: this.$t("undo"),
-          onClick: (e, toastObject) => {
-            this.bodyParams = oldBodyParams
-            toastObject.remove()
-          },
-        },
-      })
-    },
-    copyRequestCode() {
-      this.$refs.copyRequestCode.innerHTML = this.doneButton
-      this.$toast.success(this.$t("copied_to_clipboard"), {
-        icon: "done",
-      })
-      this.$refs.generatedCode.select()
-      document.execCommand("copy")
-      setTimeout(() => (this.$refs.copyRequestCode.innerHTML = this.copyButton), 1000)
-    },
-    ToggleExpandResponse() {
-      this.expandResponse = !this.expandResponse
-      this.responseBodyMaxLines = this.responseBodyMaxLines == Infinity ? 16 : Infinity
-    },
-    setRouteQueryState() {
-      const flat = key => (this[key] !== "" ? `${key}=${this[key]}&` : "")
-      const deep = key => {
-        const haveItems = [...this[key]].length
-        if (haveItems && this[key]["value"] !== "") {
-          return `${key}=${JSON.stringify(this[key])}&`
-        }
-        return ""
-      }
-      let flats = [
-        "method",
-        "url",
-        "path",
-        !this.urlExcludes.auth ? "auth" : null,
-        !this.urlExcludes.httpUser ? "httpUser" : null,
-        !this.urlExcludes.httpPassword ? "httpPassword" : null,
-        !this.urlExcludes.bearerToken ? "bearerToken" : null,
-        "contentType",
-      ]
-        .filter(item => item !== null)
-        .map(item => flat(item))
-      const deeps = ["headers", "params"].map(item => deep(item))
-      const bodyParams = this.rawInput ? [flat("rawParams")] : [deep("bodyParams")]
-      // history.replaceState(
-      //   window.location.href,
-      //   "",
-      //   `/?${encodeURI(
-      //     flats
-      //       .concat(deeps, bodyParams)
-      //       .join("")
-      //       .slice(0, -1)
-      //   )}`
-      // )
-    },
-    setRouteQueries(queries) {
-      if (typeof queries !== "object") throw new Error("Route query parameters must be a Object")
-      for (const key in queries) {
-        if (["headers", "params", "bodyParams"].includes(key))
-          this[key] = JSON.parse(decodeURI(queries[key]))
-        if (key === "rawParams") {
-          this.rawInput = true
-          this.rawParams = queries["rawParams"]
-        } else if (typeof this[key] === "string") {
-          this[key] = queries[key]
-        }
-      }
-    },
-    // observeRequestButton() {
-    //   const requestElement = this.$refs.request.$el
-    //   const sendButtonElement = this.$refs.sendButton
-    //   const observer = new IntersectionObserver(
-    //     (entries, observer) => {
-    //       entries.forEach(({ isIntersecting }) => {
-    //         if (isIntersecting) sendButtonElement.classList.remove("show")
-    //         // The button should float when it is no longer visible on screen.
-    //         // This is done by adding the show class to the button.
-    //         else sendButtonElement.classList.add("show")
-    //       })
-    //     },
-    //     {
-    //       rootMargin: "0px",
-    //       threshold: [0],
-    //     }
-    //   )
-    //   observer.observe(requestElement)
-    // },
-    handleImport() {
-      const { value: text } = document.getElementById("import-text")
-      try {
-        const parsedCurl = parseCurlCommand(text)
-        const { origin, pathname } = new URL(parsedCurl.url.replace(/"/g, "").replace(/'/g, ""))
-        this.url = origin
-        this.path = pathname
-        this.headers = []
-        if (parsedCurl.headers) {
-          for (const key of Object.keys(parsedCurl.headers)) {
-            this.$store.commit("addHeaders", {
-              key,
-              value: parsedCurl.headers[key],
-            })
-          }
-        }
-        this.method = parsedCurl.method.toUpperCase()
-        if (parsedCurl["data"]) {
-          this.rawInput = true
-          this.rawParams = parsedCurl["data"]
-        }
-        this.showModal = false
-      } catch (error) {
-        this.showModal = false
-        this.$toast.error(this.$t("curl_invalid_format"), {
-          icon: "error",
-        })
       }
     },
     clearContent(name, { target }) {
@@ -1436,7 +664,7 @@ export default {
       } else {
         this.urlExcludes[excludedField] = excluded
       }
-      this.setRouteQueryState()
+      // this.setRouteQueryState()
     },
     uploadAttachment() {
       this.filenames = ""
@@ -1472,106 +700,6 @@ export default {
         })
       }
     },
-    async handleAccessTokenRequest() {
-      if (this.oidcDiscoveryUrl === "" && (this.authUrl === "" || this.accessTokenUrl === "")) {
-        this.$toast.error(this.$t("complete_config_urls"), {
-          icon: "error",
-        })
-        return
-      }
-      try {
-        const tokenReqParams = {
-          grantType: "code",
-          oidcDiscoveryUrl: this.oidcDiscoveryUrl,
-          authUrl: this.authUrl,
-          accessTokenUrl: this.accessTokenUrl,
-          clientId: this.clientId,
-          scope: this.scope,
-        }
-        await tokenRequest(tokenReqParams)
-      } catch (e) {
-        this.$toast.error(e, {
-          icon: "code",
-        })
-      }
-    },
-    async oauthRedirectReq() {
-      const tokenInfo = await oauthRedirect()
-      if (tokenInfo.hasOwnProperty("access_token")) {
-        this.bearerToken = tokenInfo.access_token
-        this.addOAuthToken({
-          name: this.accessTokenName,
-          value: tokenInfo.access_token,
-        })
-      }
-    },
-    addOAuthToken({ name, value }) {
-      this.$store.commit("addOAuthToken", {
-        name,
-        value,
-      })
-      return false
-    },
-    removeOAuthToken(index) {
-      const oldTokens = this.tokens.slice()
-      this.$store.commit("removeOAuthToken", index)
-      this.$toast.error(this.$t("deleted"), {
-        icon: "delete",
-        action: {
-          text: this.$t("undo"),
-          onClick: (e, toastObject) => {
-            this.tokens = oldTokens
-            toastObject.remove()
-          },
-        },
-      })
-    },
-    useOAuthToken(value) {
-      this.bearerToken = value
-      this.showTokenList = false
-    },
-    addOAuthTokenReq() {
-      try {
-        const name = this.tokenReqName
-        const details = JSON.parse(this.tokenReqDetails)
-        this.$store.commit("addOAuthTokenReq", {
-          name,
-          details,
-        })
-        this.$toast.info(this.$t("token_request_saved"))
-        this.showTokenRequestList = false
-      } catch (e) {
-        this.$toast.error(e, {
-          icon: "code",
-        })
-      }
-    },
-    removeOAuthTokenReq(index) {
-      const oldTokenReqs = this.tokenReqs.slice()
-      const targetReqIndex = this.tokenReqs.findIndex(({ name }) => name === this.tokenReqName)
-      if (targetReqIndex < 0) return
-      this.$store.commit("removeOAuthTokenReq", targetReqIndex)
-      this.$toast.error(this.$t("deleted"), {
-        icon: "delete",
-        action: {
-          text: this.$t("undo"),
-          onClick: (e, toastObject) => {
-            this.tokenReqs = oldTokenReqs
-            toastObject.remove()
-          },
-        },
-      })
-    },
-    tokenReqChange({ target }) {
-      const { details, name } = this.tokenReqs.find(({ name }) => name === target.value)
-      const { oidcDiscoveryUrl, authUrl, accessTokenUrl, clientId, scope } = details
-      this.tokenReqName = name
-      this.oidcDiscoveryUrl = oidcDiscoveryUrl
-      this.authUrl = authUrl
-      this.accessTokenUrl = accessTokenUrl
-      this.clientId = clientId
-      this.scope = scope
-    },
     keyListener(e) {
       if (e.key === "g" && (e.ctrlKey || e.metaKey)) {
         e.preventDefault()
@@ -1581,14 +709,10 @@ export default {
         this.$refs.clearAll.click()
       } else if (e.key === "Escape") {
         e.preventDefault()
-        this.showModal = this.showTokenList = this.showTokenRequestList = false
+        this.showTokenList = this.showTokenRequestList = false
         this.isHidden = true
       }
     },
-  },
-  async mounted() {
-    // this.observeRequestButton()
-    await this.oauthRedirectReq()
   },
   created() {
     document.addEventListener("keydown", this.keyListener)
@@ -1599,27 +723,6 @@ export default {
       httpPassword: true,
       bearerToken: true,
     }
-    if (Object.keys(this.$route.query).length) this.setRouteQueries(this.$route.query)
-    this.$watch(
-      vm => [
-        vm.label,
-        vm.method,
-        vm.url,
-        vm.auth,
-        vm.path,
-        vm.httpUser,
-        vm.httpPassword,
-        vm.bearerToken,
-        vm.headers,
-        vm.params,
-        vm.bodyParams,
-        vm.contentType,
-        vm.rawParams,
-      ],
-      val => {
-        this.setRouteQueryState()
-      }
-    )
   },
   beforeDestroy() {
     document.removeEventListener("keydown", this.keyListener)

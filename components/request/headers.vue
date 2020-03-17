@@ -2,7 +2,7 @@
   <div>
     <v-row>
       <v-col cols="10">
-        <v-btn class="v-primary v-raised" @click="$emit('add_new')">
+        <v-btn class="v-primary v-raised" @click="addRequestHeader">
           <v-icon>add</v-icon>
           <span>{{ $t("add_new") }}</span>
         </v-btn>
@@ -44,7 +44,7 @@
       <v-col cols="2">
         <v-btn
           class="v-raised v-icon-button"
-          @click="$emit('delete', index)"
+          @click="removeRequestHeader(index)"
           v-tooltip="$t('delete')"
           ><v-icon>delete</v-icon></v-btn
         >
@@ -54,13 +54,18 @@
 </template>
 
 <script>
+import { commonHeaders } from "../../functions/headers"
 export default {
   components: {
     autocomplete: () => import("../../components/ui/autocomplete"),
   },
-  props: {
-    commonHeaders: Array[String],
-    headers: Array[Object],
+  computed: {
+    headers() {
+      return this.$store.state.request.headers
+    },
+    commonHeaders() {
+      return commonHeaders
+    },
   },
   methods: {
     setHeaderKey(index, event) {
@@ -68,6 +73,28 @@ export default {
     },
     setHeaderValue(index, event) {
       this.$store.commit("setValueHeader", { index: index, value: event })
+    },
+    addRequestHeader() {
+      this.$store.commit("addHeaders", {
+        key: "",
+        value: "",
+      })
+      return false
+    },
+    removeRequestHeader(index) {
+      // .slice() gives us an entirely new array rather than giving us just the reference
+      const oldHeaders = this.headers.slice()
+      this.$store.commit("removeHeaders", index)
+      this.$toast.error(this.$t("deleted"), {
+        icon: "delete",
+        action: {
+          text: this.$t("undo"),
+          onClick: (e, toastObject) => {
+            this.headers = oldHeaders
+            toastObject.remove()
+          },
+        },
+      })
     },
   },
 }

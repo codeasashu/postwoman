@@ -18,11 +18,7 @@
     <v-row ref="request-input">
       <v-col cols="2">
         <v-input>
-          <v-select
-            :label="$t('method')"
-            :items="requestMethods"
-            v-model="selectedRequest.method"
-          ></v-select>
+          <v-select :label="$t('method')" :items="requestMethods" v-model="method"></v-select>
         </v-input>
       </v-col>
       <v-col cols="6">
@@ -71,7 +67,7 @@
         </v-btn>
         <v-btn
           class="v-primary v-raised v-icon-button"
-          @click="clearContent('', $event)"
+          @click="clearContents($event)"
           id="clearAll"
           ref="clearAll"
           v-tooltip.bottom="$t('clear_all')"
@@ -149,19 +145,31 @@ export default {
     },
     selectedRequest: {
       get() {
-        return Object.assign(
+        let _request = Object.assign(
           //  {}, basicRequestSchema, this.$store.state.postwoman.selectedRequest
           {},
           basicRequestSchema,
           this.$props.request
         )
+        console.log("s", _request, basicRequestSchema, this.$props.request)
+        return _request
       },
       set(val) {
+        console.log("set", val)
         this.$store.commit("setRequest", val)
+      },
+    },
+    method: {
+      get() {
+        return this.selectedRequest.method
+      },
+      set(value) {
+        this.$store.commit("setState", { attribute: "method", value })
       },
     },
     uri: {
       get() {
+        console.log("uri", this.selectedRequest)
         if (this.selectedRequest.url && this.selectedRequest.path) {
           return this.selectedRequest.url + this.selectedRequest.path
         }
@@ -172,12 +180,12 @@ export default {
         let url
         try {
           url = new URL(url)
-          this.selectedRequest.url = url.origin
-          this.selectedRequest.path = url.pathname
+          this.$store.commit("setState", { attribute: "url", value: url.origin })
+          this.$store.commit("setState", { attribute: "path", value: url.pathname })
         } catch (error) {
           let uriRegex = value.match(/^((http[s]?:\/\/)?(<<[^\/]+>>)?[^\/]*|)(\/?.*)$/)
-          this.selectedRequest.url = uriRegex[1]
-          this.selectedRequest.path = uriRegex[4]
+          this.$store.commit("setState", { attribute: "url", value: uriRegex[1] })
+          this.$store.commit("setState", { attribute: "path", value: uriRegex[4] })
         }
       },
     },
@@ -229,10 +237,10 @@ export default {
       //Send emit evt
       this.$emit("send", this.selectedRequest)
     },
-    clearContents() {
+    clearContents(event) {
       this.selectedRequest = httpbinRequest
       //Send clr evt
-      this.$emit("clear")
+      this.$emit("clear", { target: "", event })
     },
     checkCollections() {
       const checkCollectionAvailability =
