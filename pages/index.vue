@@ -157,7 +157,6 @@ export default {
       showPreRequestScript: false,
       testsEnabled: false,
       testScript: "// pw.expect('variable').toBe('value');",
-      preRequestScript: "// pw.env.set('variable', 'value');",
       testReports: null,
       downloadButton: '<i class="material-icons">get_app</i>',
       doneButton: '<i class="material-icons">done</i>',
@@ -218,58 +217,10 @@ export default {
         this.rawParams = "{}"
       }
     },
-    selectedRequest(newValue, oldValue) {
-      // @TODO: Convert all variables to single request variable
-      if (!newValue) return
-      this.uri = newValue.url + newValue.path
-      this.url = newValue.url
-      this.path = newValue.path
-      this.method = newValue.method
-      this.auth = newValue.auth
-      this.httpUser = newValue.httpUser
-      this.httpPassword = newValue.httpPassword
-      this.passwordFieldType = newValue.passwordFieldType
-      this.bearerToken = newValue.bearerToken
-      this.headers = newValue.headers
-      this.params = newValue.params
-      this.bodyParams = newValue.bodyParams
-      this.rawParams = newValue.rawParams
-      this.rawInput = newValue.rawInput
-      this.contentType = newValue.contentType
-      this.requestType = newValue.requestType
-      this.label = newValue.name
-    },
-    method() {
-      this.contentType = ["POST", "PUT", "PATCH"].includes(this.method) ? "application/json" : ""
-    },
   },
   computed: {
     environments() {
       return this.$store.state.postwoman.environments
-    },
-    auth: {
-      get() {
-        return this.$store.state.request.auth
-      },
-      set(value) {
-        this.$store.commit("setState", { value, attribute: "auth" })
-      },
-    },
-    httpUser: {
-      get() {
-        return this.$store.state.request.httpUser
-      },
-      set(value) {
-        this.$store.commit("setState", { value, attribute: "httpUser" })
-      },
-    },
-    httpPassword: {
-      get() {
-        return this.$store.state.request.httpPassword
-      },
-      set(value) {
-        this.$store.commit("setState", { value, attribute: "httpPassword" })
-      },
     },
     bearerToken: {
       get() {
@@ -440,14 +391,8 @@ export default {
         })
       },
     },
-    selectedRequest() {
-      return this.$store.state.postwoman.selectedRequest
-    },
     currentRequest() {
       return this.$store.state.request
-    },
-    requestName() {
-      return this.label
     },
     statusCategory() {
       return findStatusGroup(this.response.status)
@@ -525,16 +470,14 @@ export default {
           const time = new Date().toLocaleTimeString()
           // Addition of an entry to the history component.
           const entry = {
-            label: this.requestName,
+            label: this.currentRequest.label || "",
             status,
             date,
             time,
             body,
-            method: this.method,
-            url: this.url,
-            path: this.path,
-            usesScripts: Boolean(this.preRequestScript),
-            preRequestScript: this.preRequestScript,
+            method: this.currentRequest.method,
+            url: this.currentRequest.url,
+            path: this.currentRequest.path,
             duration,
             star: false,
           }
@@ -564,16 +507,14 @@ export default {
           this.response.body = error.response.data
           // Addition of an entry to the history component.
           const entry = {
-            label: this.requestName,
+            label: this.currentRequest.label || "",
             status: this.response.status,
             date: new Date().toLocaleDateString(),
             time: new Date().toLocaleTimeString(),
-            method: this.method,
+            method: this.currentRequest.method,
             body: this.response.body,
-            url: this.url,
-            path: this.path,
-            usesScripts: Boolean(this.preRequestScript),
-            preRequestScript: this.preRequestScript,
+            url: this.currentRequest.url,
+            path: this.currentRequest.path,
           }
           this.$store.commit("postwoman/addHistory", entry)
           //this.$refs.historyComponent.addEntry(entry)
@@ -607,9 +548,6 @@ export default {
     clearContent(name, { target }) {
       switch (name) {
         case "auth":
-          this.auth = "None"
-          this.httpUser = ""
-          this.httpPassword = ""
           this.bearerToken = ""
           this.showTokenRequest = false
           this.tokens = []
@@ -638,6 +576,7 @@ export default {
           this.testReports = null
           break
         default:
+          this.$store.commit("resetRequest")
           this.showTokenRequest = false
           this.tokens = []
           this.tokenReqs = []
@@ -649,11 +588,14 @@ export default {
           this.scope = ""
           this.files = []
       }
-      target.innerHTML = this.doneButton
       this.$toast.info(this.$t("cleared"), {
         icon: "clear_all",
       })
-      setTimeout(() => (target.innerHTML = '<i class="material-icons">clear_all</i>'), 1000)
+
+      if (target) {
+        target.innerHTML = this.doneButton
+        setTimeout(() => (target.innerHTML = '<i class="material-icons">clear_all</i>'), 1000)
+      }
     },
     setExclude(excludedField, excluded) {
       if (excludedField === "auth") {
@@ -706,7 +648,7 @@ export default {
         this.sendRequest()
       } else if (e.key === "j" && (e.ctrlKey || e.metaKey)) {
         e.preventDefault()
-        this.$refs.clearAll.click()
+        this.clearContent("", { target: undefined })
       } else if (e.key === "Escape") {
         e.preventDefault()
         this.showTokenList = this.showTokenRequestList = false

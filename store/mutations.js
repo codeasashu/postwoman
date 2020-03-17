@@ -1,6 +1,12 @@
+import { httpbinRequest } from "../functions"
+
 export default {
   setRequest({ request }, newRequest) {
     request = Object.assign({}, request, newRequest)
+  },
+
+  resetRequest({ request }) {
+    request = httpbinRequest
   },
 
   setState({ request }, { attribute, value }) {
