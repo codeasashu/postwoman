@@ -36,6 +36,9 @@
             </v-row>
           </v-col>
         </v-row>
+        <v-row v-if="errors.length > 0">
+          <v-col cols="12" v-for="(error, index) in errors" :key="index">Error: {{ error }}</v-col>
+        </v-row>
         <v-row>
           <v-col>
             <v-btn @click="hideModal">{{ $t("cancel") }}</v-btn>
@@ -65,6 +68,7 @@ export default {
       name: undefined,
       baseurl: undefined,
       description: undefined,
+      errors: [],
     }
   },
   methods: {
@@ -73,18 +77,25 @@ export default {
     },
     add() {
       if (this.$refs.form.validate()) {
+        this.errors = []
         // Add openapi spec
-        this.$store.commit("openapispec/addOas", {
-          name: this.$data.name,
-          baseurl: this.$data.baseurl,
-          description: this.$data.description,
-        })
-        this.hideModal()
+        try {
+          this.$store.commit("openapispec/add", {
+            name: this.$data.name,
+            baseurl: this.$data.baseurl,
+            description: this.$data.description,
+          })
+          this.hideModal()
+        } catch (error) {
+          console.log("error from store", error)
+          this.errors.push(error)
+        }
       }
     },
     hideModal() {
       this.$refs.form.reset()
       this.$refs.form.resetValidation()
+      this.errors = []
       this.$emit("hide-modal")
     },
   },

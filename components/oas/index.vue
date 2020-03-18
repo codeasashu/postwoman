@@ -1,22 +1,12 @@
 <template>
   <div>
     <addOas :show="showModalAddOas" @hide-modal="displayModalAddOas(false)" />
-    <!-- <editOas
-            :show="showModalEdit"
-            :oas="editingOas"
-            @hide-modal="displayModalEditOas(false)"
-        />
-        <addOasRequest
-            :show="showModalEdit"
-            :oas="editingOas"
-            @hide-modal="displayModalAddOasRequest(false)"
-        />
-        <editOasRequest
-            :show="showModalEdit"
-            :oas="editingOas"
-            :request="editingRequest"
-            @hide-modal="displayModalEditOasRequest(false)"
-        /> -->
+    <edit-oas
+      v-if="editingOas"
+      :show="showModalEditOas"
+      :oas="editingOas"
+      @hide-modal="displayModalEditOas(false)"
+    />
     <v-row>
       <v-col class="oas-header" cols="50">
         <v-btn small color="primary" @click="displayModalAddOas(true)">
@@ -35,6 +25,20 @@
         <v-expansion-panel v-for="oas in oascollection" :key="oas.id" class="v-list-item-expand">
           <v-expansion-panel-header>
             {{ oas.info.title }} ({{ oas.servers[0]["url"] }})
+            <template v-slot:actions>
+              <kebob-menu>
+                <template slot="menu">
+                  <v-list>
+                    <v-list-item @click="editOas(oas)">
+                      <v-list-item-title>{{ $t("edit") }}</v-list-item-title>
+                    </v-list-item>
+                    <v-list-item @click="removeOas(oas)">
+                      <v-list-item-title>{{ $t("delete") }}</v-list-item-title>
+                    </v-list-item>
+                  </v-list>
+                </template>
+              </kebob-menu>
+            </template>
           </v-expansion-panel-header>
           <v-expansion-panel-content>
             <p>Nothing here</p>
@@ -49,16 +53,14 @@ export default {
   components: {
     addOas: () => import("./add"),
     editOas: () => import("./edit"),
-    addOasRequest: () => import("./addRequest"),
-    editOasRequest: () => import("./editRequest"),
     VirtualList: () => import("vue-virtual-scroll-list"),
+    kebobMenu: () => import("../../components/ui/kebobMenu"),
   },
   data() {
     return {
       showModalAddOas: false,
       showModalEditOas: false,
-      showModalAddOasRequest: false,
-      showModalEditOasRequest: false,
+      editingOas: undefined,
     }
   },
   computed: {
@@ -73,11 +75,13 @@ export default {
     displayModalEditOas(shouldDisplay) {
       this.showModalEditOas = shouldDisplay
     },
-    displayModalAddOasRequest(shouldDisplay) {
-      this.showModalAddOasRequest = shouldDisplay
+    editOas(oas) {
+      this.$data.editingOas = oas
+      this.displayModalEditOas(true)
     },
-    displayModalEditOasRequest(shouldDisplay) {
-      this.showModalEditOasRequest = shouldDisplay
+    removeOas(oas) {
+      if (!confirm("Are you sure you want to remove this Collection?")) return
+      this.$store.commit("openapispec/remove", oas)
     },
   },
 }
