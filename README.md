@@ -452,3 +452,7 @@ This project is licensed under the [MIT License](https://opensource.org/licenses
   <br>
   <h3>Happy Coding ❤︎</h3>
 </div>
+
+## TODO
+
+1. Add capability shift requests to-from one OAS spec to another
