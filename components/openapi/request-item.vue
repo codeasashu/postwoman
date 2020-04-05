@@ -21,6 +21,12 @@
             </button>
           </div>
           <div>
+            <button class="icon" @click="downloadSpec()" ref="downloadSpec" v-close-popover>
+              <i class="material-icons">pencil</i>
+              <span>{{ $t("export") }}</span>
+            </button>
+          </div>
+          <div>
             <button class="icon" @click="removeSpec" v-close-popover>
               <i class="material-icons">delete</i>
               <span>{{ $t("delete") }}</span>
@@ -96,6 +102,23 @@ export default {
     },
     editSpec(spec) {
       this.$emit("edit-spec", { spec })
+    },
+    downloadSpec() {
+      const dataToWrite = JSON.stringify(this.spec, null, 2)
+      const file = new Blob([dataToWrite], { type: "application/json" })
+      const a = document.createElement("a")
+      const url = URL.createObjectURL(file)
+      a.href = url
+      a.download = `${this.spec.info.title} - ${this.spec["x-internal-id"]} on ${Date()}`.replace(
+        /\./g,
+        "[dot]"
+      )
+      document.body.appendChild(a)
+      a.click()
+      //this.$refs.downloadSpec.innerHTML = this.doneButton
+      this.$toast.success(this.$t("download_started"), {
+        icon: "done",
+      })
     },
   },
 }
