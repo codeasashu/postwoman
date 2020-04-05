@@ -15,6 +15,15 @@ export const mutations = {
     state.specs.push(spec)
   },
 
+  remove(state, id) {
+    state.specs.forEach((_spec, key) => {
+      if (getid(_spec) == id) {
+        state.specs.splice(key, 1)
+        return
+      }
+    })
+  },
+
   addResponse(state, response) {
     state.response = response
   },
