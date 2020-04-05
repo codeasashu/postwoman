@@ -93,6 +93,7 @@ export default {
       addRequest(
         this.$data.requestData.specid,
         {
+          title: this.$data.requestData.name || this.$store.state.request.label,
           request: this.$store.state.request,
           response: this.$store.state.openapi.response,
         },

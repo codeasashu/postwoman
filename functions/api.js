@@ -36,10 +36,10 @@ export const updateSpec = async (data, specid, { state }) => {
   })
 }
 
-export const addRequest = async (specid, { request, response }, { state }) => {
+export const addRequest = async (specid, { title, request, response }, { state }) => {
   return await apiClient.post(
     `spec/${specid}`,
-    { request, response },
+    { title, request, response },
     {
       headers: {
         Authorization: state.auth.user.email,
