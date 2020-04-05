@@ -1,9 +1,9 @@
 import axios from "axios"
 
 const axiosWithProxy = async (req, { state }) => {
-  const { data } = await axios.post(
+  const data = await axios.post(
     state.postwoman.settings.PROXY_URL || "https://postwoman.apollosoftware.xyz/",
-    req
+    state.request
   )
   return data
 }

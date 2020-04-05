@@ -415,6 +415,14 @@
             <span>
               <button
                 class="icon"
+                @click="saveOpenapi"
+                :disabled="!isValidURL"
+                v-tooltip.bottom="$t('openapi_spec_save')"
+              >
+                <i class="material-icons">file_share</i>
+              </button>
+              <button
+                class="icon"
                 @click="copyRequest"
                 id="copyRequest"
                 ref="copyRequest"
@@ -1002,6 +1010,10 @@
               <environments @use-environment="useSelectedEnvironment($event)" />
             </tab>
 
+            <tab :id="'spec'" :icon="'style'" :label="$t('spec')">
+              <openapi />
+            </tab>
+
             <tab :id="'notes'" :icon="'note'" :label="$t('notes')">
               <pw-section class="pink" :label="$t('notes')" ref="sync">
                 <div v-if="fb.currentUser">
@@ -1029,6 +1041,8 @@
         @hide-model="hideRequestModal"
         :editing-request="editRequest"
       />
+
+      <saveRequestOpenapi :show="showOasModal" @hide-modal="hideOpenapiModal" />
 
       <pw-modal v-if="showModal" @close="showModal = false">
         <div slot="header">
@@ -1376,10 +1390,13 @@ export default {
     login: () => import("../components/firebase/login"),
     tabs: () => import("../components/ui/tabs"),
     tab: () => import("../components/ui/tab"),
+    openapi: () => import("../components/openapi"),
+    saveRequestOpenapi: () => import("../components/openapi/saveRequest"),
   },
   data() {
     return {
       showModal: false,
+      showOasModal: false,
       showPreRequestScript: false,
       testsEnabled: false,
       testScript: "// pw.expect('variable').toBe('value');",
@@ -1960,6 +1977,12 @@ export default {
     },
   },
   methods: {
+    saveOpenapi() {
+      this.$data.showOasModal = true
+    },
+    hideOpenapiModal() {
+      this.$data.showOasModal = false
+    },
     useSelectedEnvironment(environment) {
       let preRequestScriptString = ""
       for (let variable of environment.variables) {
@@ -2107,6 +2130,7 @@ export default {
           const body = (this.response.body = payload.data)
           const date = new Date().toLocaleDateString()
           const time = new Date().toLocaleTimeString()
+          this.$store.commit("openapi/addResponse", Object.assign({}, this.response))
           // Addition of an entry to the history component.
           const entry = {
             label: this.requestName,
@@ -2134,6 +2158,7 @@ export default {
           this.response.headers = error.response.headers
           this.response.status = error.response.status
           this.response.body = error.response.data
+          this.$store.commit("openapi/addResponse", Object.assign({}, this.response))
           // Addition of an entry to the history component.
           const entry = {
             label: this.requestName,
