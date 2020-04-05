@@ -39,7 +39,7 @@
           <button class="icon" @click="hideModal">
             {{ $t("cancel") }}
           </button>
-          <button class="icon primary" @click="addNewSpec">
+          <button class="icon primary" @click="editSpec">
             {{ $t("save") }}
           </button>
         </span>
@@ -49,24 +49,34 @@
 </template>
 <script>
 import { fb } from "../../functions/fb"
-import { addSpec } from "../../functions/api"
+import { updateSpec } from "../../functions/api"
 
 export default {
   props: {
     show: Boolean,
+    spec: Object,
   },
   components: {
     modal: () => import("../../components/ui/modal"),
   },
   data() {
     return {
-      title: undefined,
-      url: undefined,
-      description: undefined,
+      title: this.spec ? this.spec.info.title : undefined,
+      url: this.spec ? this.spec.servers[0] : undefined,
+      description: this.spec ? this.spec.description : undefined,
     }
   },
+  watch: {
+    spec(val) {
+      if (val) {
+        this.title = val.info.title
+        this.url = val.servers[0]["url"]
+        this.description = val.description
+      }
+    },
+  },
   methods: {
-    addNewSpec() {
+    editSpec() {
       if (!this.$data.title) {
         this.$toast.info($t("invalid_spec_name"))
         return
@@ -76,16 +86,20 @@ export default {
         return
       }
 
-      addSpec(
+      updateSpec(
         {
           title: this.$data.title,
           url: this.$data.url,
           description: this.$data.description || "",
         },
+        this.$props.spec["x-internal-id"],
         this.$store
       ).then(
         res => {
-          this.$store.commit("openapi/add", res.data)
+          this.$store.commit("openapi/upate", {
+            id: this.$props.spec["x-internal-id"],
+            spec: res.data,
+          })
           this.$toast.success(this.$t("success"), {
             icon: "done",
           })

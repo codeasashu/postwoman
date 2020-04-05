@@ -25,6 +25,17 @@ export const deleteSpec = async (specid, { state }) =>
     },
   })
 
+//@TODO this api only updates `info` and nothing more.
+//should be able to handle request and responses as well
+export const updateSpec = async (data, specid, { state }) => {
+  console.log("desc", data)
+  return await apiClient.put(`spec/${specid}`, data, {
+    headers: {
+      Authorization: state.auth.user.email,
+    },
+  })
+}
+
 export const addRequest = async (specid, { request, response }, { state }) => {
   return await apiClient.post(
     `spec/${specid}`,
