@@ -90,10 +90,14 @@ export default {
         return
       }
 
-      addRequest(this.$data.requestData.specid, {
-        request: this.$store.state.request,
-        response: this.$store.state.openapi.response,
-      }).then(
+      addRequest(
+        this.$data.requestData.specid,
+        {
+          request: this.$store.state.request,
+          response: this.$store.state.openapi.response,
+        },
+        this.$store
+      ).then(
         res => {
           this.$store.commit("openapi/update", {
             id: this.$data.requestData.specid,

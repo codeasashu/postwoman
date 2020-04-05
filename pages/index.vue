@@ -417,9 +417,10 @@
                 class="icon"
                 @click="saveOpenapi"
                 :disabled="!isValidURL"
+                v-if="isLoggedIn"
                 v-tooltip.bottom="$t('openapi_spec_save')"
               >
-                <i class="material-icons">file_share</i>
+                <i class="material-icons">folder</i>
               </button>
               <button
                 class="icon"
@@ -1016,7 +1017,7 @@
 
             <tab :id="'notes'" :icon="'note'" :label="$t('notes')">
               <pw-section class="pink" :label="$t('notes')" ref="sync">
-                <div v-if="fb.currentUser">
+                <div v-if="isLoggedIn">
                   <inputform />
                   <notes />
                 </div>
@@ -1549,6 +1550,9 @@ export default {
     },
   },
   computed: {
+    isLoggedIn () {
+      return this.$store.state.auth.loggedIn === true
+    },
     uri: {
       get() {
         return this.$store.state.request.uri ? this.$store.state.request.uri : this.url + this.path

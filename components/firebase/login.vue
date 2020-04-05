@@ -1,7 +1,7 @@
 <template>
   <div>
     <div>
-      <button class="icon" @click="signInWithGoogle" v-close-popover>
+      <button class="icon" @click="$auth.loginWith('google')" v-close-popover>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="24"

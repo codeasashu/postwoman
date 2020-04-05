@@ -32,14 +32,12 @@
     <div v-show="showChildren">
       <ul>
         <li v-for="(request, index) in requests" :key="index">
-          {{ request.path }} - {{ request.method }}
-          <!-- <folder
-            :folder="folder"
-            :folderIndex="index"
-            :collection-index="collectionIndex"
-            @edit-folder="editFolder(collectionIndex, folder, index)"
-            @edit-request="$emit('edit-request', $event)"
-          /> -->
+          <div>
+            <button class="icon">
+              <i class="material-icons">insert_drive_file</i>
+              <span>{{ request.path }} - {{ request.method }}</span>
+            </button>
+          </div>
         </li>
         <li v-if="spec.paths.length === 0">
           <label>{{ $t("spec_empty") }}</label>
@@ -58,7 +56,6 @@ ul {
 <script>
 export default {
   components: {
-    method: () => import("./method"),
     VirtualList: () => import("vue-virtual-scroll-list"),
   },
   props: {

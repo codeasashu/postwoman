@@ -76,11 +76,14 @@ export default {
         return
       }
 
-      addSpec({
-        title: this.$data.title,
-        url: this.$data.url,
-        description: this.$data.description,
-      }).then(
+      addSpec(
+        {
+          title: this.$data.title,
+          url: this.$data.url,
+          description: this.$data.description,
+        },
+        this.$store
+      ).then(
         res => {
           this.$store.commit("openapi/add", res.data)
           this.$toast.success(this.$t("success"), {

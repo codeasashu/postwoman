@@ -1,0 +1,300 @@
+TypeError at /api/v1/spec/
+get() missing 2 required positional arguments: 'self' and 'specid'
+
+Request Method: GET
+Request URL: http://localhost:8080/api/v1/spec/
+Django Version: 3.0.4
+Python Executable: /Users/ashutosh/Documents/Projects/apiman/api/venv/bin/python
+Python Version: 3.7.4
+Python Path: ['/Users/ashutosh/Documents/Projects/apiman/api', '/Users/ashutosh/Documents/Projects/apiman/api/venv/lib/python37.zip', '/Users/ashutosh/Documents/Projects/apiman/api/venv/lib/python3.7', '/Users/ashutosh/Documents/Projects/apiman/api/venv/lib/python3.7/lib-dynload', '/usr/local/Cellar/python/3.7.4_1/Frameworks/Python.framework/Versions/3.7/lib/python3.7', '/Users/ashutosh/Documents/Projects/apiman/api/venv/lib/python3.7/site-packages', '/Users/ashutosh/Documents/Projects/apiman/api/api', '/Users/ashutosh/Documents/Projects/apiman/api/api']
+Server time: Sun, 5 Apr 2020 05:47:21 +0000
+Installed Applications:
+['rest_framework',
+ 'api.example.apps.ExampleConfig',
+ 'corsheaders',
+ 'django_extensions']
+Installed Middleware:
+['corsheaders.middleware.CorsMiddleware',
+ 'django.middleware.security.SecurityMiddleware',
+ 'django.middleware.common.CommonMiddleware',
+ 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+ 'request_logging.middleware.LoggingMiddleware',
+ 'api.middleware.ApiManMiddleware']
+
+
+Traceback (most recent call last):
+  File "/Users/ashutosh/Documents/Projects/apiman/api/venv/lib/python3.7/site-packages/django/core/handlers/exception.py", line 34, in inner
+    response = get_response(request)
+  File "/Users/ashutosh/Documents/Projects/apiman/api/venv/lib/python3.7/site-packages/django/core/handlers/base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/Users/ashutosh/Documents/Projects/apiman/api/venv/lib/python3.7/site-packages/django/core/handlers/base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/ashutosh/Documents/Projects/apiman/api/venv/lib/python3.7/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/Users/ashutosh/Documents/Projects/apiman/api/venv/lib/python3.7/site-packages/django/views/generic/base.py", line 71, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/ashutosh/Documents/Projects/apiman/api/venv/lib/python3.7/site-packages/rest_framework/views.py", line 505, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/ashutosh/Documents/Projects/apiman/api/venv/lib/python3.7/site-packages/rest_framework/views.py", line 465, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/ashutosh/Documents/Projects/apiman/api/venv/lib/python3.7/site-packages/rest_framework/views.py", line 476, in raise_uncaught_exception
+    raise exc
+  File "/Users/ashutosh/Documents/Projects/apiman/api/venv/lib/python3.7/site-packages/rest_framework/views.py", line 502, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/ashutosh/Documents/Projects/apiman/api/api/v1/views/spec.py", line 17, in get
+    specs = Spec.get()
+
+Exception Type: TypeError at /api/v1/spec/
+Exception Value: get() missing 2 required positional arguments: 'self' and 'specid'
+Request information:
+USER: None
+
+GET: No GET data
+
+POST: No POST data
+
+FILES: No FILES data
+
+COOKIES: No cookie data
+
+META:
+COLORFGBG = '7;0'
+COLORTERM = 'truecolor'
+COMMAND_MODE = 'unix2003'
+CONTENT_LENGTH = ''
+CONTENT_TYPE = 'text/plain'
+DATABASE_URL = 'mysql://root:root@0.0.0.0/apiman'
+DJANGO_SETTINGS_MODULE = 'config.settings.local'
+EDITOR = 'nvim'
+GATEWAY_INTERFACE = 'CGI/1.1'
+HOME = '/Users/ashutosh'
+HTTP_ACCEPT = '*/*'
+HTTP_ACCEPT_ENCODING = 'gzip, deflate'
+HTTP_AUTHORIZATION = '216.ashutosh@gmail.com'
+HTTP_CONNECTION = 'keep-alive'
+HTTP_HOST = 'localhost:8080'
+HTTP_USER_AGENT = 'HTTPie/1.0.2'
+ITERM_PROFILE = 'Default'
+ITERM_SESSION_ID = 'w0t0p0:7099558C-C666-4317-8205-E4626289FE29'
+LANG = 'en_US.UTF-8'
+LC_ALL = 'en_US.UTF-8'
+LC_CTYPE = 'UTF-8'
+LC_TERMINAL = 'iTerm2'
+LC_TERMINAL_VERSION = '3.3.1'
+LESS = '-R'
+LOGNAME = 'ashutosh'
+LSCOLORS = 'Gxfxcxdxbxegedabagacad'
+LaunchInstanceID = '5EB1870B-B574-4791-A867-E0BC6E3ACA16'
+NVM_BIN = '/Users/ashutosh/.nvm/versions/node/v10.16.3/bin'
+NVM_CD_FLAGS = '-q'
+NVM_DIR = '/Users/ashutosh/.nvm'
+OLDPWD = '/Users/ashutosh/Documents/Projects/apiman'
+PAGER = 'less'
+PATH = '/Users/ashutosh/Documents/Projects/apiman/api/venv/bin:/Users/ashutosh/.nvm/versions/node/v10.16.3/bin:/usr/local/aws/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/MacGPG2/bin:/Users/ashutosh/.fzf-vim/bin'
+PATH_INFO = '/api/v1/spec/'
+PHPBREW_BIN = '/Users/ashutosh/.phpbrew/bin'
+PHPBREW_HOME = '/Users/ashutosh/.phpbrew'
+PHPBREW_ROOT = '/Users/ashutosh/.phpbrew'
+PHPBREW_SET_PROMPT = '1'
+PHPBREW_VERSION_REGEX = '^([[:digit:]]+\\.){2}[[:digit:]]+((alpha|beta|RC)[[:digit:]]+)?$'
+PWD = '/Users/ashutosh/Documents/Projects/apiman/api'
+QUERY_STRING = ''
+REDIS_URL = 'redis://0.0.0.0:6379'
+REMOTE_ADDR = '127.0.0.1'
+REMOTE_HOST = ''
+REQUEST_METHOD = 'GET'
+RUN_MAIN = 'true'
+SCRIPT_NAME = ''
+SECURITYSESSIONID = '186a6'
+SERVER_NAME = '1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa'
+SERVER_PORT = '8080'
+SERVER_PROTOCOL = 'HTTP/1.1'
+SERVER_SOFTWARE = 'WSGIServer/0.2'
+SHELL = '/bin/zsh'
+SHLVL = '1'
+SSH_AUTH_SOCK = '/private/tmp/com.apple.launchd.Dzw6DXxLgU/Listeners'
+TERM = 'xterm-256color'
+TERM_PROGRAM = 'iTerm.app'
+TERM_PROGRAM_VERSION = '3.3.1'
+TERM_SESSION_ID = 'w0t0p0:7099558C-C666-4317-8205-E4626289FE29'
+TMPDIR = '/var/folders/rz/ztff99dx1hn48g0k9tly72280000gn/T/'
+TZ = 'UTC'
+USER = 'ashutosh'
+VIRTUAL_ENV = '/Users/ashutosh/Documents/Projects/apiman/api/venv'
+VIRTUAL_ENV_DISABLE_PROMPT = '1'
+XPC_FLAGS = '0x0'
+XPC_SERVICE_NAME = '0'
+ZSH = '/Users/ashutosh/.oh-my-zsh'
+_ = '/Users/ashutosh/Documents/Projects/apiman/api/venv/bin/python'
+__CF_USER_TEXT_ENCODING = '0x1F5:0:2'
+wsgi.errors = <_io.TextIOWrapper name='<stderr>' mode='w' encoding='UTF-8'>
+wsgi.file_wrapper = ''
+wsgi.input = <django.core.handlers.wsgi.LimitedStream object at 0x1045a2a10>
+wsgi.multiprocess = False
+wsgi.multithread = True
+wsgi.run_once = False
+wsgi.url_scheme = 'http'
+wsgi.version = '(1, 0)'
+
+Settings:
+Using settings module config.settings.local
+ABSOLUTE_URL_OVERRIDES = {}
+ADMINS = []
+ALLOWED_HOSTS = ['localhost', '0.0.0.0', '127.0.0.1']
+APPEND_SLASH = False
+APPS_DIR = <Path:/Users/ashutosh/Documents/Projects/apiman/api/api>
+AUTHENTICATION_BACKENDS = []
+AUTH_PASSWORD_VALIDATORS = '********************'
+AUTH_USER_MODEL = 'auth.User'
+CACHES = {'default': {'BACKEND': 'django_redis.cache.RedisCache', 'LOCATION': 'redis://0.0.0.0:6379', 'OPTIONS': {'CLIENT_CLASS': 'django_redis.client.DefaultClient', 'IGNORE_EXCEPTIONS': True}}}
+CACHE_MIDDLEWARE_ALIAS = 'default'
+CACHE_MIDDLEWARE_KEY_PREFIX = '********************'
+CACHE_MIDDLEWARE_SECONDS = 600
+CORS_ORIGIN_ALLOW_ALL = True
+CSRF_COOKIE_AGE = 31449600
+CSRF_COOKIE_DOMAIN = None
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_NAME = 'csrftoken'
+CSRF_COOKIE_PATH = '/'
+CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SECURE = False
+CSRF_FAILURE_VIEW = 'django.views.csrf.csrf_failure'
+CSRF_HEADER_NAME = 'HTTP_X_CSRFTOKEN'
+CSRF_TRUSTED_ORIGINS = []
+CSRF_USE_SESSIONS = False
+DATABASES = {'default': {'ENGINE': 'django.db.backends.sqlite3', 'NAME': ':memory:', 'ATOMIC_REQUESTS': False, 'AUTOCOMMIT': True, 'CONN_MAX_AGE': 0, 'OPTIONS': {}, 'TIME_ZONE': None, 'USER': '', 'PASSWORD': '********************', 'HOST': '', 'PORT': '', 'TEST': {'CHARSET': None, 'COLLATION': None, 'NAME': None, 'MIRROR': None}}}
+DATABASE_ROUTERS = []
+DATA_UPLOAD_MAX_MEMORY_SIZE = 2621440
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 1000
+DATETIME_FORMAT = 'N j, Y, P'
+DATETIME_INPUT_FORMATS = ['%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M:%S.%f', '%Y-%m-%d %H:%M', '%Y-%m-%d', '%m/%d/%Y %H:%M:%S', '%m/%d/%Y %H:%M:%S.%f', '%m/%d/%Y %H:%M', '%m/%d/%Y', '%m/%d/%y %H:%M:%S', '%m/%d/%y %H:%M:%S.%f', '%m/%d/%y %H:%M', '%m/%d/%y']
+DATE_FORMAT = 'N j, Y'
+DATE_INPUT_FORMATS = ['%Y-%m-%d', '%m/%d/%Y', '%m/%d/%y', '%b %d %Y', '%b %d, %Y', '%d %b %Y', '%d %b, %Y', '%B %d %Y', '%B %d, %Y', '%d %B %Y', '%d %B, %Y']
+DEBUG = True
+DEBUG_PROPAGATE_EXCEPTIONS = False
+DECIMAL_SEPARATOR = '.'
+DEFAULT_CHARSET = 'utf-8'
+DEFAULT_EXCEPTION_REPORTER_FILTER = 'django.views.debug.SafeExceptionReporterFilter'
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+DEFAULT_FROM_EMAIL = 'webmaster@localhost'
+DEFAULT_INDEX_TABLESPACE = ''
+DEFAULT_TABLESPACE = ''
+DISALLOWED_USER_AGENTS = []
+DJANGO_APPS = []
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'localhost'
+EMAIL_HOST_PASSWORD = '********************'
+EMAIL_HOST_USER = ''
+EMAIL_PORT = 25
+EMAIL_SSL_CERTFILE = None
+EMAIL_SSL_KEYFILE = '********************'
+EMAIL_SUBJECT_PREFIX = '[Django] '
+EMAIL_TIMEOUT = None
+EMAIL_USE_LOCALTIME = False
+EMAIL_USE_SSL = False
+EMAIL_USE_TLS = False
+FILE_CHARSET = 'utf-8'
+FILE_UPLOAD_DIRECTORY_PERMISSIONS = None
+FILE_UPLOAD_HANDLERS = ['django.core.files.uploadhandler.MemoryFileUploadHandler', 'django.core.files.uploadhandler.TemporaryFileUploadHandler']
+FILE_UPLOAD_MAX_MEMORY_SIZE = 2621440
+FILE_UPLOAD_PERMISSIONS = 420
+FILE_UPLOAD_TEMP_DIR = None
+FIRST_DAY_OF_WEEK = 0
+FIXTURE_DIRS = "('/Users/ashutosh/Documents/Projects/apiman/api/api/fixtures',)"
+FORCE_SCRIPT_NAME = None
+FORMAT_MODULE_PATH = None
+FORM_RENDERER = 'django.forms.renderers.DjangoTemplates'
+IGNORABLE_404_URLS = []
+INSTALLED_APPS = ['rest_framework', 'api.example.apps.ExampleConfig', 'corsheaders', 'django_extensions']
+INTERNAL_IPS = []
+LANGUAGES = [('af', 'Afrikaans'), ('ar', 'Arabic'), ('ast', 'Asturian'), ('az', 'Azerbaijani'), ('bg', 'Bulgarian'), ('be', 'Belarusian'), ('bn', 'Bengali'), ('br', 'Breton'), ('bs', 'Bosnian'), ('ca', 'Catalan'), ('cs', 'Czech'), ('cy', 'Welsh'), ('da', 'Danish'), ('de', 'German'), ('dsb', 'Lower Sorbian'), ('el', 'Greek'), ('en', 'English'), ('en-au', 'Australian English'), ('en-gb', 'British English'), ('eo', 'Esperanto'), ('es', 'Spanish'), ('es-ar', 'Argentinian Spanish'), ('es-co', 'Colombian Spanish'), ('es-mx', 'Mexican Spanish'), ('es-ni', 'Nicaraguan Spanish'), ('es-ve', 'Venezuelan Spanish'), ('et', 'Estonian'), ('eu', 'Basque'), ('fa', 'Persian'), ('fi', 'Finnish'), ('fr', 'French'), ('fy', 'Frisian'), ('ga', 'Irish'), ('gd', 'Scottish Gaelic'), ('gl', 'Galician'), ('he', 'Hebrew'), ('hi', 'Hindi'), ('hr', 'Croatian'), ('hsb', 'Upper Sorbian'), ('hu', 'Hungarian'), ('hy', 'Armenian'), ('ia', 'Interlingua'), ('id', 'Indonesian'), ('io', 'Ido'), ('is', 'Icelandic'), ('it', 'Italian'), ('ja', 'Japanese'), ('ka', 'Georgian'), ('kab', 'Kabyle'), ('kk', 'Kazakh'), ('km', 'Khmer'), ('kn', 'Kannada'), ('ko', 'Korean'), ('lb', 'Luxembourgish'), ('lt', 'Lithuanian'), ('lv', 'Latvian'), ('mk', 'Macedonian'), ('ml', 'Malayalam'), ('mn', 'Mongolian'), ('mr', 'Marathi'), ('my', 'Burmese'), ('nb', 'Norwegian Bokmål'), ('ne', 'Nepali'), ('nl', 'Dutch'), ('nn', 'Norwegian Nynorsk'), ('os', 'Ossetic'), ('pa', 'Punjabi'), ('pl', 'Polish'), ('pt', 'Portuguese'), ('pt-br', 'Brazilian Portuguese'), ('ro', 'Romanian'), ('ru', 'Russian'), ('sk', 'Slovak'), ('sl', 'Slovenian'), ('sq', 'Albanian'), ('sr', 'Serbian'), ('sr-latn', 'Serbian Latin'), ('sv', 'Swedish'), ('sw', 'Swahili'), ('ta', 'Tamil'), ('te', 'Telugu'), ('th', 'Thai'), ('tr', 'Turkish'), ('tt', 'Tatar'), ('udm', 'Udmurt'), ('uk', 'Ukrainian'), ('ur', 'Urdu'), ('uz', 'Uzbek'), ('vi', 'Vietnamese'), ('zh-hans', 'Simplified Chinese'), ('zh-hant', 'Traditional Chinese')]
+LANGUAGES_BIDI = ['he', 'ar', 'fa', 'ur']
+LANGUAGE_CODE = 'en-us'
+LANGUAGE_COOKIE_AGE = None
+LANGUAGE_COOKIE_DOMAIN = None
+LANGUAGE_COOKIE_HTTPONLY = False
+LANGUAGE_COOKIE_NAME = 'django_language'
+LANGUAGE_COOKIE_PATH = '/'
+LANGUAGE_COOKIE_SAMESITE = None
+LANGUAGE_COOKIE_SECURE = False
+LOCALE_PATHS = []
+LOCAL_APPS = ['api.example.apps.ExampleConfig', 'corsheaders']
+LOGGING = {'version': 1, 'disable_existing_loggers': False, 'formatters': {'verbose': {'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'}}, 'handlers': {'console': {'level': 'DEBUG', 'class': 'logging.StreamHandler', 'formatter': 'verbose'}}, 'root': {'level': 'INFO', 'handlers': ['console']}}
+LOGGING_CONFIG = 'logging.config.dictConfig'
+LOGIN_REDIRECT_URL = '/accounts/profile/'
+LOGIN_URL = '/accounts/login/'
+LOGOUT_REDIRECT_URL = None
+MANAGERS = []
+MEDIA_ROOT = '/Users/ashutosh/Documents/Projects/apiman/api/api/media'
+MEDIA_URL = '/media/'
+MESSAGE_STORAGE = 'django.contrib.messages.storage.fallback.FallbackStorage'
+MIDDLEWARE = ['corsheaders.middleware.CorsMiddleware', 'django.middleware.security.SecurityMiddleware', 'django.middleware.common.CommonMiddleware', 'django.middleware.clickjacking.XFrameOptionsMiddleware', 'request_logging.middleware.LoggingMiddleware', 'api.middleware.ApiManMiddleware']
+MIGRATION_MODULES = {}
+MONTH_DAY_FORMAT = 'F j'
+NUMBER_GROUPING = 0
+PASSWORD_HASHERS = '********************'
+PASSWORD_RESET_TIMEOUT_DAYS = '********************'
+PREPEND_WWW = False
+REQUEST_LOGGING_ENABLE_COLORIZE = False
+REST_FRAMEWORK = {'DEFAULT_AUTHENTICATION_CLASSES': [], 'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.AllowAny',), 'DEFAULT_RENDERER_CLASSES': ('api.renderers.MyOperatorRenderer',), 'DEFAULT_PARSER_CLASSES': ('rest_framework.parsers.JSONParser',), 'UNAUTHENTICATED_USER': None}
+ROOT_DIR = <Path:/Users/ashutosh/Documents/Projects/apiman/api>
+ROOT_URLCONF = 'config.urls'
+SECRET_KEY = '********************'
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+SECURE_HSTS_PRELOAD = False
+SECURE_HSTS_SECONDS = 0
+SECURE_PROXY_SSL_HEADER = None
+SECURE_REDIRECT_EXEMPT = []
+SECURE_REFERRER_POLICY = None
+SECURE_SSL_HOST = None
+SECURE_SSL_REDIRECT = False
+SERVER_EMAIL = 'root@localhost'
+SESSION_CACHE_ALIAS = 'default'
+SESSION_COOKIE_AGE = 1209600
+SESSION_COOKIE_DOMAIN = None
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_NAME = 'sessionid'
+SESSION_COOKIE_PATH = '/'
+SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SECURE = False
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SESSION_FILE_PATH = None
+SESSION_SAVE_EVERY_REQUEST = False
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
+SETTINGS_MODULE = 'config.settings.local'
+SHORT_DATETIME_FORMAT = 'm/d/Y P'
+SHORT_DATE_FORMAT = 'm/d/Y'
+SIGNING_BACKEND = 'django.core.signing.TimestampSigner'
+SILENCED_SYSTEM_CHECKS = []
+STATICFILES_DIRS = [<Path:/Users/ashutosh/Documents/Projects/apiman/api/static>]
+STATICFILES_FINDERS = ['django.contrib.staticfiles.finders.FileSystemFinder', 'django.contrib.staticfiles.finders.AppDirectoriesFinder']
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+STATIC_ROOT = None
+STATIC_URL = '/static/'
+TEMPLATES = []
+TEST_NON_SERIALIZED_APPS = []
+TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+THIRD_PARTY_APPS = ['rest_framework']
+THOUSAND_SEPARATOR = ','
+TIME_FORMAT = 'P'
+TIME_INPUT_FORMATS = ['%H:%M:%S', '%H:%M:%S.%f', '%H:%M']
+TIME_ZONE = 'UTC'
+UNAUTHENTICATED_PATHS = ['/api/v1/request']
+USE_I18N = True
+USE_L10N = False
+USE_THOUSAND_SEPARATOR = False
+USE_TZ = True
+USE_X_FORWARDED_HOST = False
+USE_X_FORWARDED_PORT = False
+WSGI_APPLICATION = 'config.wsgi.application'
+X_FRAME_OPTIONS = 'DENY'
+YEAR_MONTH_FORMAT = 'F Y'
+
+
+You're seeing this error because you have DEBUG = True in your
+Django settings file. Change that to False, and Django will
+display a standard page generated by the handler for this status code.
+

@@ -4,8 +4,22 @@ const apiClient = axios.create({
   baseURL: "http://localhost:8080/api/v1",
 })
 
-export const addSpec = async data => await apiClient.post("spec/", data)
+export const addSpec = async (data, {state}) => await apiClient.post("spec/", data, {
+  headers: {
+    'Authorization': state.auth.user.email
+  }
+})
 
-export const addRequest = async (specid, { request, response }) => {
-  return await apiClient.post(`spec/${specid}`, { request, response })
+export const getSpec = async ({ state }) => await apiClient.get("spec/", {
+  headers: {
+    'Authorization': state.auth.user.email
+  }
+})
+
+export const addRequest = async (specid, { request, response }, {state}) => {
+  return await apiClient.post(`spec/${specid}`, { request, response },  {
+    headers: {
+      'Authorization': state.auth.user.email
+    }
+  })
 }

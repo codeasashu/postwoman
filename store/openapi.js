@@ -7,6 +7,10 @@ export const state = () => ({
 const getid = spec => spec["x-internal-id"]
 
 export const mutations = {
+  replace(state, specs) {
+    state.specs = specs
+  },
+
   add(state, spec) {
     state.specs.push(spec)
   },
