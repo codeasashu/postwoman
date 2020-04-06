@@ -14,6 +14,14 @@
         <logo alt class="material-icons" style="height: 24px;"></logo>
       </nuxt-link>
       <nuxt-link
+        :to="localePath('design')"
+        :class="linkActive('/design')"
+        v-tooltip.right="$t('design')"
+        :aria-label="$t('design')"
+      >
+        <i class="material-icons">brush</i>
+      </nuxt-link>
+      <nuxt-link
         :to="localePath('realtime')"
         :class="linkActive('/realtime')"
         v-tooltip.right="$t('realtime')"
