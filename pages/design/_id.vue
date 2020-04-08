@@ -966,12 +966,12 @@
               <requests :specid="$route.params.id" ref="responseComponent" />
             </tab>
 
-            <tab :id="'collections'" :icon="'folder_special'" :label="$t('collections')">
-              <collections />
-            </tab>
-
             <tab :id="'env'" :icon="'style'" :label="$t('environments')">
               <environments @use-environment="useSelectedEnvironment($event)" />
+            </tab>
+
+            <tab :id="'collections'" :icon="'folder_special'" :label="$t('collections')">
+              <collections />
             </tab>
 
             <tab :id="'notes'" :icon="'note'" :label="$t('notes')">
