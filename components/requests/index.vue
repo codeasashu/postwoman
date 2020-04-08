@@ -7,7 +7,7 @@ TODO:
   <pw-section class="yellow" :label="$t('requests')" ref="requests">
     <div class="flex-wrap">
       <div>
-        <button class="icon" @click="$emit('new_request')">
+        <button class="icon" @click="resetRequestRepsonse">
           <i class="material-icons">add</i>
           <span>{{ $t("new") }}</span>
         </button>
@@ -24,7 +24,7 @@ TODO:
     >
       <ul>
         <li v-for="(request, index) in requests" :key="index">
-          <request :request="request" />
+          <request :request="request" :specid="specid" />
         </li>
         <li v-if="requests.length === 0">
           <label>Requests are empty</label>
@@ -50,7 +50,7 @@ import { fb } from "../../functions/fb"
 
 export default {
   props: {
-    spec: Object,
+    specid: String,
   },
   components: {
     "pw-section": () => import("../layout/section"),
@@ -63,6 +63,11 @@ export default {
     }
   },
   computed: {
+    spec() {
+      return this.$store.state.openapi.specs
+        .filter(spec => spec["x-internal-id"] == this.specid)
+        .pop()
+    },
     requests() {
       let reqs = []
       for (let path in this.spec.paths) {
@@ -77,6 +82,11 @@ export default {
       return reqs
     },
   },
+  watch: {
+    spec(val) {
+      console.log("spec changed!!", val)
+    },
+  },
   async mounted() {
     this._keyListener = function(e) {
       if (e.key === "Escape") {
@@ -89,6 +99,9 @@ export default {
   methods: {
     displayModalEdit(shouldDisplay) {
       this.showModalEdit = shouldDisplay
+    },
+    resetRequestRepsonse() {
+      this.$store.dispatch("design/reset")
     },
   },
   beforeDestroy() {

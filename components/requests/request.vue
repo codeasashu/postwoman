@@ -6,15 +6,34 @@
           <i class="material-icons" v-show="!showChildren">arrow_right</i>
           <i class="material-icons" v-show="showChildren">arrow_drop_down</i>
           <i class="material-icons">folder</i>
-          <span>{{ request.method }} - {{ request.operation.summary }}</span>
+          <span>{{ request.operation.summary }}</span>
         </button>
       </div>
+      <v-popover>
+        <button class="tooltip-target icon" v-tooltip="$t('more')">
+          <i class="material-icons">more_vert</i>
+        </button>
+        <template slot="popover">
+          <div>
+            <button class="icon" @click="selectOperation(request.operation)" v-close-popover>
+              <i class="material-icons">tab</i>
+              <span>{{ $t("use") }}</span>
+            </button>
+          </div>
+          <div>
+            <button class="icon" @click="removeOperation(request.operation)" v-close-popover>
+              <i class="material-icons">delete</i>
+              <span>{{ $t("delete") }}</span>
+            </button>
+          </div>
+        </template>
+      </v-popover>
     </div>
     <div v-show="showChildren">
       <ul>
         <li v-for="(response, index) in responses" :key="index">
           <div>
-            <button class="icon">
+            <button class="icon" @click="selectResponse(request.operation, response.code)">
               <i class="material-icons">insert_drive_file</i>
               <span>{{ response.code }} - {{ response.contentType }}</span>
             </button>
@@ -27,10 +46,23 @@
     </div>
   </div>
 </template>
+<style scoped lang="scss">
+ul {
+  display: flex;
+  flex-direction: column;
+}
+
+ul li {
+  display: flex;
+  margin-left: 32px;
+  border-left: 1px solid var(--brd-color);
+}
+</style>
 <script>
 export default {
   props: {
     request: Object,
+    specid: String,
   },
   data() {
     return {
@@ -56,6 +88,47 @@ export default {
   methods: {
     toggleShowChildren() {
       this.showChildren = !this.showChildren
+    },
+    selectOperation(operation) {
+      this.selectRequest(operation)
+
+      //Select default first responsee (200 if exist, else any first)
+      let responseCodes = Object.keys(operation["x-originator"].responses)
+      let selectedResponseCode =
+        responseCodes.indexOf(200) > -1 ? 200 : responseCodes.length ? responseCodes[0] : undefined
+
+      if (selectedResponseCode) {
+        this.selectResponse(operation, selectedResponseCode)
+      }
+    },
+    selectRequest(operation) {
+      let request = Object.assign(
+        {
+          label: operation.summary,
+        },
+        operation["x-originator"].request
+      )
+      this.$store.commit("design/selectRequest", request)
+    },
+    selectResponse(operation, code) {
+      this.selectRequest(operation)
+      let response = operation["x-originator"].responses[code]
+      if (response) this.$store.commit("design/selectResponse", response)
+    },
+    removeOperation(operation) {
+      if (!confirm("You sure to delete this request?")) {
+        return
+      }
+      this.$store
+        .dispatch("openapi/deleteOperation", {
+          specid: this.specid,
+          operationid: operation["x-op-id"],
+        })
+        .then(res => {
+          this.$toast.success(this.$t("deleted"), {
+            icon: "done",
+          })
+        })
     },
   },
 }

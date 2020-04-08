@@ -155,7 +155,7 @@
             </div>
             <li>
               <label for="url">{{ $t("url") }}</label>
-              <small>{{ this.spec.servers[0].url }}</small>
+              <small>{{ basePath }}</small>
               <input
                 :class="{ error: !isValidURL }"
                 @keyup.enter="sendRequest()"
@@ -259,7 +259,7 @@
                     :name="'bparam' + index"
                     :value="param.key"
                     @change="
-                      $store.commit('setKeyBodyParams', {
+                      $store.commit('design/setKeyBodyParams', {
                         index,
                         value: $event.target.value,
                       })
@@ -275,7 +275,7 @@
                     :name="'bvalue' + index"
                     :value="param.value"
                     @change="
-                      $store.commit('setValueBodyParams', {
+                      $store.commit('design/setValueBodyParams', {
                         index,
                         value: $event.target.value,
                       })
@@ -728,7 +728,7 @@
                       :spellcheck="false"
                       :value="header.key"
                       @input="
-                        $store.commit('setKeyHeader', {
+                        $store.commit('design/setKeyHeader', {
                           index,
                           value: $event,
                         })
@@ -743,7 +743,7 @@
                       :name="'value' + index"
                       :value="header.value"
                       @change="
-                        $store.commit('setValueHeader', {
+                        $store.commit('design/setValueHeader', {
                           index,
                           value: $event.target.value,
                         })
@@ -808,7 +808,7 @@
                       :name="'param' + index"
                       :value="param.key"
                       @change="
-                        $store.commit('setKeyParams', {
+                        $store.commit('design/setKeyParams', {
                           index,
                           value: $event.target.value,
                         })
@@ -822,7 +822,7 @@
                       :name="'value' + index"
                       :value="param.value"
                       @change="
-                        $store.commit('setValueParams', {
+                        $store.commit('design/setValueParams', {
                           index,
                           value: $event.target.value,
                         })
@@ -963,7 +963,7 @@
         <section>
           <tabs>
             <tab :id="'requests'" :icon="'watch_later'" :label="$t('requests')" :selected="true">
-              <requests :spec="spec" ref="responseComponent" />
+              <requests :specid="$route.params.id" ref="responseComponent" />
             </tab>
 
             <tab :id="'collections'" :icon="'folder_special'" :label="$t('collections')">
@@ -1141,7 +1141,7 @@
                 :placeholder="'name ' + (index + 1)"
                 :value="token.name"
                 @change="
-                  $store.commit('setOAuthTokenName', {
+                  $store.commit('design/setOAuthTokenName', {
                     index,
                     value: $event.target.value,
                   })
@@ -1374,7 +1374,7 @@ export default {
       response: {
         label: "",
         status: "",
-        headers: {},
+        headers: { "content-type": "text/plain" },
         body: "",
       },
       previewEnabled: false,
@@ -1424,32 +1424,13 @@ export default {
   watch: {
     currentResponse(val) {
       if (val) {
-        let pp = cloneDeep(val)
+        this.copyResponseObject(val)
+      } else {
         this.response = {
-          label: pp.label,
-          status: pp.status,
-          headers: pp.headers,
-          body: pp.body,
-        }
-
-        if (pp.headers.hasOwnProperty("content-type")) {
-          switch (pp.headers["content-type"]) {
-            case "application/json":
-              this.responseBodyType = "json"
-              break
-            case "application/hal+json":
-              this.responseBodyType = "json"
-              break
-            case "text/html":
-              this.responseBodyType = "html"
-              break
-            case "text/plain":
-              this.responseBodyType = "text"
-              break
-            default:
-              this.responseBodyType = "text"
-              break
-          }
+          label: "",
+          status: "",
+          headers: { "content-type": "text/plain" },
+          body: "",
         }
       }
     },
@@ -1519,7 +1500,7 @@ export default {
       this.showRequestModal = true
     },
     method() {
-      // this.$store.commit('setState', { 'value': ["POST", "PUT", "PATCH"].includes(this.method) ? 'application/json' : '', 'attribute': 'contentType' })
+      // this.$store.commit('design/setState', { 'value': ["POST", "PUT", "PATCH"].includes(this.method) ? 'application/json' : '', 'attribute': 'contentType' })
       this.contentType = ["POST", "PUT", "PATCH"].includes(this.method) ? "application/json" : ""
     },
   },
@@ -1535,110 +1516,112 @@ export default {
       return this.$store.state.auth.loggedIn === true
     },
     uri() {
-      return this.$store.state.request.uri ? this.$store.state.request.uri : this.url + this.path
+      return this.$store.state.design.request.uri
+        ? this.$store.state.design.request.uri
+        : this.url + this.path
     },
     url: {
       get() {
-        return this.$store.state.request.url
+        return this.$store.state.design.request.url
       },
       set(value) {
-        this.$store.commit("setState", { value, attribute: "url" })
+        this.$store.commit("design/setState", { value, attribute: "url" })
       },
     },
     method: {
       get() {
-        return this.$store.state.request.method
+        return this.$store.state.design.request.method
       },
       set(value) {
-        this.$store.commit("setState", { value, attribute: "method" })
+        this.$store.commit("design/setState", { value, attribute: "method" })
       },
     },
     path: {
       get() {
-        return this.$store.state.request.path
+        return this.$store.state.design.request.path
       },
       set(value) {
-        this.$store.commit("setState", { value, attribute: "path" })
+        this.$store.commit("design/setState", { value, attribute: "path" })
       },
     },
     label: {
       get() {
-        return this.$store.state.request.label
+        return this.$store.state.design.request.label
       },
       set(value) {
-        this.$store.commit("setState", { value, attribute: "label" })
+        this.$store.commit("design/setState", { value, attribute: "label" })
       },
     },
     auth: {
       get() {
-        return this.$store.state.request.auth
+        return this.$store.state.design.request.auth
       },
       set(value) {
-        this.$store.commit("setState", { value, attribute: "auth" })
+        this.$store.commit("design/setState", { value, attribute: "auth" })
       },
     },
     httpUser: {
       get() {
-        return this.$store.state.request.httpUser
+        return this.$store.state.design.request.httpUser
       },
       set(value) {
-        this.$store.commit("setState", { value, attribute: "httpUser" })
+        this.$store.commit("design/setState", { value, attribute: "httpUser" })
       },
     },
     httpPassword: {
       get() {
-        return this.$store.state.request.httpPassword
+        return this.$store.state.design.request.httpPassword
       },
       set(value) {
-        this.$store.commit("setState", { value, attribute: "httpPassword" })
+        this.$store.commit("design/setState", { value, attribute: "httpPassword" })
       },
     },
     bearerToken: {
       get() {
-        return this.$store.state.request.bearerToken
+        return this.$store.state.design.request.bearerToken
       },
       set(value) {
-        this.$store.commit("setState", { value, attribute: "bearerToken" })
+        this.$store.commit("design/setState", { value, attribute: "bearerToken" })
       },
     },
     tokens: {
       get() {
-        return this.$store.state.oauth2.tokens
+        return this.$store.state.design.oauth2.tokens
       },
       set(value) {
-        this.$store.commit("setOAuth2", { value, attribute: "tokens" })
+        this.$store.commit("design/setOAuth2", { value, attribute: "tokens" })
       },
     },
     tokenReqs: {
       get() {
-        return this.$store.state.oauth2.tokenReqs
+        return this.$store.state.design.oauth2.tokenReqs
       },
       set(value) {
-        this.$store.commit("setOAuth2", { value, attribute: "tokenReqs" })
+        this.$store.commit("design/setOAuth2", { value, attribute: "tokenReqs" })
       },
     },
     tokenReqSelect: {
       get() {
-        return this.$store.state.oauth2.tokenReqSelect
+        return this.$store.state.design.oauth2.tokenReqSelect
       },
       set(value) {
-        this.$store.commit("setOAuth2", { value, attribute: "tokenReqSelect" })
+        this.$store.commit("design/setOAuth2", { value, attribute: "tokenReqSelect" })
       },
     },
     tokenReqName: {
       get() {
-        return this.$store.state.oauth2.tokenReqName
+        return this.$store.state.design.oauth2.tokenReqName
       },
       set(value) {
-        this.$store.commit("setOAuth2", { value, attribute: "tokenReqName" })
+        this.$store.commit("design/setOAuth2", { value, attribute: "tokenReqName" })
       },
     },
     accessTokenName: {
       get() {
-        return this.$store.state.oauth2.accessTokenName
+        return this.$store.state.design.oauth2.accessTokenName
       },
       set(value) {
-        this.$store.commit("setOAuth2", {
+        this.$store.commit("design/setOAuth2", {
           value,
           attribute: "accessTokenName",
         })
@@ -1646,10 +1629,10 @@ export default {
     },
     oidcDiscoveryUrl: {
       get() {
-        return this.$store.state.oauth2.oidcDiscoveryUrl
+        return this.$store.state.design.oauth2.oidcDiscoveryUrl
       },
       set(value) {
-        this.$store.commit("setOAuth2", {
+        this.$store.commit("design/setOAuth2", {
           value,
           attribute: "oidcDiscoveryUrl",
         })
@@ -1657,82 +1640,82 @@ export default {
     },
     authUrl: {
       get() {
-        return this.$store.state.oauth2.authUrl
+        return this.$store.state.design.oauth2.authUrl
       },
       set(value) {
-        this.$store.commit("setOAuth2", { value, attribute: "authUrl" })
+        this.$store.commit("design/setOAuth2", { value, attribute: "authUrl" })
       },
     },
     accessTokenUrl: {
       get() {
-        return this.$store.state.oauth2.accessTokenUrl
+        return this.$store.state.design.oauth2.accessTokenUrl
       },
       set(value) {
-        this.$store.commit("setOAuth2", { value, attribute: "accessTokenUrl" })
+        this.$store.commit("design/setOAuth2", { value, attribute: "accessTokenUrl" })
       },
     },
     clientId: {
       get() {
-        return this.$store.state.oauth2.clientId
+        return this.$store.state.design.oauth2.clientId
       },
       set(value) {
-        this.$store.commit("setOAuth2", { value, attribute: "clientId" })
+        this.$store.commit("design/setOAuth2", { value, attribute: "clientId" })
       },
     },
     scope: {
       get() {
-        return this.$store.state.oauth2.scope
+        return this.$store.state.design.oauth2.scope
       },
       set(value) {
-        this.$store.commit("setOAuth2", { value, attribute: "scope" })
+        this.$store.commit("design/setOAuth2", { value, attribute: "scope" })
       },
     },
     state: {
       get() {
-        return this.$store.state.oauth2.state
+        return this.$store.state.design.oauth2.state
       },
       set(value) {
-        this.$store.commit("setOAuth2", { value, attribute: "state" })
+        this.$store.commit("design/setOAuth2", { value, attribute: "state" })
       },
     },
     headers: {
       get() {
-        return this.$store.state.request.headers
+        return this.$store.state.design.request.headers
       },
       set(value) {
-        this.$store.commit("setState", { value, attribute: "headers" })
+        this.$store.commit("design/setState", { value, attribute: "headers" })
       },
     },
     params: {
       get() {
-        return this.$store.state.request.params
+        return this.$store.state.design.request.params
       },
       set(value) {
-        this.$store.commit("setState", { value, attribute: "params" })
+        this.$store.commit("design/setState", { value, attribute: "params" })
       },
     },
     bodyParams: {
       get() {
-        return this.$store.state.request.bodyParams
+        return this.$store.state.design.request.bodyParams
       },
       set(value) {
-        this.$store.commit("setState", { value, attribute: "bodyParams" })
+        this.$store.commit("design/setState", { value, attribute: "bodyParams" })
       },
     },
     rawParams: {
       get() {
-        return this.$store.state.request.rawParams
+        return this.$store.state.design.request.rawParams
       },
       set(value) {
-        this.$store.commit("setState", { value, attribute: "rawParams" })
+        this.$store.commit("design/setState", { value, attribute: "rawParams" })
       },
     },
     rawInput: {
       get() {
-        return this.$store.state.request.rawInput
+        return this.$store.state.design.request.rawInput
       },
       set(value) {
-        this.$store.commit("setState", { value, attribute: "rawInput" })
+        this.$store.commit("design/setState", { value, attribute: "rawInput" })
       },
     },
     rawInputEditorLang() {
@@ -1740,26 +1723,26 @@ export default {
     },
     requestType: {
       get() {
-        return this.$store.state.request.requestType
+        return this.$store.state.design.request.requestType
       },
       set(value) {
-        this.$store.commit("setState", { value, attribute: "requestType" })
+        this.$store.commit("design/setState", { value, attribute: "requestType" })
       },
     },
     contentType: {
       get() {
-        return this.$store.state.request.contentType
+        return this.$store.state.design.request.contentType
       },
       set(value) {
-        this.$store.commit("setState", { value, attribute: "contentType" })
+        this.$store.commit("design/setState", { value, attribute: "contentType" })
       },
     },
     passwordFieldType: {
       get() {
-        return this.$store.state.request.passwordFieldType
+        return this.$store.state.design.request.passwordFieldType
       },
       set(value) {
-        this.$store.commit("setState", {
+        this.$store.commit("design/setState", {
           value,
           attribute: "passwordFieldType",
         })
@@ -1948,6 +1931,38 @@ export default {
     },
   },
   methods: {
+    copyResponseObject(originalResponse) {
+      let pp = cloneDeep(originalResponse)
+      if (!pp || !pp.hasOwnProperty("status")) {
+        return
+      }
+      this.response = {
+        label: pp.label,
+        status: pp.status,
+        headers: Object.assign({}, { "content-type": "text/plain" }, pp.headers),
+        body: pp.body,
+      }
+
+      if (pp.headers.hasOwnProperty("content-type")) {
+        switch (pp.headers["content-type"]) {
+          case "application/json":
+            this.responseBodyType = "json"
+            break
+          case "application/hal+json":
+            this.responseBodyType = "json"
+            break
+          case "text/html":
+            this.responseBodyType = "html"
+            break
+          case "text/plain":
+            this.responseBodyType = "text"
+            break
+          default:
+            this.responseBodyType = "text"
+            break
+        }
+      }
+    },
     getResponseContentType() {
       let contentType = "text/plain" //Default text
       switch (this.responseBodyType) {
@@ -2047,7 +2062,7 @@ export default {
     },
     setUrlPath() {
       let value = this.basePath + this.$data._uri
-      this.$store.commit("setState", { value, attribute: "uri" })
+      this.$store.commit("design/setState", { value, attribute: "uri" })
       let url
       if (this.preRequestScript && this.showPreRequestScript) {
         const environmentVariables = getEnvironmentVariablesFromScript(this.preRequestScript)
@@ -2126,9 +2141,25 @@ export default {
         requestType: this.requestType,
       }
 
-      this.$store.commit("design/addRequest", { specid: this.spec, request: request })
-
-      console.log("request", request)
+      this.$store
+        .dispatch("design/addRequest", {
+          specid: this.spec["x-internal-id"],
+          request,
+          response: this.response,
+        })
+        .then(
+          res => {
+            this.$toast.success(this.$t("request_saved"), {
+              icon: "done",
+            })
+          },
+          err => {
+            console.error(err)
+            this.$toast.error(this.$t("check_console_details"), {
+              icon: "error",
+            })
+          }
+        )
       return
 
       // Start showing the loading bar as soon as possible.
@@ -2304,7 +2335,7 @@ export default {
       this.params = params
     },
     addRequestHeader() {
-      this.$store.commit("addHeaders", {
+      this.$store.commit("design/addHeaders", {
         key: "",
         value: "",
       })
@@ -2313,7 +2344,7 @@ export default {
     removeRequestHeader(index) {
       // .slice() gives us an entirely new array rather than giving us just the reference
       const oldHeaders = this.headers.slice()
-      this.$store.commit("removeHeaders", index)
+      this.$store.commit("design/removeHeaders", index)
       this.$toast.error(this.$t("deleted"), {
         icon: "delete",
         action: {
@@ -2326,13 +2357,13 @@ export default {
       })
     },
     addRequestParam() {
-      this.$store.commit("addParams", { key: "", value: "" })
+      this.$store.commit("design/addParams", { key: "", value: "" })
       return false
     },
     removeRequestParam(index) {
       // .slice() gives us an entirely new array rather than giving us just the reference
       const oldParams = this.params.slice()
-      this.$store.commit("removeParams", index)
+      this.$store.commit("design/removeParams", index)
       this.$toast.error(this.$t("deleted"), {
         icon: "delete",
         action: {
@@ -2345,13 +2376,13 @@ export default {
       })
     },
     addRequestBodyParam() {
-      this.$store.commit("addBodyParams", { key: "", value: "" })
+      this.$store.commit("design/addBodyParams", { key: "", value: "" })
       return false
     },
     removeRequestBodyParam(index) {
       // .slice() gives us an entirely new array rather than giving us just the reference
       const oldBodyParams = this.bodyParams.slice()
-      this.$store.commit("removeBodyParams", index)
+      this.$store.commit("design/removeBodyParams", index)
       this.$toast.error(this.$t("deleted"), {
         icon: "delete",
         action: {
@@ -2536,7 +2567,7 @@ export default {
         this.headers = []
         if (parsedCurl.headers) {
           for (const key of Object.keys(parsedCurl.headers)) {
-            this.$store.commit("addHeaders", {
+            this.$store.commit("design/addHeaders", {
               key,
               value: parsedCurl.headers[key],
             })
@@ -2734,7 +2765,7 @@ export default {
       }
     },
     addOAuthToken({ name, value }) {
-      this.$store.commit("addOAuthToken", {
+      this.$store.commit("design/addOAuthToken", {
         name,
         value,
       })
@@ -2742,7 +2773,7 @@ export default {
     },
     removeOAuthToken(index) {
       const oldTokens = this.tokens.slice()
-      this.$store.commit("removeOAuthToken", index)
+      this.$store.commit("design/removeOAuthToken", index)
       this.$toast.error(this.$t("deleted"), {
         icon: "delete",
         action: {
@@ -2762,7 +2793,7 @@ export default {
       try {
         const name = this.tokenReqName
         const details = JSON.parse(this.tokenReqDetails)
-        this.$store.commit("addOAuthTokenReq", {
+        this.$store.commit("design/addOAuthTokenReq", {
           name,
           details,
         })
@@ -2778,7 +2809,7 @@ export default {
       const oldTokenReqs = this.tokenReqs.slice()
       const targetReqIndex = this.tokenReqs.findIndex(({ name }) => name === this.tokenReqName)
       if (targetReqIndex < 0) return
-      this.$store.commit("removeOAuthTokenReq", targetReqIndex)
+      this.$store.commit("design/removeOAuthTokenReq", targetReqIndex)
       this.$toast.error(this.$t("deleted"), {
         icon: "delete",
         action: {
@@ -2824,6 +2855,7 @@ export default {
     }
     document.addEventListener("keydown", this._keyListener.bind(this))
     this.$data._uri = this.path
+    this.copyResponseObject(this.currentResponse)
     await this.oauthRedirectReq()
   },
   created() {

@@ -58,7 +58,7 @@ ul {
 </style>
 
 <script>
-import { getSpec } from "../../functions/api"
+import { getSpecs } from "../../functions/api"
 export default {
   components: {
     "pw-section": () => import("../layout/section"),
@@ -81,19 +81,13 @@ export default {
     },
   },
   mounted() {
-    getSpec(this.$store).then(
-      resp => {
-        this.$store.commit("openapi/replace", resp.data)
-      },
-      err => console.error(err)
-    )
+    this.$store.dispatch("openapi/fetchSpecs")
   },
   methods: {
     displayModalAdd(shouldDisplay) {
       this.showModalAdd = shouldDisplay
     },
     displayModalEdit(shouldDisplay, spec) {
-      console.log("here", shouldDisplay, spec)
       this.showModalEdit = shouldDisplay
       this.editingSpec = spec
     },

@@ -28,11 +28,10 @@
   </div>
 </template>
 <script>
-import { getSpec } from "../functions/api"
+import { getSpecs } from "../functions/api"
 import section from "../components/layout/section"
 export default {
-  asyncData({ params, store, $axios, $nuxt, error }) {
-    console.log("here")
+  async asyncData({ params, store, $axios, $nuxt, error }) {
     let showBackBtn = false
     let specs = store.state.openapi.specs
     let spec = undefined
@@ -40,15 +39,9 @@ export default {
       showBackBtn = true
       spec = specs.filter(_spec => _spec["x-internal-id"] == params.id).pop()
     }
-    console.log("selecyedSpec", spec)
-    getSpec(store).then(
-      resp => {
-        store.commit("openapi/replace", resp.data)
-        return { specs: resp.data, selectedSpec: spec }
-      },
-      err => console.error(err)
-    )
-    return { specs, selectedSpec: spec, showBackBtn }
+    await store.dispatch("openapi/fetchSpecs")
+    console.log("fetched")
+    return { selectedSpec: spec, showBackBtn }
   },
   watch: {
     "$route.path": function(val) {
@@ -61,11 +54,16 @@ export default {
       } else {
         this.selectedSpec = undefined
       }
-      console.log("path", val, this.$route.params)
+      this.resetRequestResponse()
     },
   },
   components: {
     "pw-section": section,
+  },
+  computed: {
+    specs() {
+      return this.$store.state.openapi.specs
+    },
   },
   data() {
     return {
@@ -79,8 +77,10 @@ export default {
   //       }
   //   },
   methods: {
+    resetRequestResponse() {
+      this.$store.dispatch("design/reset")
+    },
     selectSpec() {
-      console.log("selected", this.selectedSpec)
       if (this.selectedSpec)
         this.$router.push({
           path: `/design/${this.selectedSpec["x-internal-id"]}`,

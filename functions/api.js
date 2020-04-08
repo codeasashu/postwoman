@@ -11,8 +11,15 @@ export const addSpec = async (data, { state }) =>
     },
   })
 
-export const getSpec = async ({ state }) =>
+export const getSpecs = async ({ state }) =>
   await apiClient.get("spec/", {
+    headers: {
+      Authorization: state.auth.user.email,
+    },
+  })
+
+export const getSpec = async (specid, { state }) =>
+  await apiClient.get(`spec/${specid}?format=json`, {
     headers: {
       Authorization: state.auth.user.email,
     },
@@ -36,6 +43,7 @@ export const updateSpec = async (data, specid, { state }) => {
   })
 }
 
+// Use this api to upsert request and response to spec
 export const addRequest = async (specid, { title, request, response }, { state }) => {
   return await apiClient.post(
     `spec/${specid}`,
@@ -46,4 +54,12 @@ export const addRequest = async (specid, { title, request, response }, { state }
       },
     }
   )
+}
+
+export const deleteRequest = async (specid, operationid, { state }) => {
+  return await apiClient.delete(`spec/${specid}/operation/${operationid}`, {
+    headers: {
+      Authorization: state.auth.user.email,
+    },
+  })
 }
