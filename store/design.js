@@ -44,7 +44,20 @@ export const mutations = {
   },
 
   selectResponse(state, response) {
-    state.response = response
+    let body = response.body
+    if (
+      response.headers["content-type"] == "application/json" ||
+      response.headers["content-type"] == "application/hal+json"
+    ) {
+      try {
+        body = JSON.parse(response.body)
+      } catch (err) {
+        console.log("ERROR_PARSING_RESPONSE", err, body)
+      } finally {
+        response.body = body
+      }
+    }
+    state.response = respsonse
   },
 
   deleteResponse(state, response) {

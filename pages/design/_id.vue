@@ -1345,7 +1345,7 @@ export default {
     collections: () => import("../../components/collections"),
     saveRequestAs: () => import("../../components/collections/saveRequestAs"),
     Editor: AceEditor,
-    environments: () => import("../../components/environments"),
+    environments: () => import("../../components/design/environments"),
     inputform: () => import("../../components/firebase/inputform"),
     notes: () => import("../../components/firebase/feeds"),
     login: () => import("../../components/firebase/login"),
