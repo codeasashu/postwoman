@@ -1,5 +1,4 @@
 import * as api from "../functions/api"
-
 export const state = () => ({
   specid: undefined,
   responses: [],
@@ -44,20 +43,7 @@ export const mutations = {
   },
 
   selectResponse(state, response) {
-    let body = response.body
-    if (
-      response.headers["content-type"] == "application/json" ||
-      response.headers["content-type"] == "application/hal+json"
-    ) {
-      try {
-        body = JSON.parse(response.body)
-      } catch (err) {
-        console.log("ERROR_PARSING_RESPONSE", err, body)
-      } finally {
-        response.body = body
-      }
-    }
-    state.response = respsonse
+    state.response = api.parseResponseContentType(response)
   },
 
   deleteResponse(state, response) {
@@ -71,7 +57,8 @@ export const mutations = {
         state.responses.splice(index, 1)
       }
     })
-    state.responses.push(response)
+    let _response = api.parseResponseContentType(response)
+    state.responses.push(_response)
   },
 
   //@TODO Not updating in realtime (on refresh works)
@@ -211,7 +198,7 @@ export const actions = {
         {
           title: request.label,
           request,
-          response,
+          response: api.parseResponseContentType(response),
         },
         { state: rootState }
       )

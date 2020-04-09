@@ -1,7 +1,10 @@
 import axios from "axios"
+import { cloneDeep } from "lodash"
+
+export const APIURL = "http://localhost:8080/api/v1"
 
 const apiClient = axios.create({
-  baseURL: "http://localhost:8080/api/v1",
+  baseURL: APIURL,
 })
 
 export const addSpec = async (data, { state }) =>
@@ -62,4 +65,34 @@ export const deleteRequest = async (specid, operationid, { state }) => {
       Authorization: state.auth.user.email,
     },
   })
+}
+
+export const deleteResponse = async (specid, operationid, { code, contentType }, { state }) => {
+  return await apiClient.put(
+    `spec/${specid}/operation/${operationid}`,
+    { code, contentType },
+    {
+      headers: {
+        Authorization: state.auth.user.email,
+      },
+    }
+  )
+}
+
+export const parseResponseContentType = response => {
+  let _response = cloneDeep(response)
+  let body = _response.body
+  if (
+    _response.headers["content-type"] == "application/json" ||
+    _response.headers["content-type"] == "application/hal+json"
+  ) {
+    try {
+      body = JSON.parse(_response.body)
+    } catch (err) {
+      console.log("ERROR_PARSING_RESPONSE", err, body)
+    } finally {
+      _response.body = body
+    }
+  }
+  return _response
 }

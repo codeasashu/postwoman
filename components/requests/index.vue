@@ -70,6 +70,7 @@ export default {
     },
     requests() {
       let reqs = []
+      if (!this.spec) return reqs
       for (let path in this.spec.paths) {
         for (let method in this.spec.paths[path]) {
           reqs.push({

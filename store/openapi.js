@@ -2,7 +2,7 @@ import Vue from "vue"
 import * as api from "../functions/api"
 
 export const state = () => ({
-  apiurl: "http://localhost:8080/api/v1",
+  apiurl: api.APIURL,
   response: undefined,
   specs: [],
 })
@@ -88,5 +88,19 @@ export const actions = {
         return dispatch("fetchSpec", specid)
       }
     })
+  },
+
+  async deleteResponse({ rootState, dispatch }, { specid, operationid, data }) {
+    return await api.deleteResponse(specid, operationid, data, { state: rootState }).then(
+      () => dispatch("fetchSpec", specid),
+      err => console.error("[APIERROR]", err)
+    )
+  },
+
+  async deleteSpec({ rootState, dispatch }, specid) {
+    return await api.deleteSpec(specid, { state: rootState }).then(
+      () => dispatch("fetchSpecs"),
+      err => console.error("[APIERROR]", err)
+    )
   },
 }

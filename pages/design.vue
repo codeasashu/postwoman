@@ -1,9 +1,14 @@
 <template>
   <div class="page">
     <div class="content">
-      <div v-if="showBackBtn">
-        <nuxt-link to="/design">Back</nuxt-link>
+      <div v-if="onSpecPage">
+        <nuxt-link class="button" to="/design">Back</nuxt-link>
       </div>
+      <div v-if="onSpecPage">
+        <button @click="deleteSpec">Delete spec</button>
+      </div>
+    </div>
+    <div class="content">
       <div class="page-columns inner-left">
         <pw-section class="orange" label="Select-spec">
           <ul>
@@ -27,25 +32,46 @@
     </div>
   </div>
 </template>
+<style scoped lang="scss">
+.button {
+  display: -webkit-inline-box;
+  display: inline-flex;
+  -webkit-box-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  justify-content: center;
+  margin: 4px;
+  padding: 6px 16px;
+  border-radius: 20px;
+  background-color: var(--ac-color);
+  color: var(--act-color);
+  font-size: 16px;
+  font-family: "Poppins", "Roboto", "Noto", sans-serif;
+  font-weight: 700;
+  -webkit-transition: all 0.2s ease-in-out;
+  transition: all 0.2s ease-in-out;
+  fill: var(--act-color);
+  cursor: pointer;
+}
+</style>
 <script>
 import { getSpecs } from "../functions/api"
 import section from "../components/layout/section"
 export default {
   async asyncData({ params, store, $axios, $nuxt, error }) {
-    let showBackBtn = false
+    let onSpecPage = false
     let specs = store.state.openapi.specs
     let spec = undefined
     if (params.hasOwnProperty("id")) {
-      showBackBtn = true
+      onSpecPage = true
       spec = specs.filter(_spec => _spec["x-internal-id"] == params.id).pop()
     }
     await store.dispatch("openapi/fetchSpecs")
-    console.log("fetched")
-    return { selectedSpec: spec, showBackBtn }
+    return { selectedSpec: spec, onSpecPage }
   },
   watch: {
     "$route.path": function(val) {
-      this.showBackBtn = /\/design\/(.{1,})+/g.test(val)
+      this.onSpecPage = /\/design\/(.{1,})+/g.test(val)
 
       if (this.$route.params.hasOwnProperty("id")) {
         this.selectedSpec = this.specs
@@ -68,7 +94,7 @@ export default {
   data() {
     return {
       selectedSpec: undefined,
-      showBackBtn: false,
+      onSpecPage: false,
     }
   },
   //   computed: {
@@ -80,12 +106,20 @@ export default {
     resetRequestResponse() {
       this.$store.dispatch("design/reset")
     },
+    deleteSpec() {
+      if (confirm("Are you sure?")) {
+        this.$store.dispatch("openapi/deleteSpec", this.selectedSpec["x-internal-id"]).then(
+          () => this.$router.replace("/design/"),
+          err => console.error(err)
+        )
+      }
+    },
     selectSpec() {
       if (this.selectedSpec)
         this.$router.push({
           path: `/design/${this.selectedSpec["x-internal-id"]}`,
         })
-      else {
+      else if (this.$route.path != "/design/") {
         this.$router.replace("/design/")
       }
     },

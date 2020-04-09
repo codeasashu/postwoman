@@ -1940,24 +1940,28 @@ export default {
         label: pp.label,
         status: pp.status,
         headers: Object.assign({}, { "content-type": "text/plain" }, pp.headers),
-        body: pp.body,
       }
 
       if (pp.headers.hasOwnProperty("content-type")) {
         switch (pp.headers["content-type"]) {
           case "application/json":
+            this.response.body = JSON.stringify(pp.body, null, 2)
             this.responseBodyType = "json"
             break
           case "application/hal+json":
+            this.response.body = JSON.stringify(pp.body, null, 2)
             this.responseBodyType = "json"
             break
           case "text/html":
+            this.response.body = pp.body
             this.responseBodyType = "html"
             break
           case "text/plain":
+            this.response.body = pp.body
             this.responseBodyType = "text"
             break
           default:
+            this.response.body = pp.body
             this.responseBodyType = "text"
             break
         }
