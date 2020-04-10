@@ -902,7 +902,7 @@
             <ul>
               <li>
                 <label for="content-type">content-type</label>
-                <select v-model="responseBodyType" @change="changeRepsonseContentType">
+                <select v-model="responseBodyType">
                   <option value="json">Json</option>
                   <option value="text">Text</option>
                   <option value="html">Html</option>
@@ -1353,8 +1353,13 @@ export default {
     tab: () => import("../../components/ui/tab"),
     saveRequestOpenapi: () => import("../../components/openapi/saveRequest"),
   },
-  asyncData({ params, store, $axios, $nuxt, error }) {
+  asyncData({ params, store, $axios, $nuxt, error, redirect }) {
     let spec = store.state.openapi.specs.filter(spec => spec["x-internal-id"] == params.id).pop()
+    if (!spec) {
+      redirect(302, `/fork/${params.id}`)
+      error({ message: "Spec not found", statusCode: 404 })
+    }
+    console.log("selectedspec", spec, params)
     return { spec }
   },
   data() {
@@ -1478,7 +1483,8 @@ export default {
     selectedRequest(newValue, oldValue) {
       // @TODO: Convert all variables to single request variable
       if (!newValue) return
-      this.uri = newValue.url + newValue.path
+      console.log("j bhi", newValue, oldValue)
+      //this.uri = newValue.url + newValue.path
       this.url = newValue.url
       this.path = newValue.path
       this.method = newValue.method
@@ -1712,9 +1718,11 @@ export default {
     },
     rawInput: {
       get() {
+        console.log("I am called1", this.$store.state.design.request.rawInput)
         return this.$store.state.design.request.rawInput
       },
       set(value) {
+        console.log("I am called2", value)
         this.$store.commit("design/setState", { value, attribute: "rawInput" })
       },
     },
@@ -1993,10 +2001,10 @@ export default {
       this.$data.response["time"] = new Date().toLocaleTimeString()
       this.$store.commit("design/addResponse", cloneDeep(this.$data.response))
     },
-    changeRepsonseContentType(event) {
-      event.preventDefault()
-      this.$data.response.headers["content-type"] = this.getResponseContentType()
-    },
+    // changeRepsonseContentType(event) {
+    //   event.preventDefault()
+    //   this.$data.response.headers["content-type"] = this.getResponseContentType()
+    // },
     saveOpenapi() {
       this.$data.showOasModal = true
     },
@@ -2145,6 +2153,7 @@ export default {
         requestType: this.requestType,
       }
 
+      this.response.headers["content-type"] = this.getResponseContentType()
       this.$store
         .dispatch("design/addRequest", {
           specid: this.spec["x-internal-id"],

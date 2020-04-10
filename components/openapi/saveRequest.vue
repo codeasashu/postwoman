@@ -77,7 +77,6 @@
 </template>
 <script>
 import { fb } from "../../functions/fb"
-import { addRequest } from "../../functions/api"
 import AceEditor from "../../components/ui/ace-editor"
 
 export default {
@@ -160,24 +159,19 @@ export default {
         return
       }
 
-      addRequest(
-        this.$data.requestData.specid,
-        {
-          title: this.$data.requestData.name || this.$store.state.request.label,
-          request: this.$store.state.request,
-          response: this.$store.state.openapi.response,
-        },
-        this.$store
-      ).then(
-        res => {
-          this.$store.commit("openapi/update", {
-            id: this.$data.requestData.specid,
-            spec: res.data,
-          })
-          this.hideModal()
-        },
-        err => console.log(err)
-      )
+      this.$store
+        .dispatch("openapi/addRequest", {
+          specid: this.$data.requestData.specid,
+          data: {
+            title: this.$data.requestData.name || this.$store.state.request.label,
+            request: this.$store.state.request,
+            response: this.$store.state.openapi.response,
+          },
+        })
+        .then(
+          () => this.hideModal(),
+          err => console.error(err)
+        )
       // this.hideModal()
     },
     hideModal() {

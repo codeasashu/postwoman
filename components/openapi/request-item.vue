@@ -60,7 +60,6 @@ ul {
 </style>
 
 <script>
-import { deleteSpec } from "../../functions/api"
 export default {
   components: {
     VirtualList: () => import("vue-virtual-scroll-list"),
@@ -95,10 +94,8 @@ export default {
     },
     removeSpec() {
       if (!confirm("Are you sure you want to remove this Spec?")) return
-      deleteSpec(this.spec["x-internal-id"], this.$store).then(
-        res => {
-          this.$store.commit("openapi/remove", this.spec["x-internal-id"])
-        },
+      this.$store.dispatch("openapi/deleteSpec", this.spec["x-internal-id"]).then(
+        () => {},
         err => console.error(err)
       )
     },

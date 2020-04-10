@@ -49,7 +49,6 @@
 </template>
 <script>
 import { fb } from "../../functions/fb"
-import { addSpec } from "../../functions/api"
 
 export default {
   props: {
@@ -76,22 +75,19 @@ export default {
         return
       }
 
-      addSpec(
-        {
+      this.$store
+        .dispatch("openapi/addSpec", {
           title: this.$data.title,
           url: this.$data.url,
           description: this.$data.description || "",
-        },
-        this.$store
-      ).then(
-        res => {
-          this.$store.commit("openapi/add", res.data)
-          this.$toast.success(this.$t("success"), {
-            icon: "done",
-          })
-        },
-        err => console.log(err)
-      )
+        })
+        .then(
+          () =>
+            this.$toast.success(this.$t("success"), {
+              icon: "done",
+            }),
+          err => console.error(err)
+        )
 
       this.$emit("hide-modal")
     },

@@ -16,13 +16,13 @@ export const routerBase =
     ? {
         router: {
           base: `/${repoName}/`,
-          middleware: ['auth'],
+          middleware: ["auth"],
         },
       }
     : {
         router: {
           base: "/",
-          middleware: ['auth'],
+          middleware: ["auth"],
         },
       }
 export default {
@@ -44,9 +44,17 @@ export default {
     strategies: {
       google: {
         //redirect_uri: '/login',
-        client_id: '406186701865-s61e6rf1tjn8tck25olhfmp28hgm0n1e.apps.googleusercontent.com',
-      }
-    }
+        client_id: "406186701865-s61e6rf1tjn8tck25olhfmp28hgm0n1e.apps.googleusercontent.com",
+      },
+      local: {
+        endpoints: {
+          login: { url: "/", method: "post", propertyName: "token" },
+          user: { url: "me", method: "get", propertyName: "data" },
+          logout: false,
+        },
+      },
+    },
+    plugins: ["~/plugins/axios.js", { src: "~/plugins/auth.js", mode: "client" }],
   },
   head: {
     title: `${meta.name} \u2022 ${meta.shortDescription}`,
@@ -233,6 +241,9 @@ export default {
     {
       src: "~/plugins/v-tooltip",
     },
+    {
+      src: "~/plugins/axios",
+    },
   ],
   /*
    ** Nuxt.js dev-modules
@@ -245,7 +256,7 @@ export default {
     // See https://goo.gl/OOhYW5
     ["@nuxtjs/pwa"],
     ["@nuxtjs/axios"],
-    ['@nuxtjs/auth'],
+    ["@nuxtjs/auth"],
     ["@nuxtjs/toast"],
     ["@nuxtjs/google-analytics"],
     ["@nuxtjs/sitemap"],

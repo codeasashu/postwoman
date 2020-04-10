@@ -49,7 +49,6 @@
 </template>
 <script>
 import { fb } from "../../functions/fb"
-import { updateSpec } from "../../functions/api"
 
 export default {
   props: {
@@ -86,26 +85,19 @@ export default {
         return
       }
 
-      updateSpec(
-        {
-          title: this.$data.title,
-          url: this.$data.url,
-          description: this.$data.description || "",
-        },
-        this.$props.spec["x-internal-id"],
-        this.$store
-      ).then(
-        res => {
-          this.$store.commit("openapi/upate", {
-            id: this.$props.spec["x-internal-id"],
-            spec: res.data,
-          })
-          this.$toast.success(this.$t("success"), {
-            icon: "done",
-          })
-        },
-        err => console.log(err)
-      )
+      this.$store
+        .dispatch("openapi/updateSpec", {
+          specid: this.$props.spec["x-internal-id"],
+          data: {
+            title: this.$data.title,
+            url: this.$data.url,
+            description: this.$data.description || "",
+          },
+        })
+        .then(
+          () => this.$toast.success(this.$t("success"), { icon: "done" }),
+          err => console.log(err)
+        )
 
       this.$emit("hide-modal")
     },

@@ -1,9 +1,12 @@
-import * as api from "../functions/api"
+import { cloneDeep } from "lodash"
+import _url from "url"
+
 export const state = () => ({
   specid: undefined,
   responses: [],
   requests: [],
   response: undefined,
+  selectedRequest: {},
   request: {
     method: "GET",
     uri: "",
@@ -43,7 +46,7 @@ export const mutations = {
   },
 
   selectResponse(state, response) {
-    state.response = api.parseResponseContentType(response)
+    state.response = parseResponseContentType(response)
   },
 
   deleteResponse(state, response) {
@@ -57,7 +60,8 @@ export const mutations = {
         state.responses.splice(index, 1)
       }
     })
-    let _response = api.parseResponseContentType(response)
+    let _response = parseResponseContentType(response)
+    console.log("resp", response, _response)
     state.responses.push(_response)
   },
 
@@ -180,7 +184,11 @@ export const mutations = {
   },
 
   selectRequest(state, request) {
-    state.request = Object.assign({}, state.request, request)
+    let parsed_url = _url.parse(request.uri)
+    let path = parsed_url && parsed_url.path
+    console.log("state", request, Object.assign({ path }, request))
+    state.request = Object.assign({ path }, request)
+    state.selectedRequest = Object.assign({}, state.request)
   },
 }
 
@@ -190,24 +198,39 @@ export const actions = {
     commit("resetResponses")
   },
 
-  async addRequest({ state, rootState, commit }, { specid, request, response }) {
+  async addRequest({ commit }, { specid, request, response }) {
     commit("addResponse", response)
-    await api
-      .addRequest(
-        specid,
-        {
-          title: request.label,
-          request,
-          response: api.parseResponseContentType(response),
-        },
-        { state: rootState }
-      )
+    await this.$api
+      .addRequest(specid, {
+        title: request.label,
+        request,
+        response: parseResponseContentType(response),
+      })
       .then(
         res => {
+          console.log("got response", res.data, response)
           commit("selectResponse", response)
           commit("openapi/update", { id: specid, spec: res.data }, { root: true })
         },
         err => console.error("[API ERROR]", err)
       )
   },
+}
+
+const parseResponseContentType = response => {
+  let _response = cloneDeep(response)
+  let body = _response.body
+  if (
+    _response.headers["content-type"] == "application/json" ||
+    _response.headers["content-type"] == "application/hal+json"
+  ) {
+    try {
+      body = JSON.parse(_response.body)
+    } catch (err) {
+      console.log("ERROR_PARSING_RESPONSE", err, body)
+    } finally {
+      _response.body = body
+    }
+  }
+  return _response
 }

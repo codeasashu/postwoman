@@ -15,7 +15,7 @@
         </button>
         <template slot="popover">
           <div>
-            <button class="icon" @click="selectOperation(request.operation)" v-close-popover>
+            <button class="icon" @click="selectRequest(request.operation)" v-close-popover>
               <i class="material-icons">tab</i>
               <span>{{ $t("use") }}</span>
             </button>
@@ -121,17 +121,14 @@ export default {
     toggleShowChildren() {
       this.showChildren = !this.showChildren
     },
-    selectOperation(operation) {
-      this.selectRequest(operation)
-
-      //Select default first responsee (200 if exist, else any first)
-      let responseCodes = Object.keys(operation["x-originator"].responses)
-      let selectedResponseCode =
+    getDefaultResponse(operation, code) {
+      const responseCodes = Object.keys(operation["x-originator"].responses)
+      if (responseCodes.indexOf(code) > -1) return operation["x-originator"].responses[code]
+      const selectedResponseCode =
         responseCodes.indexOf(200) > -1 ? 200 : responseCodes.length ? responseCodes[0] : undefined
-
-      if (selectedResponseCode) {
-        this.selectResponse(operation, selectedResponseCode)
-      }
+      return selectedResponseCode
+        ? operation["x-originator"].responses[operation["x-originator"].responses]
+        : undefined
     },
     selectRequest(operation) {
       let request = Object.assign(
@@ -144,8 +141,9 @@ export default {
     },
     selectResponse(operation, code) {
       this.selectRequest(operation)
-      let response = operation["x-originator"].responses[code]
+      let response = this.getDefaultResponse(operation, code)
       if (response) this.$store.commit("design/selectResponse", response)
+      else this.$store.commit("design/resetResponses")
     },
     removeResponse(response) {
       if (!confirm("You sure to delete this response?")) {

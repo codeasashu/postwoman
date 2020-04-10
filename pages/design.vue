@@ -55,7 +55,6 @@
 }
 </style>
 <script>
-import { getSpecs } from "../functions/api"
 import section from "../components/layout/section"
 export default {
   async asyncData({ params, store, $axios, $nuxt, error }) {

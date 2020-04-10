@@ -1,8 +1,6 @@
 import Vue from "vue"
-import * as api from "../functions/api"
 
 export const state = () => ({
-  apiurl: api.APIURL,
   response: undefined,
   specs: [],
 })
@@ -42,18 +40,8 @@ export const mutations = {
 }
 
 export const actions = {
-  // async runApi({ state }, { callback, data}) {
-  //   let results = undefined
-  //   try {
-  //     results = !!data ? await callback(data, { state }) : await callback({ state })
-  //   } catch (err) {
-  //     console.log('[API ERROR]', err)
-  //   }
-  //   return results
-  // },
-
-  async fetchSpec({ rootState, commit }, specid) {
-    return await api.getSpec(specid, { state: rootState }).then(
+  async fetchSpec({ commit }, specid) {
+    return await this.$api.getSpec(specid).then(
       resp => {
         commit("update", {
           id: specid,
@@ -68,8 +56,8 @@ export const actions = {
     )
   },
 
-  async fetchSpecs({ rootState, commit }) {
-    return await api.getSpecs({ state: rootState }).then(
+  async fetchSpecs({ commit }) {
+    return await this.$api.getSpecs().then(
       resp => {
         commit("replace", resp.data)
         return resp
@@ -81,8 +69,8 @@ export const actions = {
     )
   },
 
-  async deleteOperation({ rootState, dispatch }, { specid, operationid }) {
-    return await api.deleteRequest(specid, operationid, { state: rootState }).then(res => {
+  async deleteOperation({ dispatch }, { specid, operationid }) {
+    return await this.$api.deleteRequest(specid, operationid).then(res => {
       if (res.data.deleted && res.data.deleted == true) {
         //Refresh thiss spec
         return dispatch("fetchSpec", specid)
@@ -90,16 +78,39 @@ export const actions = {
     })
   },
 
-  async deleteResponse({ rootState, dispatch }, { specid, operationid, data }) {
-    return await api.deleteResponse(specid, operationid, data, { state: rootState }).then(
+  async deleteResponse({ dispatch }, { specid, operationid, data }) {
+    return await this.$api.deleteResponse(specid, operationid, data).then(
       () => dispatch("fetchSpec", specid),
       err => console.error("[APIERROR]", err)
     )
   },
 
-  async deleteSpec({ rootState, dispatch }, specid) {
-    return await api.deleteSpec(specid, { state: rootState }).then(
+  async deleteSpec({ dispatch }, specid) {
+    return await this.$api.deleteSpec(specid).then(
       () => dispatch("fetchSpecs"),
+      err => console.error("[APIERROR]", err)
+    )
+  },
+
+  async addSpec({ commit }, { title, url, description }) {
+    description = description || ""
+    return await this.$api.addSpec({ title, url, description }).then(
+      res => commit("add", res.data),
+      err => console.error("[APIERROR]", err)
+    )
+  },
+
+  async updateSpec({ commit }, { specid, data: { title, url, description } }) {
+    description = description || ""
+    return await this.$api.updateSpec({ title, url, description }).then(
+      res => commit("update", { id: specid, spec: res.data }),
+      err => console.error("[APIERROR]", err)
+    )
+  },
+
+  async addRequest({ commit }, { specid, data: { title, request, response } }) {
+    return await this.$api.addRequest({ title, request, response }).then(
+      res => commit("update", { id: specid, spec: res.data }),
       err => console.error("[APIERROR]", err)
     )
   },

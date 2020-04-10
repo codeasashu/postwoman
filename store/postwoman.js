@@ -69,10 +69,18 @@ export const SETTINGS_KEYS = [
    * to run the requests
    */
   "EXTENSIONS_ENABLED",
+
+  /**
+   * A boolean value indicating whether to use the browser extensions
+   * to run the requests
+   */
+  "LOGIN_STRATEGY",
 ]
 
 export const state = () => ({
-  settings: {},
+  settings: {
+    LOGIN_STRATEGY: "google",
+  },
   collections: [
     {
       name: "My Collection",

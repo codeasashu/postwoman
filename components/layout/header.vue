@@ -35,7 +35,7 @@
         >
           <i class="material-icons">offline_bolt</i>
         </button>
-        <v-popover v-if="fb.currentUser === null">
+        <v-popover v-if="$auth.loggedIn === false">
           <button class="icon" v-tooltip="$t('login_with')">
             <i class="material-icons">vpn_key</i>
           </button>
@@ -47,15 +47,15 @@
           <button
             class="icon"
             v-tooltip="
-              (fb.currentUser.displayName || '<label><i>Name not found</i></label>') +
+              ($auth.user.name || '<label><i>Name not found</i></label>') +
                 '<br>' +
-                (fb.currentUser.email || '<label><i>Email not found</i></label>')
+                ($auth.user.email || '<label><i>Email not found</i></label>')
             "
             aria-label="Account"
           >
             <img
-              v-if="fb.currentUser.photoURL"
-              :src="fb.currentUser.photoURL"
+              v-if="$auth.user.picture"
+              :src="$auth.user.picture"
               class="material-icons"
               alt="Profile image"
             />
@@ -269,7 +269,7 @@ export default {
   components: {
     modal: () => import("../ui/modal"),
     login: () => import("../firebase/login"),
-    logout: () => import("../firebase/logout"),
+    logout: () => import("../design/logout"),
     contributors: () => import("./contributors"),
   },
 

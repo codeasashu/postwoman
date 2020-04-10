@@ -1,7 +1,7 @@
 <template>
   <div class="container d-flex align-items-center justify-content-center flex-column">
     <div>
-      <button class="icon" @click="$auth.loginWith('google')" v-close-popover>
+      <button class="icon" @click="login" v-close-popover>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="24"
@@ -24,3 +24,20 @@
   min-height: 70vh;
 }
 </style>
+<script>
+export default {
+  computed: {
+    strategy() {
+      return this.$store.state.postwoman.settings.LOGIN_STRATEGY
+    },
+    bearer() {
+      return this.$auth.$storage.getUniversal(`${this.$auth.options.token.prefix}${this.strategy}`)
+    },
+  },
+  methods: {
+    login() {
+      this.$auth.loginWith(this.strategy).then(() => this.$toast.success("Logged In!"))
+    },
+  },
+}
+</script>

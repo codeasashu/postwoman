@@ -58,7 +58,6 @@ ul {
 </style>
 
 <script>
-import { getSpecs } from "../../functions/api"
 export default {
   components: {
     "pw-section": () => import("../layout/section"),
