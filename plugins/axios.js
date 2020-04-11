@@ -56,8 +56,7 @@ class AuthApi extends Api {
 }
 
 class SpecApi extends Api {
-  //axios = () => { console.log('k', this.client); return this.client; }
-
+  // Spec related APIs
   addSpec = async data => await this.client.post("spec/", data)
   getSpec = async specid => await this.client.get(`spec/${specid}?format=json`)
   getSpecs = async () => await this.client.get("spec/")
@@ -71,6 +70,8 @@ class SpecApi extends Api {
     await this.client.delete(`spec/${specid}/operation/${operationid}`)
   deleteResponse = async (specid, operationid, { code, contentType }) =>
     await this.client.put(`spec/${specid}/operation/${operationid}`, { code, contentType })
-  // addRequest = async () => await this.client.get("spec/")
-  // addRequest = async () => await this.client.get("spec/")
+
+  // Fork related APIs
+  getFork = async specid => await this.client.get(`fork/${specid}`)
+  forkSpec = async specid => await this.client.post(`fork/${specid}`)
 }

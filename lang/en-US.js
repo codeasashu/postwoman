@@ -276,4 +276,6 @@ export default {
   notes: "Notes",
   socketio: "Socket.IO",
   event_name: "Event Name",
+  fork: "Fork Project",
+  view_fork: "Visit Fork",
 }

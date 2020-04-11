@@ -114,4 +114,19 @@ export const actions = {
       err => console.error("[APIERROR]", err)
     )
   },
+
+  async getFork(state, specid) {
+    console.log("specid", specid)
+    return await this.$api.getFork(specid).then(
+      res => res.data.specid,
+      err => console.error("[APIERROR]", err)
+    )
+  },
+
+  async forkSpec({ dispatch }, specid) {
+    return await this.$api.forkSpec(specid).then(
+      () => dispatch("fetchSpec", specid),
+      err => console.error("[APIERROR]", err)
+    )
+  },
 }
