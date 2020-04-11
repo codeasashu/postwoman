@@ -1,7 +1,14 @@
 <template>
   <div class="page">
     <div class="content">
-      <div class="page-columns inner-left" v-if="spec">
+      <h2 v-if="spec">{{ spec.info.title }}</h2>
+      &nbsp;&nbsp;
+      <nuxt-link v-if="$route.params.id" :to="`/fork/${$route.params.id}`">
+        <button>{{ $t("fork") }}</button>
+      </nuxt-link>
+    </div>
+    <div class="content">
+      <div class="page-columns inner-left">
         <pw-section class="blue" :label="$t('request')" ref="request">
           <div class="blue">
             <label for="label">{{ $t("label") }}</label>
@@ -9,6 +16,7 @@
               id="label"
               name="label"
               type="text"
+              readonly
               v-model="label"
               :placeholder="$t('required')"
             />
@@ -27,128 +35,6 @@
                       readonly
                     />
                     <input v-else v-model="method" placeholder="CUSTOM" />
-                    <template slot="popover">
-                      <div>
-                        <button
-                          class="icon"
-                          @click="
-                            customMethod = false
-                            method = 'GET'
-                          "
-                          v-close-popover
-                        >
-                          GET
-                        </button>
-                      </div>
-                      <div>
-                        <button
-                          class="icon"
-                          @click="
-                            customMethod = false
-                            method = 'HEAD'
-                          "
-                          v-close-popover
-                        >
-                          HEAD
-                        </button>
-                      </div>
-                      <div>
-                        <button
-                          class="icon"
-                          @click="
-                            customMethod = false
-                            method = 'POST'
-                          "
-                          v-close-popover
-                        >
-                          POST
-                        </button>
-                      </div>
-                      <div>
-                        <button
-                          class="icon"
-                          @click="
-                            customMethod = false
-                            method = 'PUT'
-                          "
-                          v-close-popover
-                        >
-                          PUT
-                        </button>
-                      </div>
-                      <div>
-                        <button
-                          class="icon"
-                          @click="
-                            customMethod = false
-                            method = 'DELETE'
-                          "
-                          v-close-popover
-                        >
-                          DELETE
-                        </button>
-                      </div>
-                      <div>
-                        <button
-                          class="icon"
-                          @click="
-                            customMethod = false
-                            method = 'CONNECT'
-                          "
-                          v-close-popover
-                        >
-                          CONNECT
-                        </button>
-                      </div>
-                      <div>
-                        <button
-                          class="icon"
-                          @click="
-                            customMethod = false
-                            method = 'OPTIONS'
-                          "
-                          v-close-popover
-                        >
-                          OPTIONS
-                        </button>
-                      </div>
-                      <div>
-                        <button
-                          class="icon"
-                          @click="
-                            customMethod = false
-                            method = 'TRACE'
-                          "
-                          v-close-popover
-                        >
-                          TRACE
-                        </button>
-                      </div>
-                      <div>
-                        <button
-                          class="icon"
-                          @click="
-                            customMethod = false
-                            method = 'PATCH'
-                          "
-                          v-close-popover
-                        >
-                          PATCH
-                        </button>
-                      </div>
-                      <div>
-                        <button
-                          class="icon"
-                          @click="
-                            customMethod = true
-                            method = 'CUSTOM'
-                          "
-                          v-close-popover
-                        >
-                          CUSTOM
-                        </button>
-                      </div>
-                    </template>
                   </v-popover>
                 </span>
               </li>
@@ -158,35 +44,20 @@
               <small>{{ basePath }}</small>
               <input
                 :class="{ error: !isValidURL }"
-                @keyup.enter="sendRequest()"
                 id="url"
                 name="url"
                 type="url"
-                @change="pathInputHandler()"
-                @blur="setUri"
+                readonly
                 v-model="$data._uri"
                 spellcheck="false"
               />
             </li>
-            <div>
-              <li>
-                <label class="hide-on-small-screen" for="send">&nbsp;</label>
-                <button @click="sendRequest" id="send" ref="sendButton">
-                  {{ $t("save") }}
-                  <span>
-                    <i class="material-icons">send</i>
-                  </span>
-                </button>
-              </li>
-            </div>
           </ul>
           <div class="blue" label="Request Body" v-if="['POST', 'PUT', 'PATCH'].includes(method)">
             <ul>
               <li>
                 <label for="contentType">{{ $t("content_type") }}</label>
-                <autocomplete :source="validContentTypes" :spellcheck="false" v-model="contentType"
-                  >Content Type</autocomplete
-                >
+                <input id="contentType" name="contentType" readonly v-model="contentType" />
               </li>
             </ul>
             <ul>
@@ -197,45 +68,6 @@
                       {{ $t("raw_input") }}
                     </pw-toggle>
                   </span>
-                  <div>
-                    <label for="attachment">
-                      <button
-                        class="icon"
-                        @click="$refs.attachment.click()"
-                        v-tooltip="
-                          files.length === 0 ? $t('upload_file') : filenames.replace('<br/>', '')
-                        "
-                      >
-                        <i class="material-icons">attach_file</i>
-                        <span>
-                          {{
-                            files.length === 0
-                              ? "No files"
-                              : files.length == 1
-                              ? "1 file"
-                              : files.length + " files"
-                          }}
-                        </span>
-                      </button>
-                    </label>
-                    <input
-                      ref="attachment"
-                      name="attachment"
-                      type="file"
-                      @change="uploadAttachment"
-                      multiple
-                    />
-                    <label for="payload">
-                      <button
-                        class="icon"
-                        @click="$refs.payload.click()"
-                        v-tooltip="$t('import_json')"
-                      >
-                        <i class="material-icons">post_add</i>
-                      </button>
-                    </label>
-                    <input ref="payload" name="payload" type="file" @change="uploadPayload" />
-                  </div>
                 </div>
               </li>
             </ul>
@@ -259,13 +91,7 @@
                     :placeholder="'key ' + (index + 1)"
                     :name="'bparam' + index"
                     :value="param.key"
-                    @change="
-                      $store.commit('design/setKeyBodyParams', {
-                        index,
-                        value: $event.target.value,
-                      })
-                    "
-                    @keyup.prevent="setRouteQueryState"
+                    readonly
                     autofocus
                   />
                 </li>
@@ -275,34 +101,8 @@
                     :id="'bvalue' + index"
                     :name="'bvalue' + index"
                     :value="param.value"
-                    @change="
-                      $store.commit('design/setValueBodyParams', {
-                        index,
-                        value: $event.target.value,
-                      })
-                    "
-                    @keyup.prevent="setRouteQueryState"
+                    readonly
                   />
-                </li>
-                <div>
-                  <li>
-                    <button
-                      class="icon"
-                      @click="removeRequestBodyParam(index)"
-                      v-tooltip.bottom="$t('delete')"
-                      id="delParam"
-                    >
-                      <i class="material-icons">delete</i>
-                    </button>
-                  </li>
-                </div>
-              </ul>
-              <ul>
-                <li>
-                  <button class="icon" @click="addRequestBodyParam" name="addrequest">
-                    <i class="material-icons">add</i>
-                    <span>{{ $t("add_new") }}</span>
-                  </button>
                 </li>
               </ul>
             </div>
@@ -314,6 +114,7 @@
                     v-model="rawParams"
                     :lang="rawInputEditorLang"
                     :options="{
+                      readOnly: true,
                       maxLines: '16',
                       minLines: '8',
                       fontSize: '16px',
@@ -330,14 +131,6 @@
             <span>
               <button
                 class="icon"
-                id="show-modal"
-                @click="showModal = true"
-                v-tooltip.bottom="$t('import_curl')"
-              >
-                <i class="material-icons">import_export</i>
-              </button>
-              <button
-                class="icon"
                 id="code"
                 @click="isHidden = !isHidden"
                 :disabled="!isValidURL"
@@ -346,80 +139,6 @@
                 }"
               >
                 <i class="material-icons">code</i>
-              </button>
-              <button
-                class="icon"
-                id="preRequestScriptButton"
-                v-tooltip.bottom="{
-                  content: !showPreRequestScript
-                    ? $t('show_prerequest_script')
-                    : $t('hide_prerequest_script'),
-                }"
-                @click="showPreRequestScript = !showPreRequestScript"
-              >
-                <i
-                  class="material-icons"
-                  :class="showPreRequestScript"
-                  v-if="!showPreRequestScript"
-                >
-                  playlist_add
-                </i>
-                <i class="material-icons" :class="showPreRequestScript" v-else>
-                  close
-                </i>
-              </button>
-              <button
-                class="icon"
-                id="preRequestScriptButto"
-                v-tooltip.bottom="{
-                  content: !testsEnabled ? 'Enable Tests' : 'Disable Tests',
-                }"
-                @click="testsEnabled = !testsEnabled"
-              >
-                <i class="material-icons" :class="testsEnabled" v-if="!testsEnabled">
-                  playlist_add_check
-                </i>
-                <i class="material-icons" :class="testsEnabled" v-else>close</i>
-              </button>
-            </span>
-            <span>
-              <button
-                class="icon"
-                @click="saveOpenapi"
-                :disabled="!isValidURL"
-                v-if="isLoggedIn"
-                v-tooltip.bottom="$t('openapi_spec_save')"
-              >
-                <i class="material-icons">folder</i>
-              </button>
-              <button
-                class="icon"
-                @click="copyRequest"
-                id="copyRequest"
-                ref="copyRequest"
-                :disabled="!isValidURL"
-                v-tooltip.bottom="$t('copy_request_link')"
-              >
-                <i v-if="navigatorShare" class="material-icons">share</i>
-                <i v-else class="material-icons">file_copy</i>
-              </button>
-              <button
-                class="icon"
-                @click="saveRequest"
-                id="saveRequest"
-                ref="saveRequest"
-                :disabled="!isValidURL"
-                v-tooltip.bottom="$t('save_to_collections')"
-              >
-                <i class="material-icons">save</i>
-              </button>
-              <button
-                class="icon"
-                @click="clearContent('', $event)"
-                v-tooltip.bottom="$t('clear_all')"
-                ref="clearAll"
-              >
-                <i class="material-icons">clear_all</i>
               </button>
             </span>
           </div>
@@ -446,6 +165,7 @@
                 v-model="testScript"
                 :lang="'javascript'"
                 :options="{
+                  readOnly: true,
                   maxLines: '16',
                   minLines: '8',
                   fontSize: '16px',
@@ -454,37 +174,6 @@
                   useWorker: false,
                 }"
               />
-              <div v-if="testReports">
-                <div class="flex-wrap">
-                  <label>Test Reports</label>
-                  <div>
-                    <button
-                      class="icon"
-                      @click="clearContent('tests', $event)"
-                      v-tooltip.bottom="$t('clear')"
-                    >
-                      <i class="material-icons">clear_all</i>
-                    </button>
-                  </div>
-                </div>
-                <div v-for="(testReport, index) in testReports" :key="index">
-                  <div v-if="testReport.startBlock" class="info">
-                    <h4>{{ testReport.startBlock }}</h4>
-                  </div>
-                  <p v-else-if="testReport.result" class="flex-wrap info">
-                    <span :class="testReport.styles.class">
-                      <i class="material-icons">
-                        {{ testReport.styles.icon }}
-                      </i>
-                      <span>&nbsp; {{ testReport.result }}</span>
-                      <span v-if="testReport.message">
-                        <label>&nbsp; • &nbsp; {{ testReport.message }}</label>
-                      </span>
-                    </span>
-                  </p>
-                  <div v-else-if="testReport.endBlock"><hr /></div>
-                </div>
-              </div>
             </li>
           </ul>
         </pw-section>
@@ -497,29 +186,15 @@
                   <li>
                     <div class="flex-wrap">
                       <label for="auth">{{ $t("authentication") }}</label>
-                      <div>
-                        <button
-                          class="icon"
-                          @click="clearContent('auth', $event)"
-                          v-tooltip.bottom="$t('clear')"
-                        >
-                          <i class="material-icons">clear_all</i>
-                        </button>
-                      </div>
                     </div>
                     <span class="select-wrapper">
-                      <select id="auth" v-model="auth">
-                        <option>None</option>
-                        <option>Basic Auth</option>
-                        <option>Bearer Token</option>
-                        <option>OAuth 2.0</option>
-                      </select>
+                      <input :value="auth" readonly />
                     </span>
                   </li>
                 </ul>
                 <ul v-if="auth === 'Basic Auth'">
                   <li>
-                    <input placeholder="User" name="http_basic_user" v-model="httpUser" />
+                    <input readonly placeholder="User" name="http_basic_user" v-model="httpUser" />
                   </li>
                   <li>
                     <input
@@ -527,6 +202,7 @@
                       name="http_basic_passwd"
                       :type="passwordFieldType"
                       v-model="httpPassword"
+                      readonly
                     />
                   </li>
                   <div>
@@ -548,31 +224,15 @@
                 <ul v-if="auth === 'Bearer Token' || auth === 'OAuth 2.0'">
                   <li>
                     <div class="flex-wrap">
-                      <input placeholder="Token" name="bearer_token" v-model="bearerToken" />
-                      <button
-                        v-if="auth === 'OAuth 2.0'"
-                        class="icon"
-                        @click="showTokenList = !showTokenList"
-                        v-tooltip.bottom="$t('use_token')"
-                      >
-                        <i class="material-icons">open_in_new</i>
-                      </button>
-                      <button
-                        v-if="auth === 'OAuth 2.0'"
-                        class="icon"
-                        @click="showTokenRequest = !showTokenRequest"
-                        v-tooltip.bottom="$t('get_token')"
-                      >
-                        <i class="material-icons">vpn_key</i>
-                      </button>
+                      <input
+                        placeholder="Token"
+                        name="bearer_token"
+                        readonly
+                        v-model="bearerToken"
+                      />
                     </div>
                   </li>
                 </ul>
-                <div class="flex-wrap">
-                  <pw-toggle :on="!urlExcludes.auth" @change="setExclude('auth', !$event)">
-                    {{ $t("include_in_url") }}
-                  </pw-toggle>
-                </div>
               </pw-section>
               <pw-section
                 v-if="showTokenRequest"
@@ -701,15 +361,6 @@
                   <li>
                     <div class="flex-wrap">
                       <label for="headerList">{{ $t("header_list") }}</label>
-                      <div>
-                        <button
-                          class="icon"
-                          @click="clearContent('headers', $event)"
-                          v-tooltip.bottom="$t('clear')"
-                        >
-                          <i class="material-icons">clear_all</i>
-                        </button>
-                      </div>
                     </div>
                     <textarea
                       id="headerList"
@@ -728,14 +379,7 @@
                       :source="commonHeaders"
                       :spellcheck="false"
                       :value="header.key"
-                      @input="
-                        $store.commit('design/setKeyHeader', {
-                          index,
-                          value: $event,
-                        })
-                      "
-                      @keyup.prevent="setRouteQueryState"
-                      autofocus
+                      readonly
                     />
                   </li>
                   <li>
@@ -743,34 +387,8 @@
                       :placeholder="$t('value_count', { count: index + 1 })"
                       :name="'value' + index"
                       :value="header.value"
-                      @change="
-                        $store.commit('design/setValueHeader', {
-                          index,
-                          value: $event.target.value,
-                        })
-                      "
-                      @keyup.prevent="setRouteQueryState"
+                      readonly
                     />
-                  </li>
-                  <div>
-                    <li>
-                      <button
-                        class="icon"
-                        @click="removeRequestHeader(index)"
-                        v-tooltip.bottom="$t('delete')"
-                        id="header"
-                      >
-                        <i class="material-icons">delete</i>
-                      </button>
-                    </li>
-                  </div>
-                </ul>
-                <ul>
-                  <li>
-                    <button class="icon" @click="addRequestHeader">
-                      <i class="material-icons">add</i>
-                      <span>{{ $t("add_new") }}</span>
-                    </button>
                   </li>
                 </ul>
               </pw-section>
@@ -782,15 +400,6 @@
                   <li>
                     <div class="flex-wrap">
                       <label for="paramList">{{ $t("parameter_list") }}</label>
-                      <div>
-                        <button
-                          class="icon"
-                          @click="clearContent('parameters', $event)"
-                          v-tooltip.bottom="$t('clear')"
-                        >
-                          <i class="material-icons">clear_all</i>
-                        </button>
-                      </div>
                     </div>
                     <textarea
                       id="paramList"
@@ -808,13 +417,7 @@
                       :placeholder="$t('parameter_count', { count: index + 1 })"
                       :name="'param' + index"
                       :value="param.key"
-                      @change="
-                        $store.commit('design/setKeyParams', {
-                          index,
-                          value: $event.target.value,
-                        })
-                      "
-                      autofocus
+                      readonly
                     />
                   </li>
                   <li>
@@ -822,60 +425,20 @@
                       :placeholder="$t('value_count', { count: index + 1 })"
                       :name="'value' + index"
                       :value="param.value"
-                      @change="
-                        $store.commit('design/setValueParams', {
-                          index,
-                          value: $event.target.value,
-                        })
-                      "
+                      readonly
                     />
-                  </li>
-                  <div>
-                    <li>
-                      <button
-                        class="icon"
-                        @click="removeRequestParam(index)"
-                        v-tooltip.bottom="$t('delete')"
-                        id="param"
-                      >
-                        <i class="material-icons">delete</i>
-                      </button>
-                    </li>
-                  </div>
-                </ul>
-                <ul>
-                  <li>
-                    <button class="icon" @click="addRequestParam">
-                      <i class="material-icons">add</i>
-                      <span>{{ $t("add_new") }}</span>
-                    </button>
                   </li>
                 </ul>
               </pw-section>
             </tab>
           </tabs>
-
-          <!-- <div class="flex-wrap">
-            <span></span>
-            <button
-              class="icon hide-on-small-screen"
-              @click="activeSidebar = !activeSidebar"
-              v-tooltip="{
-                content: activeSidebar ? 'Hide Sidebar' : 'Show Sidebar'
-              }"
-            >
-              <i class="material-icons">
-                {{ activeSidebar ? "last_page" : "first_page" }}
-              </i>
-            </button>
-          </div> -->
         </section>
 
         <pw-section class="purple" id="response" ref="saveresponse" :label="$t('response')">
           <ul>
             <li>
               <label for="responseLabel">Response Label</label>
-              <input id="responseLabel" v-model="response.label" name="responseLabel" />
+              <input id="responseLabel" :value="response.label" readonly name="responseLabel" />
             </li>
           </ul>
           <ul>
@@ -883,11 +446,12 @@
               <label for="status">{{ $t("status") }}</label>
               <input
                 :class="statusCategory ? statusCategory.className : ''"
-                v-model="response.status"
+                :value="response.status"
                 ref="status"
                 id="status"
                 name="status"
                 type="text"
+                readonly
               />
             </li>
           </ul>
@@ -895,7 +459,7 @@
             <ul v-for="(value, key) in response.headers" :key="key">
               <li>
                 <label :for="key">{{ key }}</label>
-                <input :id="key" :value="value" :name="key" />
+                <input :id="key" :value="value" :name="key" readonly />
               </li>
             </ul>
           </div>
@@ -903,10 +467,10 @@
             <ul>
               <li>
                 <label for="content-type">content-type</label>
-                <select v-model="responseBodyType">
-                  <option value="json">Json</option>
-                  <option value="text">Text</option>
-                  <option value="html">Html</option>
+                <select disabled>
+                  <option value="json" :selected="responseBodyType == 'json'">Json</option>
+                  <option value="text" :selected="responseBodyType == 'text'">Text</option>
+                  <option value="html" :selected="responseBodyType == 'html'">Html</option>
                 </select>
                 <!-- <input v-model="responseType" name="content-type" /> -->
               </li>
@@ -926,6 +490,7 @@
                     readOnly: false,
                     showPrintMargin: false,
                     useWorker: false,
+                    readOnly: true,
                   }"
                 />
                 <iframe
@@ -948,12 +513,6 @@
                     {{ previewEnabled ? $t("hide_preview") : $t("preview_html") }}
                   </span>
                 </button>
-                <button :disabled="!response.status || !responseBodyType" @click="saveResponse">
-                  {{ $t("save") }}
-                  <span>
-                    <i class="material-icons">code</i>
-                  </span>
-                </button>
               </div>
             </li>
           </ul>
@@ -964,7 +523,7 @@
         <section>
           <tabs>
             <tab :id="'requests'" :icon="'watch_later'" :label="$t('requests')" :selected="true">
-              <requests :specid="$route.params.id" ref="responseComponent" />
+              <requests readonly :specid="$route.params.id" ref="responseComponent" />
             </tab>
 
             <tab :id="'env'" :icon="'style'" :label="$t('environments')">
@@ -996,56 +555,6 @@
           </tabs>
         </section>
       </aside>
-
-      <save-request-as
-        :show="showRequestModal"
-        @hide-model="hideRequestModal"
-        :editing-request="editRequest"
-      />
-
-      <saveRequestOpenapi :show="showOasModal" @hide-modal="hideOpenapiModal" />
-
-      <pw-modal v-if="showModal" @close="showModal = false">
-        <div slot="header">
-          <ul>
-            <li>
-              <div class="flex-wrap">
-                <h3 class="title">{{ $t("import_curl") }}</h3>
-                <div>
-                  <button class="icon" @click="showModal = false">
-                    <i class="material-icons">close</i>
-                  </button>
-                </div>
-              </div>
-            </li>
-          </ul>
-        </div>
-        <div slot="body">
-          <ul>
-            <li>
-              <textarea
-                id="import-text"
-                autofocus
-                rows="8"
-                :placeholder="$t('enter_curl')"
-              ></textarea>
-            </li>
-          </ul>
-        </div>
-        <div slot="footer">
-          <div class="flex-wrap">
-            <span></span>
-            <span>
-              <button class="icon" @click="showModal = false">
-                {{ $t("cancel") }}
-              </button>
-              <button class="icon primary" @click="handleImport">
-                {{ $t("import") }}
-              </button>
-            </span>
-          </div>
-        </div>
-      </pw-modal>
 
       <pw-modal v-if="!isHidden" @close="isHidden = true">
         <div slot="header">
@@ -1096,6 +605,7 @@
                 ref="generatedCode"
                 name="generatedCode"
                 rows="8"
+                readonly
                 v-model="requestCode"
               ></textarea>
             </li>
@@ -1354,13 +864,19 @@ export default {
     tab: () => import("../../components/ui/tab"),
     saveRequestOpenapi: () => import("../../components/openapi/saveRequest"),
   },
-  validate({ params, store }) {
-    let spec = store.state.openapi.specs.filter(spec => spec["x-internal-id"] == params.id).pop()
-    return !!spec || store.dispatch("openapi/fetchSpec", params.id)
+  async asyncData({ params, app, store, $axios, $nuxt, error, redirect }) {
+    if (params.hasOwnProperty("id")) {
+      const { data } = await app.$api.getSpec(params.id)
+      store.commit("browse/setSpec", data)
+      console.log("specdata", data)
+      return { spec: data }
+    } else {
+      error({ message: "Spec not found", statusCode: 404 })
+    }
   },
   data() {
     return {
-      spec: undefined,
+      requestCode: undefined,
       _uri: undefined,
       showModal: false,
       showOasModal: false,
@@ -1732,6 +1248,7 @@ export default {
       },
       set(value) {
         this.$store.commit("design/setState", { value, attribute: "requestType" })
+        this.requestCode = this.getRequestCode(value)
       },
     },
     contentType: {
@@ -1833,8 +1350,21 @@ export default {
         this.responseBodyType = "json"
       },
     },
-    requestCode() {
-      if (this.requestType === "JavaScript XHR") {
+    tokenReqDetails() {
+      const details = {
+        oidcDiscoveryUrl: this.oidcDiscoveryUrl,
+        authUrl: this.authUrl,
+        accessTokenUrl: this.accessTokenUrl,
+        clientId: this.clientId,
+        scope: this.scope,
+      }
+      return JSON.stringify(details, null, 2)
+    },
+  },
+  methods: {
+    getRequestCode(value) {
+      let requestType = value || this.requestType
+      if (requestType === "JavaScript XHR") {
         const requestString = []
         requestString.push("const xhr = new XMLHttpRequest()")
         const user = this.auth === "Basic Auth" ? `'${this.httpUser}'` : null
@@ -1861,7 +1391,7 @@ export default {
           requestString.push("xhr.send()")
         }
         return requestString.join("\n")
-      } else if (this.requestType === "Fetch") {
+      } else if (requestType === "Fetch") {
         const requestString = []
         let headers = []
         requestString.push(`fetch("${this.url}${this.pathName}${this.queryString}", {\n`)
@@ -1898,7 +1428,7 @@ export default {
         requestString.push("  error.message\n")
         requestString.push("})")
         return requestString.join("")
-      } else if (this.requestType === "cURL") {
+      } else if (requestType === "cURL") {
         const requestString = []
         requestString.push(`curl -X ${this.method} \n`)
         requestString.push(`  '${this.url}${this.pathName}${this.queryString}' \n`)
@@ -1922,59 +1452,6 @@ export default {
           requestString.push(`  -d '${requestBody}' \n`)
         }
         return requestString.join("").slice(0, -2)
-      }
-    },
-    tokenReqDetails() {
-      const details = {
-        oidcDiscoveryUrl: this.oidcDiscoveryUrl,
-        authUrl: this.authUrl,
-        accessTokenUrl: this.accessTokenUrl,
-        clientId: this.clientId,
-        scope: this.scope,
-      }
-      return JSON.stringify(details, null, 2)
-    },
-  },
-  methods: {
-    setUri(event) {
-      let value = (event && event.target.value) || this.$data._uri
-      let url = this.basePath + value
-      let basepath_path
-      try {
-        baseurl = new URL(this.basePath)
-        basepath_path = baseurl.pathname
-      } catch (error) {
-        let uriRegex = this.basePath.match(/^((http[s]?:\/\/)?(<<[^\/]+>>)?[^\/]*|)(\/?.*)$/)
-        basepath_path = uriRegex[4]
-      }
-      this.$store.commit("design/setState", { value: url, attribute: "uri" })
-      if (this.preRequestScript && this.showPreRequestScript) {
-        const environmentVariables = getEnvironmentVariablesFromScript(this.preRequestScript)
-        url = parseTemplateString(value, environmentVariables)
-      }
-      try {
-        url = new URL(url)
-        this.url = url.origin
-
-        let path = url.pathname
-        if (basepath_path) {
-          path = path.replace(basepath_path, "")
-          path = path.indexOf("/") !== 0 ? "/" + path : path
-          console.log("setting path1", basepath_path, path)
-        }
-
-        this.path = path
-      } catch (error) {
-        console.log("url", url, error)
-        let uriRegex = url.match(/^((http[s]?:\/\/)?(<<[^\/]+>>)?[^\/]*|)(\/?.*)$/)
-        let path = uriRegex[4]
-        if (basepath_path) {
-          path = path.replace(basepath_path, "")
-          path = path.indexOf("/") !== 0 ? "/" + path : path
-          console.log("setting path2", basepath_path, path)
-        }
-        this.url = uriRegex[1]
-        this.path = path
       }
     },
     copyResponseObject(originalResponse) {
@@ -2110,11 +1587,32 @@ export default {
       }
       return await sendNetworkRequest(requestOptions, this.$store)
     },
+    setUrlPath() {
+      let value = this.basePath + this.$data._uri
+      this.$store.commit("design/setState", { value, attribute: "uri" })
+      let url
+      if (this.preRequestScript && this.showPreRequestScript) {
+        const environmentVariables = getEnvironmentVariablesFromScript(this.preRequestScript)
+        url = parseTemplateString(value, environmentVariables)
+      } else {
+        url = value
+      }
+      try {
+        url = new URL(url)
+        this.url = url.origin
+        this.path = url.pathname
+      } catch (error) {
+        console.log(error)
+        let uriRegex = value.match(/^((http[s]?:\/\/)?(<<[^\/]+>>)?[^\/]*|)(\/?.*)$/)
+        this.url = uriRegex[1]
+        this.path = uriRegex[4]
+      }
+    },
     async sendRequest() {
       this.$toast.clear()
 
       // Set url path
-      this.setUri()
+      this.setUrlPath()
 
       if (!this.isValidURL) {
         this.$toast.error(this.$t("url_invalid_format"), {
@@ -2568,25 +2066,6 @@ export default {
         }
       }
     },
-    observeRequestButton() {
-      const requestElement = this.$refs.request.$el
-      const sendButtonElement = this.$refs.sendButton
-      const observer = new IntersectionObserver(
-        (entries, observer) => {
-          entries.forEach(({ isIntersecting }) => {
-            if (isIntersecting) sendButtonElement.classList.remove("show")
-            // The button should float when it is no longer visible on screen.
-            // This is done by adding the show class to the button.
-            else sendButtonElement.classList.add("show")
-          })
-        },
-        {
-          rootMargin: "0px",
-          threshold: [0],
-        }
-      )
-      observer.observe(requestElement)
-    },
     handleImport() {
       const { value: text } = document.getElementById("import-text")
       try {
@@ -2863,30 +2342,6 @@ export default {
     },
   },
   async mounted() {
-    this.spec = this.$store.state.openapi.specs
-      .filter(spec => spec["x-internal-id"] == this.$route.params.id)
-      .pop()
-    this.$nextTick(() => this.observeRequestButton())
-    this._keyListener = function(e) {
-      if (e.key === "g" && (e.ctrlKey || e.metaKey)) {
-        e.preventDefault()
-        this.sendRequest()
-      } else if (e.key === "s" && (e.ctrlKey || e.metaKey)) {
-        e.preventDefault()
-        this.saveRequest()
-      } else if (e.key === "k" && (e.ctrlKey || e.metaKey)) {
-        e.preventDefault()
-        this.copyRequest()
-      } else if (e.key === "j" && (e.ctrlKey || e.metaKey)) {
-        e.preventDefault()
-        this.$refs.clearAll.click()
-      } else if (e.key === "Escape") {
-        e.preventDefault()
-        this.showModal = this.showTokenList = this.showTokenRequestList = this.showRequestModal = false
-        this.isHidden = true
-      }
-    }
-    document.addEventListener("keydown", this._keyListener.bind(this))
     this.$data._uri = this.path
     this.copyResponseObject(this.currentResponse)
     await this.oauthRedirectReq()

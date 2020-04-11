@@ -116,7 +116,6 @@ export const actions = {
   },
 
   async getFork(state, specid) {
-    console.log("specid", specid)
     return await this.$api.getFork(specid).then(
       res => res.data.specid,
       err => console.error("[APIERROR]", err)
@@ -125,7 +124,10 @@ export const actions = {
 
   async forkSpec({ dispatch }, specid) {
     return await this.$api.forkSpec(specid).then(
-      () => dispatch("fetchSpec", specid),
+      async res => {
+        await dispatch("fetchSpec", res.data["x-internal-id"])
+        return res
+      },
       err => console.error("[APIERROR]", err)
     )
   },

@@ -2,7 +2,9 @@
   <div>
     <div class="page page-fork">
       <img src="~static/images/fork.png" :alt="$t('fork')" class="fork_banner" />
-      <h2>Fork</h2>
+      <h2>
+        Fork : &nbsp; <span v-if="spec">{{ spec.info.title }}</span>
+      </h2>
       <div v-if="spec">
         <pre>Spec id (rev: {{ spec.info.version }}) <br /> <u>{{ $route.params.id }}</u></pre>
         <p v-if="!forkedSpecidLink">

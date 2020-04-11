@@ -6,6 +6,7 @@
       </div>
       <div v-if="onSpecPage">
         <button @click="deleteSpec">Delete spec</button>
+        <button v-if="selectedSpec" @click="showShareModalWindow()">{{ $t("share") }}</button>
       </div>
     </div>
     <div class="content">
@@ -29,6 +30,47 @@
           <nuxt-child />
         </pw-section>
       </div>
+      <pw-modal v-if="showShareModal && selectedSpec" @close="showShareModal = false">
+        <div slot="header">
+          <ul>
+            <li>
+              <div class="flex-wrap">
+                <h3 class="title">{{ $t("share") }}</h3>
+                <div>
+                  <button class="icon" @click="showShareModal = false">
+                    <i class="material-icons">close</i>
+                  </button>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+        <div slot="body">
+          <ul>
+            <li>
+              <input
+                id="share-text"
+                ref="sharespectext"
+                :value="`${basepath}/browse/${selectedSpec['x-internal-id']}`"
+                :placeholder="$t('enter_curl')"
+              />
+            </li>
+          </ul>
+        </div>
+        <div slot="footer">
+          <div class="flex-wrap">
+            <span></span>
+            <span>
+              <button class="icon" @click="showShareModal = false">
+                {{ $t("cancel") }}
+              </button>
+              <button class="icon primary" @click="copyShareUrl">
+                {{ $t("copy") }}
+              </button>
+            </span>
+          </div>
+        </div>
+      </pw-modal>
     </div>
   </div>
 </template>
@@ -84,16 +126,21 @@ export default {
   },
   components: {
     "pw-section": section,
+    "pw-modal": () => import("../components/ui/modal"),
   },
   computed: {
     specs() {
       return this.$store.state.openapi.specs
+    },
+    basepath() {
+      return window.location.protocol.concat("//") + window.location.host
     },
   },
   data() {
     return {
       selectedSpec: undefined,
       onSpecPage: false,
+      showShareModal: false,
     }
   },
   //   computed: {
@@ -105,6 +152,13 @@ export default {
     resetRequestResponse() {
       this.$store.dispatch("design/reset")
     },
+    copyShareUrl() {
+      this.$toast.success(this.$t("copied_to_clipboard"), {
+        icon: "done",
+      })
+      this.$refs.sharespectext.select()
+      document.execCommand("copy")
+    },
     deleteSpec() {
       if (confirm("Are you sure?")) {
         this.$store.dispatch("openapi/deleteSpec", this.selectedSpec["x-internal-id"]).then(
@@ -112,6 +166,9 @@ export default {
           err => console.error(err)
         )
       }
+    },
+    showShareModalWindow() {
+      this.showShareModal = true
     },
     selectSpec() {
       if (this.selectedSpec)

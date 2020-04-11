@@ -9,7 +9,7 @@
           <span>{{ request.operation.summary }}</span>
         </button>
       </div>
-      <v-popover>
+      <v-popover v-if="readonly === false">
         <button class="tooltip-target icon" v-tooltip="$t('more')">
           <i class="material-icons">more_vert</i>
         </button>
@@ -39,7 +39,7 @@
                 <span>{{ response.code }} - {{ response.contentType }}</span>
               </button>
             </div>
-            <v-popover>
+            <v-popover v-if="readonly === false">
               <button class="tooltip-target icon" v-tooltip="$t('more')">
                 <i class="material-icons">more_vert</i>
               </button>
@@ -95,6 +95,10 @@ export default {
   props: {
     request: Object,
     specid: String,
+    readonly: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {

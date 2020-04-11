@@ -6,7 +6,7 @@ TODO:
 <template>
   <pw-section class="yellow" :label="$t('requests')" ref="requests">
     <div class="flex-wrap">
-      <div>
+      <div v-if="readonly === false">
         <button class="icon" @click="resetRequestRepsonse">
           <i class="material-icons">add</i>
           <span>{{ $t("new") }}</span>
@@ -24,7 +24,7 @@ TODO:
     >
       <ul>
         <li v-for="(request, index) in requests" :key="index">
-          <request :request="request" :specid="specid" />
+          <request :request="request" :specid="specid" :readonly="readonly" />
         </li>
         <li v-if="requests.length === 0">
           <label>Requests are empty</label>
@@ -51,6 +51,10 @@ import { fb } from "../../functions/fb"
 export default {
   props: {
     specid: String,
+    readonly: {
+      type: Boolean,
+      default: false,
+    },
   },
   components: {
     "pw-section": () => import("../layout/section"),
@@ -64,6 +68,9 @@ export default {
   },
   computed: {
     spec() {
+      if (this.$props.readonly) {
+        return this.$store.state.browse.spec
+      }
       return this.$store.state.openapi.specs
         .filter(spec => spec["x-internal-id"] == this.specid)
         .pop()
