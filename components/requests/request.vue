@@ -120,7 +120,7 @@ export default {
           resps.push({
             code,
             contentType,
-            description: responses[code]["content"][contentType].description,
+            description: responses[code]["description"],
             example: responses[code]["content"][contentType].example,
           })
         }

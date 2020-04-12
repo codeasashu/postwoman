@@ -948,12 +948,6 @@
                     {{ previewEnabled ? $t("hide_preview") : $t("preview_html") }}
                   </span>
                 </button>
-                <button :disabled="!response.status || !responseBodyType" @click="saveResponse">
-                  {{ $t("save") }}
-                  <span>
-                    <i class="material-icons">code</i>
-                  </span>
-                </button>
               </div>
             </li>
           </ul>
@@ -969,29 +963,6 @@
 
             <tab :id="'env'" :icon="'style'" :label="$t('environments')">
               <environments @use-environment="useSelectedEnvironment($event)" />
-            </tab>
-
-            <tab :id="'collections'" :icon="'folder_special'" :label="$t('collections')">
-              <collections />
-            </tab>
-
-            <tab :id="'notes'" :icon="'note'" :label="$t('notes')">
-              <pw-section class="pink" :label="$t('notes')" ref="sync">
-                <div v-if="isLoggedIn">
-                  <inputform />
-                  <notes />
-                </div>
-                <div v-else>
-                  <ul>
-                    <li>
-                      <label>{{ $t("login_first") }}</label>
-                      <p>
-                        <login />
-                      </p>
-                    </li>
-                  </ul>
-                </div>
-              </pw-section>
             </tab>
           </tabs>
         </section>
