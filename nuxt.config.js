@@ -16,13 +16,13 @@ export const routerBase =
     ? {
         router: {
           base: `/${repoName}/`,
-          middleware: ["auth"],
+          middleware: ["auth", "loggedIn"],
         },
       }
     : {
         router: {
           base: "/",
-          middleware: ["auth"],
+          middleware: ["auth", "loggedIn"],
         },
       }
 export default {

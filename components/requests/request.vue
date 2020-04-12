@@ -21,6 +21,12 @@
             </button>
           </div>
           <div>
+            <button class="icon" @click="$store.commit('design/resetResponses')" v-close-popover>
+              <i class="material-icons">add</i>
+              <span>{{ $t("add_response") }}</span>
+            </button>
+          </div>
+          <div>
             <button class="icon" @click="removeOperation(request.operation)" v-close-popover>
               <i class="material-icons">delete</i>
               <span>{{ $t("delete") }}</span>
@@ -33,7 +39,7 @@
       <ul>
         <li v-for="(response, index) in responses" :key="index">
           <div class="flex-wrap">
-            <div>
+            <div v-tooltip="response.description">
               <button class="icon" @click="selectResponse(request.operation, response.code)">
                 <i class="material-icons">insert_drive_file</i>
                 <span>{{ response.code }} - {{ response.contentType }}</span>
@@ -114,6 +120,7 @@ export default {
           resps.push({
             code,
             contentType,
+            description: responses[code]["content"][contentType].description,
             example: responses[code]["content"][contentType].example,
           })
         }
