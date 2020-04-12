@@ -7,6 +7,9 @@
       <div v-if="onSpecPage">
         <button @click="deleteSpec">Delete spec</button>
         <button v-if="selectedSpec" @click="showShareModalWindow()">{{ $t("share") }}</button>
+        <a class="button" :href="docurl" v-if="selectedSpec" target="_blank">{{
+          $t("documentation")
+        }}</a>
       </div>
     </div>
     <div class="content">
@@ -134,6 +137,9 @@ export default {
     },
     basepath() {
       return window.location.protocol.concat("//") + window.location.host
+    },
+    docurl() {
+      return `${this.$axios.defaults.baseURL}/docs/${this.selectedSpec["x-internal-id"]}`
     },
   },
   data() {
