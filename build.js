@@ -41,6 +41,7 @@ try {
     // Get the current version hash as the short hash from Git.
     version.hash = runCommand("git", ["rev-parse", "--short", "HEAD"])
     // Get the 'variant' name as the branch, if it's not master.
+	  /*
     version.variant =
       process.env.TRAVIS_BRANCH ||
       runCommand("git", ["branch"])
@@ -48,7 +49,7 @@ try {
         .split(" ")[0] + (IS_DEV_MODE ? " - DEV MODE" : "")
     if (["", "master"].includes(version.variant)) {
       delete version.variant
-    }
+    }*/
 
     // Write version data into a file
     fs.writeFileSync(`${PW_BUILD_DATA_DIR}/version.json`, JSON.stringify(version))
