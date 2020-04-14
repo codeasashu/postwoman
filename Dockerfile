@@ -6,6 +6,12 @@ LABEL maintainer="Liyas Thomas (liyascthomas@gmail.com)"
 RUN apk add --update --no-cache \
   git
 
+ARG API_URL $API_URL
+ARG GOOGLE_CLIENT_ID $GOOGLE_CLIENT_ID
+
+ENV API_URL $API_URL
+ENV GOOGLE_CLIENTID $GOOGLE_CLIENT_ID
+
 WORKDIR /app
 
 COPY package*.json ./
