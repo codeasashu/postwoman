@@ -1,7 +1,14 @@
-const API_BASE = "http://localhost:8080"
+export default ({ $axios, app, env }, inject) => {
+  $axios.defaults.baseURL = env.apiUrl || process.env.apiUrl
 
-export default ({ $axios }, inject) => {
-  $axios.defaults.baseURL = API_BASE
+  //Auto logout
+  $axios.onError(error => {
+    const code = parseInt(error.response && error.response.status)
+    if ([401, 403].includes(code)) {
+      app.$auth.logout()
+    }
+    return Promise.reject(error)
+  })
 
   inject("api", new SpecApi($axios))
   inject("authapi", new AuthApi($axios))
@@ -37,11 +44,12 @@ class AuthApi extends Api {
 
   constructor($axios) {
     super($axios)
+    this.superBaseUrl = $axios.defaults.baseURL
     this.client.defaults.baseURL = $axios.defaults.baseURL + this.API_PREFIX
   }
 
   get googleClient() {
-    let gclient = this.client.create({ baseURL: API_BASE + "/google_auth" })
+    let gclient = this.client.create({ baseURL: this.superBaseUrl + "/google_auth" })
     delete gclient.defaults.headers.common["Authorization"]
     return gclient
   }

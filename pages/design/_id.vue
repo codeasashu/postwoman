@@ -1325,13 +1325,11 @@ export default {
     tab: () => import("../../components/ui/tab"),
     saveRequestOpenapi: () => import("../../components/openapi/saveRequest"),
   },
-  validate({ params, store }) {
-    let spec = store.state.openapi.specs.filter(spec => spec["x-internal-id"] == params.id).pop()
-    return !!spec || store.dispatch("openapi/fetchSpec", params.id)
+  props: {
+    spec: Object,
   },
   data() {
     return {
-      spec: undefined,
       _uri: undefined,
       showModal: false,
       showOasModal: false,
@@ -1686,11 +1684,9 @@ export default {
     },
     rawInput: {
       get() {
-        console.log("I am called1", this.$store.state.design.request.rawInput)
         return this.$store.state.design.request.rawInput
       },
       set(value) {
-        console.log("I am called2", value)
         this.$store.commit("design/setState", { value, attribute: "rawInput" })
       },
     },
@@ -2096,7 +2092,7 @@ export default {
 
       //Need a valid openapi spec
       if (!this.spec) {
-        this.$toast.error(this.$t("  invalid_spec"), {
+        this.$toast.error(this.$t("invalid_spec"), {
           icon: "error",
         })
         return
@@ -2834,9 +2830,6 @@ export default {
     },
   },
   async mounted() {
-    this.spec = this.$store.state.openapi.specs
-      .filter(spec => spec["x-internal-id"] == this.$route.params.id)
-      .pop()
     this.$nextTick(() => this.observeRequestButton())
     this._keyListener = function(e) {
       if (e.key === "g" && (e.ctrlKey || e.metaKey)) {

@@ -90,11 +90,6 @@ export default {
       return reqs
     },
   },
-  watch: {
-    spec(val) {
-      console.log("spec changed!!", val)
-    },
-  },
   async mounted() {
     this._keyListener = function(e) {
       if (e.key === "Escape") {

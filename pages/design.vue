@@ -20,7 +20,7 @@
               <label for="selectSpec">{{ $t("select_spec") }}</label>
               <div>
                 <select type="text" id="selectSpec" v-model="selectedSpec" @change="selectSpec">
-                  <option></option>
+                  <option :value="undefined"></option>
                   <option v-for="spec in specs" :key="spec['x-internal-id']" :value="spec">
                     {{ spec.info.title }}
                   </option>
@@ -30,7 +30,7 @@
           </ul>
         </pw-section>
         <pw-section class="blue">
-          <nuxt-child />
+          <nuxt-child :spec="selectedSpec" />
         </pw-section>
       </div>
       <pw-modal v-if="showShareModal && selectedSpec" @close="showShareModal = false">

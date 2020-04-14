@@ -16,13 +16,13 @@ export const routerBase =
     ? {
         router: {
           base: `/${repoName}/`,
-          middleware: ["auth", "loggedIn"],
+          middleware: ["auth"],
         },
       }
     : {
         router: {
           base: "/",
-          middleware: ["auth", "loggedIn"],
+          middleware: ["auth"],
         },
       }
 export default {
@@ -32,6 +32,10 @@ export default {
    */
   server: {
     host: "0.0.0.0", // default: localhost
+    port: process.env.PORT || 3000,
+  },
+  env: {
+    apiUrl: process.env.API_URL || "http://localhost/api",
   },
   render: {
     bundleRenderer: {
@@ -44,7 +48,7 @@ export default {
     strategies: {
       google: {
         //redirect_uri: '/login',
-        client_id: "406186701865-s61e6rf1tjn8tck25olhfmp28hgm0n1e.apps.googleusercontent.com",
+        client_id: process.env.GOOGLE_CLIENT_ID,
       },
       local: {
         endpoints: {
@@ -258,15 +262,6 @@ export default {
     ["@nuxtjs/axios"],
     ["@nuxtjs/auth"],
     ["@nuxtjs/toast"],
-    ["@nuxtjs/google-analytics"],
-    ["@nuxtjs/sitemap"],
-    [
-      "@nuxtjs/google-tag-manager",
-      {
-        id: process.env.GTM_ID || "GTM-MXWD8NQ",
-      },
-    ],
-    ["@nuxtjs/robots"],
     ["nuxt-i18n"],
   ],
   pwa: {
@@ -303,18 +298,6 @@ export default {
     duration: 3000,
     theme: "bubble",
     keepOnHover: true,
-  },
-  googleAnalytics: {
-    id: process.env.GA_ID || "UA-61422507-2",
-  },
-  sitemap: {
-    hostname: "https://postwoman.io",
-  },
-  robots: {
-    UserAgent: "*",
-    Disallow: "",
-    Allow: "/",
-    Sitemap: "https://postwoman.io/sitemap.xml",
   },
   i18n: {
     locales: [
