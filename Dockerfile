@@ -6,12 +6,6 @@ LABEL maintainer="Liyas Thomas (liyascthomas@gmail.com)"
 RUN apk add --update --no-cache \
   git
 
-ARG API_URL
-ARG GOOGLE_CLIENT_ID
-
-ENV API_URL $API_URL
-ENV GOOGLE_CLIENT_ID $GOOGLE_CLIENT_ID
-
 WORKDIR /app
 
 COPY package*.json ./
@@ -19,6 +13,14 @@ COPY package*.json ./
 RUN npm install
 
 COPY . .
+
+ARG API_URL
+ARG GOOGLE_CLIENT_ID
+ARG NODE_ENV=dev
+
+ENV API_URL $API_URL
+ENV GOOGLE_CLIENT_ID $GOOGLE_CLIENT_ID
+ENV NODE_ENV $NODE_ENV
 
 RUN npm run build
 
