@@ -1,17 +1,8 @@
 export default ({ $axios, app, env }, inject) => {
   $axios.defaults.baseURL = env.apiUrl || process.env.apiUrl
 
-  //Auto logout
-  $axios.onError(error => {
-    const code = parseInt(error.response && error.response.status)
-    if ([401, 403].includes(code)) {
-      app.$auth.logout()
-    }
-    return Promise.reject(error)
-  })
-
   inject("api", new SpecApi($axios))
-  inject("authapi", new AuthApi($axios))
+  inject("authapi", new AuthApi($axios, app.$auth))
 }
 
 class Api {
@@ -20,11 +11,6 @@ class Api {
   constructor($axios) {
     this.client = $axios.create({
       baseURL: `${$axios.defaults.baseURL}${this.API_PREFIX}`,
-      // headers: {
-      //   common: {
-      //     'Custom-pwx': 'cool'
-      //   }
-      // }
     })
   }
 
@@ -64,6 +50,24 @@ class AuthApi extends Api {
 }
 
 class SpecApi extends Api {
+  constructor($axios, $auth) {
+    super($axios)
+
+    //Auto logout
+    this.client.onError(error => {
+      console.log("got error", error)
+      const code = parseInt(error.response && error.response.status)
+      if ([401, 403].includes(code)) {
+        console.log("hawww", error)
+        $auth.logout().then(
+          data => console.log("after logout", data),
+          err => console.log("err", err)
+        )
+      }
+      return Promise.reject(error)
+    })
+  }
+
   // Spec related APIs
   addSpec = async data => await this.client.post("spec/", data)
   getSpec = async specid => await this.client.get(`spec/${specid}?format=json`)

@@ -118,7 +118,10 @@ export default {
       return this.$store.state.openapi.response
     },
     responseType() {
-      return (this.response.headers["content-type"] || "").split(";")[0].toLowerCase()
+      if (this.response.headers && this.response.headers.length) {
+        return (this.response.headers["content-type"] || "").split(";")[0].toLowerCase()
+      }
+      return undefined
     },
     responseBodyType() {
       if (this.response) {

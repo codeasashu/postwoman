@@ -1442,14 +1442,13 @@ export default {
           path = path + queryString
         }
         this.path = path
-        this.$data._uri = path
+        this.$data._uri = decodeURIComponent(path)
       },
       deep: true,
     },
     selectedRequest(newValue, oldValue) {
       // @TODO: Convert all variables to single request variable
       if (!newValue) return
-      console.log("j bhi", newValue, oldValue)
       //this.uri = newValue.url + newValue.path
       this.url = newValue.url
       this.path = newValue.path
@@ -2314,7 +2313,6 @@ export default {
     getQueryStringFromPath() {
       let queryString
       const pathParsed = url.parse(this.basePath + this.$data._uri || this.path)
-      console.log("q", pathParsed, this.basePath + this.$data._uri)
       return (queryString = pathParsed.query ? pathParsed.query : "")
     },
     queryStringToArray(queryString) {
@@ -2851,7 +2849,7 @@ export default {
       }
     }
     document.addEventListener("keydown", this._keyListener.bind(this))
-    this.$data._uri = this.path
+    this.$data._uri = decodeURIComponent(this.path)
     this.copyResponseObject(this.currentResponse)
     await this.oauthRedirectReq()
   },
