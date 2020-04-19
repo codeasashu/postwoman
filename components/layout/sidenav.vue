@@ -22,6 +22,14 @@
         <i class="material-icons">brush</i>
       </nuxt-link>
       <nuxt-link
+        :to="localePath('mock')"
+        :class="linkActive('/mock')"
+        v-tooltip.right="$t('mock')"
+        :aria-label="$t('mock')"
+      >
+        <i class="material-icons">sun</i>
+      </nuxt-link>
+      <nuxt-link
         :to="localePath('realtime')"
         :class="linkActive('/realtime')"
         v-tooltip.right="$t('realtime')"

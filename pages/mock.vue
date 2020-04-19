@@ -2,14 +2,13 @@
   <div class="page">
     <div class="content">
       <div v-if="onSpecPage">
-        <nuxt-link class="button" to="/design">Back</nuxt-link>
+        <nuxt-link class="button" to="/mock">Back</nuxt-link>
       </div>
       <div v-if="onSpecPage && selectedSpec">
-        <button @click="deleteSpec">Delete spec</button>
-        <button @click="showShareModalWindow()">{{ $t("share") }}</button>
-        <a class="button" :href="docurl" target="_blank">{{ $t("documentation") }}</a>
-        <nuxt-link class="button" :to="`/mock/${selectedSpec['x-internal-id']}`">
-          {{ $t("mock") }}
+        <button @click="stopMock">Stop Mock</button>
+        <button @click="restartMock">Restart Mock</button>
+        <nuxt-link class="button" :to="`/design/${selectedSpec['x-internal-id']}`">
+          {{ $t("design") }}
         </nuxt-link>
       </div>
     </div>
@@ -30,7 +29,7 @@
             </li>
           </ul>
         </pw-section>
-        <pw-section class="blue">
+        <pw-section class="blue" v-if="selectedSpec">
           <nuxt-child :spec="selectedSpec" />
         </pw-section>
       </div>
@@ -107,7 +106,8 @@ export default {
     let onSpecPage = false
     let specs = store.state.openapi.specs
     let spec = undefined
-    if (params.hasOwnProperty("id")) {
+    if (params.hasOwnProperty("id") && typeof params.id !== "undefined") {
+      await store.dispatch("mock/getMock", params.id)
       onSpecPage = true
       spec = specs.filter(_spec => _spec["x-internal-id"] == params.id).pop()
     }
@@ -116,9 +116,9 @@ export default {
   },
   watch: {
     "$route.path": function(val) {
-      this.onSpecPage = /\/design\/(.{1,})+/g.test(val)
+      this.onSpecPage = /\/mock\/(.{1,})+/g.test(val)
 
-      if (this.$route.params.hasOwnProperty("id")) {
+      if (this.$route.params.hasOwnProperty("id") && typeof this.$route.params.id !== "undefined") {
         this.selectedSpec = this.specs
           .filter(_spec => _spec["x-internal-id"] == this.$route.params.id)
           .pop()
@@ -157,7 +157,7 @@ export default {
   //   },
   methods: {
     resetRequestResponse() {
-      this.$store.dispatch("design/reset")
+      this.$store.commit("resetRequest")
     },
     copyShareUrl() {
       this.$toast.success(this.$t("copied_to_clipboard"), {
@@ -169,7 +169,7 @@ export default {
     deleteSpec() {
       if (confirm("Are you sure?")) {
         this.$store.dispatch("openapi/deleteSpec", this.selectedSpec["x-internal-id"]).then(
-          () => this.$router.replace("/design/"),
+          () => this.$router.replace("/mock/"),
           err => console.error(err)
         )
       }
@@ -177,13 +177,21 @@ export default {
     showShareModalWindow() {
       this.showShareModal = true
     },
-    selectSpec() {
+    stopMock() {
+      this.$store
+        .dispatch("mock/stop", this.selectedSpec["x-internal-id"])
+        .then(() => this.$router.replace("/mock/"))
+    },
+    restartMock() {
+      this.$store
+        .dispatch("mock/restart", this.selectedSpec["x-internal-id"])
+        .then(() => window.location.reload())
+    },
+    async selectSpec() {
       if (this.selectedSpec)
-        this.$router.push({
-          path: `/design/${this.selectedSpec["x-internal-id"]}`,
-        })
-      else if (this.$route.path != "/design/") {
-        this.$router.replace("/design/")
+        this.$router.push({ path: `/mock/${this.selectedSpec["x-internal-id"]}` })
+      else if (this.$route.path != "/mock/") {
+        this.$router.replace("/mock/")
       }
     },
   },

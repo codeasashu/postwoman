@@ -1,8 +1,8 @@
-export default ({ $axios, app, env }, inject) => {
+export default ({ $axios, $auth, env }, inject) => {
   $axios.defaults.baseURL = env.apiUrl || process.env.apiUrl
 
-  inject("api", new SpecApi($axios))
-  inject("authapi", new AuthApi($axios, app.$auth))
+  inject("api", new SpecApi($axios, $auth))
+  inject("authapi", new AuthApi($axios))
 }
 
 class Api {
@@ -53,19 +53,35 @@ class SpecApi extends Api {
   constructor($axios, $auth) {
     super($axios)
 
+    this.auth = $auth
     //Auto logout
     this.client.onError(error => {
-      console.log("got error", error)
       const code = parseInt(error.response && error.response.status)
       if ([401, 403].includes(code)) {
-        console.log("hawww", error)
-        $auth.logout().then(
-          data => console.log("after logout", data),
-          err => console.log("err", err)
-        )
+        this.auth.logout()
       }
       return Promise.reject(error)
     })
+  }
+
+  timeout = ms => new Promise(resolve => setTimeout(resolve, ms))
+
+  retry(cb) {
+    let retryClient = this.client.create()
+    retryClient.interceptors.response.use(
+      res => {
+        if (cb(res) === true) {
+          //Rety after 5 second
+          console.log("retrying....", res.config)
+          return this.timeout(5000).then(() => retryClient.request(res.config))
+        }
+        return res
+      },
+      error => Promise.reject(error)
+    )
+    //this.client = retryClient
+    // return this
+    return retryClient
   }
 
   // Spec related APIs
@@ -86,4 +102,9 @@ class SpecApi extends Api {
   // Fork related APIs
   getFork = async specid => await this.client.get(`fork/${specid}`)
   forkSpec = async specid => await this.client.post(`fork/${specid}`)
+
+  // Mock APIs
+  getMock = async specid => await this.retry(res => !!res.data.taskid).get(`mock/${specid}`)
+  restartMock = async specid => await this.client.post(`mock/${specid}/restart`)
+  stopMock = async specid => await this.client.post(`mock/${specid}/stop`)
 }

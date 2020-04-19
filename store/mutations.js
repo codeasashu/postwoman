@@ -3,6 +3,32 @@ export default {
     request[attribute] = value
   },
 
+  setRequest(state, request) {
+    state.request = request
+  },
+
+  resetRequest(state, request) {
+    state.request = {
+      method: "GET",
+      uri: "",
+      url: "https://httpbin.org",
+      path: "/get",
+      label: "",
+      auth: "None",
+      httpUser: "",
+      httpPassword: "",
+      passwordFieldType: "password",
+      bearerToken: "",
+      headers: [],
+      params: [],
+      bodyParams: [],
+      rawParams: "",
+      rawInput: false,
+      requestType: "",
+      contentType: "",
+    }
+  },
+
   setGQLState({ gql }, { attribute, value }) {
     gql[attribute] = value
   },
