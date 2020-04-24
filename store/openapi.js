@@ -147,7 +147,10 @@ export const actions = {
   async forkSpec({ dispatch }, specid) {
     return await this.$api.forkSpec(specid).then(
       async res => {
-        await dispatch("fetchSpec", res.data["x-internal-id"])
+        await dispatch("fetchSpec", {
+          specid: res.data["x-internal-id"],
+          version: res.data.info.version,
+        })
         return res
       },
       err => console.error("[APIERROR]", err)
@@ -157,7 +160,7 @@ export const actions = {
   async addVersion({ dispatch }, { specid, version, from }) {
     return await this.$api.addVersion(specid, version, false, from).then(
       async res => {
-        await dispatch("fetchSpec", res.data["x-internal-id"])
+        await dispatch("fetchSpec", { specid: res.data["x-internal-id"], version })
         return res
       },
       err => console.error("[APIERROR]", err)

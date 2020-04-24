@@ -6,6 +6,13 @@
       <nuxt-link v-if="$route.params.id" :to="`/fork/${$route.params.id}`">
         <button>{{ $t("fork") }}</button>
       </nuxt-link>
+      <apiversion
+        :addButton="false"
+        :remButton="false"
+        :setDefaultButton="false"
+        :version="selectedMockVersion"
+        @change-version="changeMockVersion"
+      />
     </div>
     <div class="content">
       <div class="page-columns inner-left">
@@ -779,21 +786,22 @@
 </template>
 
 <script>
-import section from "../../components/layout/section"
+import section from "../../../components/layout/section"
 import url from "url"
 import querystring from "querystring"
-import { commonHeaders } from "../../functions/headers"
-import textareaAutoHeight from "../../directives/textareaAutoHeight"
-import parseCurlCommand from "../../assets/js/curlparser.js"
-import getEnvironmentVariablesFromScript from "../../functions/preRequest"
-import runTestScriptWithVariables from "../../functions/postwomanTesting"
-import parseTemplateString from "../../functions/templating"
-import AceEditor from "../../components/ui/ace-editor"
-import { tokenRequest, oauthRedirect } from "../../assets/js/oauth"
-import { sendNetworkRequest } from "../../functions/network"
-import { fb } from "../../functions/fb"
+import { commonHeaders } from "../../../functions/headers"
+import textareaAutoHeight from "../../../directives/textareaAutoHeight"
+import parseCurlCommand from "../../../assets/js/curlparser.js"
+import getEnvironmentVariablesFromScript from "../../../functions/preRequest"
+import runTestScriptWithVariables from "../../../functions/postwomanTesting"
+import parseTemplateString from "../../../functions/templating"
+import AceEditor from "../../../components/ui/ace-editor"
+import { tokenRequest, oauthRedirect } from "../../../assets/js/oauth"
+import { sendNetworkRequest } from "../../../functions/network"
+import { fb } from "../../../functions/fb"
 import { getEditorLangForMimeType } from "~/functions/editorutils"
 import { cloneDeep } from "lodash"
+import apiversion from "../../../components/openapi/version"
 const statusCategories = [
   {
     name: "informational",
@@ -849,30 +857,44 @@ export default {
   },
   components: {
     "pw-section": section,
-    "pw-toggle": () => import("../../components/ui/toggle"),
-    "pw-modal": () => import("../../components/ui/modal"),
-    autocomplete: () => import("../../components/ui/autocomplete"),
-    requests: () => import("../../components/requests"),
-    collections: () => import("../../components/collections"),
-    saveRequestAs: () => import("../../components/collections/saveRequestAs"),
+    "pw-toggle": () => import("../../../components/ui/toggle"),
+    "pw-modal": () => import("../../../components/ui/modal"),
+    autocomplete: () => import("../../../components/ui/autocomplete"),
+    requests: () => import("../../../components/requests"),
+    collections: () => import("../../../components/collections"),
+    saveRequestAs: () => import("../../../components/collections/saveRequestAs"),
     Editor: AceEditor,
-    environments: () => import("../../components/design/environments"),
-    inputform: () => import("../../components/firebase/inputform"),
-    notes: () => import("../../components/firebase/feeds"),
-    login: () => import("../../components/firebase/login"),
-    tabs: () => import("../../components/ui/tabs"),
-    tab: () => import("../../components/ui/tab"),
-    saveRequestOpenapi: () => import("../../components/openapi/saveRequest"),
+    environments: () => import("../../../components/design/environments"),
+    inputform: () => import("../../../components/firebase/inputform"),
+    notes: () => import("../../../components/firebase/feeds"),
+    login: () => import("../../../components/firebase/login"),
+    tabs: () => import("../../../components/ui/tabs"),
+    tab: () => import("../../../components/ui/tab"),
+    saveRequestOpenapi: () => import("../../../components/openapi/saveRequest"),
+    apiversion,
   },
   async asyncData({ params, app, store, $axios, $nuxt, error, redirect }) {
-    if (params.hasOwnProperty("id")) {
-      const { data } = await app.$api.getSpec(params.id)
-      store.commit("browse/setSpec", data)
-      console.log("specdata", data)
-      return { spec: data }
-    } else {
-      error({ message: "Spec not found", statusCode: 404 })
+    if (!params.id) error("Spec not found", 404)
+    await store.dispatch("openapi/fetchSpecs")
+    const spec = store.state.openapi.specs.filter(spec => spec["x-internal-id"] == params.id).pop()
+    if (!spec) {
+      return error({ statusCode: 404, message: "Spec not found" })
     }
+    const apiversion = params.apiversion || spec["info"]["version"]
+    if (
+      !!apiversion &&
+      apiversion != spec["info"]["version"] &&
+      spec["info"]["x-versions"] &&
+      spec["info"]["x-versions"].indexOf(apiversion) < 0
+    )
+      error("Version not found", 404)
+    await store.dispatch("openapi/fetchSpec", {
+      specid: spec["x-internal-id"],
+      version: apiversion,
+    })
+    const spec2 = store.state.openapi.specs.filter(spec => spec["x-internal-id"] == params.id).pop()
+    store.commit("browse/setSpec", spec2)
+    return { spec: spec2, selectedMockVersion: apiversion }
   },
   data() {
     return {
@@ -989,7 +1011,7 @@ export default {
           path = path + queryString
         }
         this.path = path
-        this.$data._uri = path
+        this.$data._uri = decodeURIComponent(path)
       },
       deep: true,
     },
@@ -1362,6 +1384,16 @@ export default {
     },
   },
   methods: {
+    async changeMockVersion(version) {
+      this.selectedMockVersion = version || this.spec.info.version
+      const { data } = await this.$store.dispatch("openapi/fetchSpec", {
+        specid: this.spec["x-internal-id"],
+        version,
+      })
+      this.$router.replace(`/browse/${data["x-internal-id"]}/${version}`)
+      this.$store.commit("browse/setSpec", data)
+      //this.spec = data
+    },
     getRequestCode(value) {
       let requestType = value || this.requestType
       if (requestType === "JavaScript XHR") {
@@ -2342,7 +2374,7 @@ export default {
     },
   },
   async mounted() {
-    this.$data._uri = this.path
+    this.$data._uri = decodeURIComponent(this.path)
     this.copyResponseObject(this.currentResponse)
     await this.oauthRedirectReq()
   },
