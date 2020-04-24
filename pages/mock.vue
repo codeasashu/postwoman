@@ -154,9 +154,7 @@ import apiversion from "../components/openapi/version"
 export default {
   async asyncData({ params, store, $axios, $nuxt, error }) {
     // Use cached
-    if (!store.state.openapi.specs.length) {
-      await store.dispatch("openapi/fetchSpecs")
-    }
+    await store.dispatch("openapi/fetchSpecs")
 
     let onSpecPage = false
     let specs = store.state.openapi.specs
@@ -164,10 +162,21 @@ export default {
     let mockRunning = false
 
     if (params.id) {
-      console.log("here")
       onSpecPage = true
       spec = specs.filter(_spec => _spec["x-internal-id"] == params.id).pop()
       if (!spec) error("Spec not found", 404)
+      console.log("xver", spec["info"]["x-versions"], params.apiversion)
+      if (
+        !!apiversion &&
+        apiversion != spec["info"]["version"] &&
+        spec["info"]["x-versions"] &&
+        spec["info"]["x-versions"].indexOf(params.apiversion) < 0
+      )
+        error("Version not found", 404)
+      await store.dispatch("openapi/fetchSpec", {
+        specid: spec["x-internal-id"],
+        version: params.apiversion,
+      })
       const mock = await store.dispatch("mock/getMockStatus", {
         specid: params.id,
         version: params.apiversion || spec.info.version,

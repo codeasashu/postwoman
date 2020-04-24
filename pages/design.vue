@@ -135,10 +135,12 @@ export default {
     if (params.hasOwnProperty("id")) {
       onSpecPage = true
       spec = specs.filter(_spec => _spec["x-internal-id"] == params.id).pop()
+      if (!spec) error("Spec not found", 404)
       if (
         !!apiversion &&
         apiversion != spec["info"]["version"] &&
-          spec["info"]["x-versions"] && spec["info"]["x-versions"].indexOf(apiversion) < 0
+        spec["info"]["x-versions"] &&
+        spec["info"]["x-versions"].indexOf(apiversion) < 0
       )
         error("Version not found", 404)
 

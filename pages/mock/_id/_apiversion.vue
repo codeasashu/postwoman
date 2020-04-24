@@ -172,7 +172,7 @@
               <li>
                 <label class="hide-on-small-screen" for="send">&nbsp;</label>
                 <button @click="sendRequest" id="send" ref="sendButton">
-                  {{ $t("save") }}
+                  {{ $t("send") }}
                   <span>
                     <i class="material-icons">send</i>
                   </span>
@@ -2773,7 +2773,7 @@ export default {
     },
   },
   async mounted() {
-    //this.$nextTick(() => this.observeRequestButton())
+    this.$nextTick(() => this.observeRequestButton())
     this._keyListener = function(e) {
       if (e.key === "g" && (e.ctrlKey || e.metaKey)) {
         e.preventDefault()
