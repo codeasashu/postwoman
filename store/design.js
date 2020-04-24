@@ -198,13 +198,14 @@ export const actions = {
     commit("resetResponses")
   },
 
-  async addRequest({ commit }, { specid, request, response }) {
+  async addRequest({ commit }, { specid, request, response, version }) {
     commit("addResponse", response)
     await this.$api
       .addRequest(specid, {
         title: request.label,
         request,
         response: parseResponseContentType(response),
+        version,
       })
       .then(
         res => {

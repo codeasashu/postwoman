@@ -164,6 +164,7 @@ export default {
         .dispatch("openapi/deleteResponse", {
           specid: this.specid,
           operationid: this.request.operation["x-op-id"],
+          version: this.$route.params.apiversion,
           data: { code: response.code, contentType: response.contentType },
         })
         .then(res => {
@@ -180,6 +181,7 @@ export default {
         .dispatch("openapi/deleteOperation", {
           specid: this.specid,
           operationid: operation["x-op-id"],
+          version: this.$route.params.apiversion,
         })
         .then(() =>
           this.$toast.success(this.$t("deleted"), {

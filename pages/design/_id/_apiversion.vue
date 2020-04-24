@@ -1,268 +1,732 @@
 <template>
-  <div class="page">
-    <div class="content" v-if="spec && mock">
-      <div class="page-columns inner-left" v-if="spec">
-        <pw-section class="blue" :label="$t('request')" ref="request">
-          <div class="blue">
-            <label for="label">{{ $t("label") }}</label>
-            <input
-              id="label"
-              name="label"
-              type="text"
-              v-model="label"
-              :placeholder="$t('required')"
-            />
-          </div>
-          <ul>
-            <div>
-              <li>
-                <label for="method">{{ $t("method") }}</label>
-                <span class="select-wrapper">
-                  <v-popover>
-                    <input
-                      id="method"
-                      class="method"
-                      v-if="!customMethod"
-                      v-model="method"
-                      readonly
-                    />
-                    <input v-else v-model="method" placeholder="CUSTOM" />
-                    <template slot="popover">
-                      <div>
-                        <button
-                          class="icon"
-                          @click="
-                            customMethod = false
-                            method = 'GET'
-                          "
-                          v-close-popover
-                        >
-                          GET
-                        </button>
-                      </div>
-                      <div>
-                        <button
-                          class="icon"
-                          @click="
-                            customMethod = false
-                            method = 'HEAD'
-                          "
-                          v-close-popover
-                        >
-                          HEAD
-                        </button>
-                      </div>
-                      <div>
-                        <button
-                          class="icon"
-                          @click="
-                            customMethod = false
-                            method = 'POST'
-                          "
-                          v-close-popover
-                        >
-                          POST
-                        </button>
-                      </div>
-                      <div>
-                        <button
-                          class="icon"
-                          @click="
-                            customMethod = false
-                            method = 'PUT'
-                          "
-                          v-close-popover
-                        >
-                          PUT
-                        </button>
-                      </div>
-                      <div>
-                        <button
-                          class="icon"
-                          @click="
-                            customMethod = false
-                            method = 'DELETE'
-                          "
-                          v-close-popover
-                        >
-                          DELETE
-                        </button>
-                      </div>
-                      <div>
-                        <button
-                          class="icon"
-                          @click="
-                            customMethod = false
-                            method = 'CONNECT'
-                          "
-                          v-close-popover
-                        >
-                          CONNECT
-                        </button>
-                      </div>
-                      <div>
-                        <button
-                          class="icon"
-                          @click="
-                            customMethod = false
-                            method = 'OPTIONS'
-                          "
-                          v-close-popover
-                        >
-                          OPTIONS
-                        </button>
-                      </div>
-                      <div>
-                        <button
-                          class="icon"
-                          @click="
-                            customMethod = false
-                            method = 'TRACE'
-                          "
-                          v-close-popover
-                        >
-                          TRACE
-                        </button>
-                      </div>
-                      <div>
-                        <button
-                          class="icon"
-                          @click="
-                            customMethod = false
-                            method = 'PATCH'
-                          "
-                          v-close-popover
-                        >
-                          PATCH
-                        </button>
-                      </div>
-                      <div>
-                        <button
-                          class="icon"
-                          @click="
-                            customMethod = true
-                            method = 'CUSTOM'
-                          "
-                          v-close-popover
-                        >
-                          CUSTOM
-                        </button>
-                      </div>
-                    </template>
-                  </v-popover>
-                </span>
-              </li>
-            </div>
+  <div class="content">
+    <div class="page-columns inner-left" v-if="spec">
+      <pw-section class="blue" :label="$t('request')" ref="request">
+        <div class="blue">
+          <label for="label">{{ $t("label") }}</label>
+          <input
+            id="label"
+            name="label"
+            type="text"
+            v-model="label"
+            :placeholder="$t('required')"
+          />
+        </div>
+        <ul>
+          <div>
             <li>
-              <label for="url">{{ $t("url") }}</label>
-              <small>{{ basePath }}</small>
-              <input
-                :class="{ error: !isValidURL }"
-                @keyup.enter="sendRequest()"
-                id="url"
-                name="url"
-                type="url"
-                @change="pathInputHandler()"
-                @blur="setUri"
-                v-model="$data._uri"
-                spellcheck="false"
-              />
+              <label for="method">{{ $t("method") }}</label>
+              <span class="select-wrapper">
+                <v-popover>
+                  <input
+                    id="method"
+                    class="method"
+                    v-if="!customMethod"
+                    v-model="method"
+                    readonly
+                  />
+                  <input v-else v-model="method" placeholder="CUSTOM" />
+                  <template slot="popover">
+                    <div>
+                      <button
+                        class="icon"
+                        @click="
+                          customMethod = false
+                          method = 'GET'
+                        "
+                        v-close-popover
+                      >
+                        GET
+                      </button>
+                    </div>
+                    <div>
+                      <button
+                        class="icon"
+                        @click="
+                          customMethod = false
+                          method = 'HEAD'
+                        "
+                        v-close-popover
+                      >
+                        HEAD
+                      </button>
+                    </div>
+                    <div>
+                      <button
+                        class="icon"
+                        @click="
+                          customMethod = false
+                          method = 'POST'
+                        "
+                        v-close-popover
+                      >
+                        POST
+                      </button>
+                    </div>
+                    <div>
+                      <button
+                        class="icon"
+                        @click="
+                          customMethod = false
+                          method = 'PUT'
+                        "
+                        v-close-popover
+                      >
+                        PUT
+                      </button>
+                    </div>
+                    <div>
+                      <button
+                        class="icon"
+                        @click="
+                          customMethod = false
+                          method = 'DELETE'
+                        "
+                        v-close-popover
+                      >
+                        DELETE
+                      </button>
+                    </div>
+                    <div>
+                      <button
+                        class="icon"
+                        @click="
+                          customMethod = false
+                          method = 'CONNECT'
+                        "
+                        v-close-popover
+                      >
+                        CONNECT
+                      </button>
+                    </div>
+                    <div>
+                      <button
+                        class="icon"
+                        @click="
+                          customMethod = false
+                          method = 'OPTIONS'
+                        "
+                        v-close-popover
+                      >
+                        OPTIONS
+                      </button>
+                    </div>
+                    <div>
+                      <button
+                        class="icon"
+                        @click="
+                          customMethod = false
+                          method = 'TRACE'
+                        "
+                        v-close-popover
+                      >
+                        TRACE
+                      </button>
+                    </div>
+                    <div>
+                      <button
+                        class="icon"
+                        @click="
+                          customMethod = false
+                          method = 'PATCH'
+                        "
+                        v-close-popover
+                      >
+                        PATCH
+                      </button>
+                    </div>
+                    <div>
+                      <button
+                        class="icon"
+                        @click="
+                          customMethod = true
+                          method = 'CUSTOM'
+                        "
+                        v-close-popover
+                      >
+                        CUSTOM
+                      </button>
+                    </div>
+                  </template>
+                </v-popover>
+              </span>
             </li>
-            <div>
+          </div>
+          <li>
+            <label for="url">{{ $t("url") }}</label>
+            <small>{{ basePath }}</small>
+            <input
+              :class="{ error: !isValidURL }"
+              @keyup.enter="sendRequest()"
+              id="url"
+              name="url"
+              type="url"
+              @change="pathInputHandler()"
+              @blur="setUri"
+              v-model="$data._uri"
+              spellcheck="false"
+            />
+          </li>
+          <div>
+            <li>
+              <label class="hide-on-small-screen" for="send">&nbsp;</label>
+              <button @click="sendRequest" id="send" ref="sendButton">
+                {{ $t("save") }}
+                <span>
+                  <i class="material-icons">send</i>
+                </span>
+              </button>
+            </li>
+          </div>
+        </ul>
+        <div class="blue" label="Request Body" v-if="['POST', 'PUT', 'PATCH'].includes(method)">
+          <ul>
+            <li>
+              <label for="contentType">{{ $t("content_type") }}</label>
+              <autocomplete :source="validContentTypes" :spellcheck="false" v-model="contentType"
+                >Content Type</autocomplete
+              >
+            </li>
+          </ul>
+          <ul>
+            <li>
+              <div class="flex-wrap">
+                <span>
+                  <pw-toggle :on="rawInput" @change="rawInput = $event">
+                    {{ $t("raw_input") }}
+                  </pw-toggle>
+                </span>
+                <div>
+                  <label for="attachment">
+                    <button
+                      class="icon"
+                      @click="$refs.attachment.click()"
+                      v-tooltip="
+                        files.length === 0 ? $t('upload_file') : filenames.replace('<br/>', '')
+                      "
+                    >
+                      <i class="material-icons">attach_file</i>
+                      <span>
+                        {{
+                          files.length === 0
+                            ? "No files"
+                            : files.length == 1
+                            ? "1 file"
+                            : files.length + " files"
+                        }}
+                      </span>
+                    </button>
+                  </label>
+                  <input
+                    ref="attachment"
+                    name="attachment"
+                    type="file"
+                    @change="uploadAttachment"
+                    multiple
+                  />
+                  <label for="payload">
+                    <button
+                      class="icon"
+                      @click="$refs.payload.click()"
+                      v-tooltip="$t('import_json')"
+                    >
+                      <i class="material-icons">post_add</i>
+                    </button>
+                  </label>
+                  <input ref="payload" name="payload" type="file" @change="uploadPayload" />
+                </div>
+              </div>
+            </li>
+          </ul>
+          <div v-if="!rawInput">
+            <ul>
               <li>
-                <label class="hide-on-small-screen" for="send">&nbsp;</label>
-                <button @click="sendRequest" id="send" ref="sendButton">
-                  {{ $t("save") }}
-                  <span>
-                    <i class="material-icons">send</i>
-                  </span>
+                <label for="reqParamList">{{ $t("parameter_list") }}</label>
+                <textarea
+                  id="reqParamList"
+                  readonly
+                  v-textarea-auto-height="rawRequestBody"
+                  v-model="rawRequestBody"
+                  :placeholder="$t('add_one_parameter')"
+                  rows="1"
+                ></textarea>
+              </li>
+            </ul>
+            <ul v-for="(param, index) in bodyParams" :key="index">
+              <li>
+                <input
+                  :placeholder="'key ' + (index + 1)"
+                  :name="'bparam' + index"
+                  :value="param.key"
+                  @change="
+                    $store.commit('design/setKeyBodyParams', {
+                      index,
+                      value: $event.target.value,
+                    })
+                  "
+                  @keyup.prevent="setRouteQueryState"
+                  autofocus
+                />
+              </li>
+              <li>
+                <input
+                  :placeholder="'value ' + (index + 1)"
+                  :id="'bvalue' + index"
+                  :name="'bvalue' + index"
+                  :value="param.value"
+                  @change="
+                    $store.commit('design/setValueBodyParams', {
+                      index,
+                      value: $event.target.value,
+                    })
+                  "
+                  @keyup.prevent="setRouteQueryState"
+                />
+              </li>
+              <div>
+                <li>
+                  <button
+                    class="icon"
+                    @click="removeRequestBodyParam(index)"
+                    v-tooltip.bottom="$t('delete')"
+                    id="delParam"
+                  >
+                    <i class="material-icons">delete</i>
+                  </button>
+                </li>
+              </div>
+            </ul>
+            <ul>
+              <li>
+                <button class="icon" @click="addRequestBodyParam" name="addrequest">
+                  <i class="material-icons">add</i>
+                  <span>{{ $t("add_new") }}</span>
                 </button>
               </li>
-            </div>
-          </ul>
-          <div class="blue" label="Request Body" v-if="['POST', 'PUT', 'PATCH'].includes(method)">
+            </ul>
+          </div>
+          <div v-else>
             <ul>
               <li>
-                <label for="contentType">{{ $t("content_type") }}</label>
-                <autocomplete :source="validContentTypes" :spellcheck="false" v-model="contentType"
-                  >Content Type</autocomplete
+                <label for="rawBody">{{ $t("raw_request_body") }}</label>
+                <Editor
+                  v-model="rawParams"
+                  :lang="rawInputEditorLang"
+                  :options="{
+                    maxLines: '16',
+                    minLines: '8',
+                    fontSize: '16px',
+                    autoScrollEditorIntoView: true,
+                    showPrintMargin: false,
+                    useWorker: false,
+                  }"
+                />
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="flex-wrap">
+          <span>
+            <button
+              class="icon"
+              id="show-modal"
+              @click="showModal = true"
+              v-tooltip.bottom="$t('import_curl')"
+            >
+              <i class="material-icons">import_export</i>
+            </button>
+            <button
+              class="icon"
+              id="code"
+              @click="isHidden = !isHidden"
+              :disabled="!isValidURL"
+              v-tooltip.bottom="{
+                content: isHidden ? $t('show_code') : $t('hide_code'),
+              }"
+            >
+              <i class="material-icons">code</i>
+            </button>
+            <button
+              class="icon"
+              id="preRequestScriptButton"
+              v-tooltip.bottom="{
+                content: !showPreRequestScript
+                  ? $t('show_prerequest_script')
+                  : $t('hide_prerequest_script'),
+              }"
+              @click="showPreRequestScript = !showPreRequestScript"
+            >
+              <i class="material-icons" :class="showPreRequestScript" v-if="!showPreRequestScript">
+                playlist_add
+              </i>
+              <i class="material-icons" :class="showPreRequestScript" v-else>
+                close
+              </i>
+            </button>
+            <button
+              class="icon"
+              id="preRequestScriptButto"
+              v-tooltip.bottom="{
+                content: !testsEnabled ? 'Enable Tests' : 'Disable Tests',
+              }"
+              @click="testsEnabled = !testsEnabled"
+            >
+              <i class="material-icons" :class="testsEnabled" v-if="!testsEnabled">
+                playlist_add_check
+              </i>
+              <i class="material-icons" :class="testsEnabled" v-else>close</i>
+            </button>
+          </span>
+          <span>
+            <button
+              class="icon"
+              @click="saveOpenapi"
+              :disabled="!isValidURL"
+              v-if="isLoggedIn"
+              v-tooltip.bottom="$t('openapi_spec_save')"
+            >
+              <i class="material-icons">folder</i>
+            </button>
+            <button
+              class="icon"
+              @click="copyRequest"
+              id="copyRequest"
+              ref="copyRequest"
+              :disabled="!isValidURL"
+              v-tooltip.bottom="$t('copy_request_link')"
+            >
+              <i v-if="navigatorShare" class="material-icons">share</i>
+              <i v-else class="material-icons">file_copy</i>
+            </button>
+            <button
+              class="icon"
+              @click="saveRequest"
+              id="saveRequest"
+              ref="saveRequest"
+              :disabled="!isValidURL"
+              v-tooltip.bottom="$t('save_to_collections')"
+            >
+              <i class="material-icons">save</i>
+            </button>
+            <button
+              class="icon"
+              @click="clearContent('', $event)"
+              v-tooltip.bottom="$t('clear_all')"
+              ref="clearAll"
+            >
+              <i class="material-icons">clear_all</i>
+            </button>
+          </span>
+        </div>
+      </pw-section>
+
+      <pw-section v-if="testsEnabled" class="orange" label="Tests" ref="postRequestTests">
+        <ul>
+          <li>
+            <div class="flex-wrap">
+              <label for="generatedCode">{{ $t("javascript_code") }}</label>
+              <div>
+                <a
+                  href="https://github.com/liyasthomas/postwoman/wiki/Post-Requests-Tests"
+                  target="_blank"
+                  rel="noopener"
                 >
-              </li>
-            </ul>
-            <ul>
-              <li>
-                <div class="flex-wrap">
-                  <span>
-                    <pw-toggle :on="rawInput" @change="rawInput = $event">
-                      {{ $t("raw_input") }}
-                    </pw-toggle>
-                  </span>
-                  <div>
-                    <label for="attachment">
-                      <button
-                        class="icon"
-                        @click="$refs.attachment.click()"
-                        v-tooltip="
-                          files.length === 0 ? $t('upload_file') : filenames.replace('<br/>', '')
-                        "
-                      >
-                        <i class="material-icons">attach_file</i>
-                        <span>
-                          {{
-                            files.length === 0
-                              ? "No files"
-                              : files.length == 1
-                              ? "1 file"
-                              : files.length + " files"
-                          }}
-                        </span>
-                      </button>
-                    </label>
-                    <input
-                      ref="attachment"
-                      name="attachment"
-                      type="file"
-                      @change="uploadAttachment"
-                      multiple
-                    />
-                    <label for="payload">
-                      <button
-                        class="icon"
-                        @click="$refs.payload.click()"
-                        v-tooltip="$t('import_json')"
-                      >
-                        <i class="material-icons">post_add</i>
-                      </button>
-                    </label>
-                    <input ref="payload" name="payload" type="file" @change="uploadPayload" />
-                  </div>
+                  <button class="icon" v-tooltip="$t('wiki')">
+                    <i class="material-icons">help</i>
+                  </button>
+                </a>
+              </div>
+            </div>
+            <Editor
+              v-model="testScript"
+              :lang="'javascript'"
+              :options="{
+                maxLines: '16',
+                minLines: '8',
+                fontSize: '16px',
+                autoScrollEditorIntoView: true,
+                showPrintMargin: false,
+                useWorker: false,
+              }"
+            />
+            <div v-if="testReports">
+              <div class="flex-wrap">
+                <label>Test Reports</label>
+                <div>
+                  <button
+                    class="icon"
+                    @click="clearContent('tests', $event)"
+                    v-tooltip.bottom="$t('clear')"
+                  >
+                    <i class="material-icons">clear_all</i>
+                  </button>
                 </div>
-              </li>
-            </ul>
-            <div v-if="!rawInput">
+              </div>
+              <div v-for="(testReport, index) in testReports" :key="index">
+                <div v-if="testReport.startBlock" class="info">
+                  <h4>{{ testReport.startBlock }}</h4>
+                </div>
+                <p v-else-if="testReport.result" class="flex-wrap info">
+                  <span :class="testReport.styles.class">
+                    <i class="material-icons">
+                      {{ testReport.styles.icon }}
+                    </i>
+                    <span>&nbsp; {{ testReport.result }}</span>
+                    <span v-if="testReport.message">
+                      <label>&nbsp; • &nbsp; {{ testReport.message }}</label>
+                    </span>
+                  </span>
+                </p>
+                <div v-else-if="testReport.endBlock"><hr /></div>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </pw-section>
+
+      <section id="options">
+        <tabs>
+          <tab :id="'authentication'" :label="$t('authentication')" :selected="true">
+            <pw-section class="cyan" :label="$t('authentication')" ref="authentication">
               <ul>
                 <li>
-                  <label for="reqParamList">{{ $t("parameter_list") }}</label>
+                  <div class="flex-wrap">
+                    <label for="auth">{{ $t("authentication") }}</label>
+                    <div>
+                      <button
+                        class="icon"
+                        @click="clearContent('auth', $event)"
+                        v-tooltip.bottom="$t('clear')"
+                      >
+                        <i class="material-icons">clear_all</i>
+                      </button>
+                    </div>
+                  </div>
+                  <span class="select-wrapper">
+                    <select id="auth" v-model="auth">
+                      <option>None</option>
+                      <option>Basic Auth</option>
+                      <option>Bearer Token</option>
+                      <option>OAuth 2.0</option>
+                    </select>
+                  </span>
+                </li>
+              </ul>
+              <ul v-if="auth === 'Basic Auth'">
+                <li>
+                  <input placeholder="User" name="http_basic_user" v-model="httpUser" />
+                </li>
+                <li>
+                  <input
+                    placeholder="Password"
+                    name="http_basic_passwd"
+                    :type="passwordFieldType"
+                    v-model="httpPassword"
+                  />
+                </li>
+                <div>
+                  <li>
+                    <button
+                      class="icon"
+                      id="switchVisibility"
+                      ref="switchVisibility"
+                      @click="switchVisibility"
+                    >
+                      <i class="material-icons" v-if="passwordFieldType === 'text'">visibility</i>
+                      <i class="material-icons" v-if="passwordFieldType !== 'text'"
+                        >visibility_off</i
+                      >
+                    </button>
+                  </li>
+                </div>
+              </ul>
+              <ul v-if="auth === 'Bearer Token' || auth === 'OAuth 2.0'">
+                <li>
+                  <div class="flex-wrap">
+                    <input placeholder="Token" name="bearer_token" v-model="bearerToken" />
+                    <button
+                      v-if="auth === 'OAuth 2.0'"
+                      class="icon"
+                      @click="showTokenList = !showTokenList"
+                      v-tooltip.bottom="$t('use_token')"
+                    >
+                      <i class="material-icons">open_in_new</i>
+                    </button>
+                    <button
+                      v-if="auth === 'OAuth 2.0'"
+                      class="icon"
+                      @click="showTokenRequest = !showTokenRequest"
+                      v-tooltip.bottom="$t('get_token')"
+                    >
+                      <i class="material-icons">vpn_key</i>
+                    </button>
+                  </div>
+                </li>
+              </ul>
+              <div class="flex-wrap">
+                <pw-toggle :on="!urlExcludes.auth" @change="setExclude('auth', !$event)">
+                  {{ $t("include_in_url") }}
+                </pw-toggle>
+              </div>
+            </pw-section>
+            <pw-section
+              v-if="showTokenRequest"
+              class="red"
+              label="Access Token Request"
+              ref="accessTokenRequest"
+            >
+              <ul>
+                <li>
+                  <div class="flex-wrap">
+                    <label for="token-name">{{ $t("token_name") }}</label>
+                    <div>
+                      <button
+                        class="icon"
+                        @click="showTokenRequestList = true"
+                        v-tooltip.bottom="$t('manage_token_req')"
+                      >
+                        <i class="material-icons">library_add</i>
+                      </button>
+                      <button
+                        class="icon"
+                        @click="clearContent('access_token', $event)"
+                        v-tooltip.bottom="$t('clear')"
+                      >
+                        <i class="material-icons">clear_all</i>
+                      </button>
+                      <button
+                        class="icon"
+                        @click="showTokenRequest = false"
+                        v-tooltip.bottom="$t('close')"
+                      >
+                        <i class="material-icons">close</i>
+                      </button>
+                    </div>
+                  </div>
+                  <input
+                    id="token-name"
+                    :placeholder="$t('optional')"
+                    name="token_name"
+                    v-model="accessTokenName"
+                    type="text"
+                  />
+                </li>
+              </ul>
+              <ul>
+                <li>
+                  <label for="oidc-discovery-url">
+                    {{ $t("oidc_discovery_url") }}
+                  </label>
+                  <input
+                    :disabled="this.authUrl !== '' || this.accessTokenUrl !== ''"
+                    id="oidc-discovery-url"
+                    name="oidc_discovery_url"
+                    type="url"
+                    v-model="oidcDiscoveryUrl"
+                    placeholder="https://example.com/.well-known/openid-configuration"
+                  />
+                </li>
+              </ul>
+              <ul>
+                <li>
+                  <label for="auth-url">{{ $t("auth_url") }}</label>
+                  <input
+                    :disabled="this.oidcDiscoveryUrl !== ''"
+                    id="auth-url"
+                    name="auth_url"
+                    type="url"
+                    v-model="authUrl"
+                    placeholder="https://example.com/login/oauth/authorize"
+                  />
+                </li>
+              </ul>
+              <ul>
+                <li>
+                  <label for="access-token-url">
+                    {{ $t("access_token_url") }}
+                  </label>
+                  <input
+                    :disabled="this.oidcDiscoveryUrl !== ''"
+                    id="access-token-url"
+                    name="access_token_url"
+                    type="url"
+                    v-model="accessTokenUrl"
+                    placeholder="https://example.com/login/oauth/access_token"
+                  />
+                </li>
+              </ul>
+              <ul>
+                <li>
+                  <label for="client-id">{{ $t("client_id") }}</label>
+                  <input
+                    id="client-id"
+                    name="client_id"
+                    type="text"
+                    v-model="clientId"
+                    placeholder="Client ID"
+                  />
+                </li>
+              </ul>
+              <ul>
+                <li>
+                  <label for="scope">{{ $t("scope") }}</label>
+                  <input
+                    id="scope"
+                    name="scope"
+                    type="text"
+                    v-model="scope"
+                    placeholder="e.g. read:org"
+                  />
+                </li>
+              </ul>
+              <ul>
+                <li>
+                  <button class="icon" @click="handleAccessTokenRequest">
+                    <i class="material-icons">vpn_key</i>
+                    <span>{{ $t("request_token") }}</span>
+                  </button>
+                </li>
+              </ul>
+            </pw-section>
+          </tab>
+
+          <tab :id="'headers'" :label="$t('headers')">
+            <pw-section class="orange" label="Headers" ref="headers">
+              <ul>
+                <li>
+                  <div class="flex-wrap">
+                    <label for="headerList">{{ $t("header_list") }}</label>
+                    <div>
+                      <button
+                        class="icon"
+                        @click="clearContent('headers', $event)"
+                        v-tooltip.bottom="$t('clear')"
+                      >
+                        <i class="material-icons">clear_all</i>
+                      </button>
+                    </div>
+                  </div>
                   <textarea
-                    id="reqParamList"
+                    id="headerList"
                     readonly
-                    v-textarea-auto-height="rawRequestBody"
-                    v-model="rawRequestBody"
-                    :placeholder="$t('add_one_parameter')"
+                    v-textarea-auto-height="headerString"
+                    v-model="headerString"
+                    :placeholder="$t('add_one_header')"
                     rows="1"
                   ></textarea>
                 </li>
               </ul>
-              <ul v-for="(param, index) in bodyParams" :key="index">
+              <ul v-for="(header, index) in headers" :key="index">
                 <li>
-                  <input
-                    :placeholder="'key ' + (index + 1)"
-                    :name="'bparam' + index"
-                    :value="param.key"
-                    @change="
-                      $store.commit('design/setKeyBodyParams', {
+                  <autocomplete
+                    :placeholder="$t('header_count', { count: index + 1 })"
+                    :source="commonHeaders"
+                    :spellcheck="false"
+                    :value="header.key"
+                    @input="
+                      $store.commit('design/setKeyHeader', {
                         index,
-                        value: $event.target.value,
+                        value: $event,
                       })
                     "
                     @keyup.prevent="setRouteQueryState"
@@ -271,12 +735,11 @@
                 </li>
                 <li>
                   <input
-                    :placeholder="'value ' + (index + 1)"
-                    :id="'bvalue' + index"
-                    :name="'bvalue' + index"
-                    :value="param.value"
+                    :placeholder="$t('value_count', { count: index + 1 })"
+                    :name="'value' + index"
+                    :value="header.value"
                     @change="
-                      $store.commit('design/setValueBodyParams', {
+                      $store.commit('design/setValueHeader', {
                         index,
                         value: $event.target.value,
                       })
@@ -288,9 +751,9 @@
                   <li>
                     <button
                       class="icon"
-                      @click="removeRequestBodyParam(index)"
+                      @click="removeRequestHeader(index)"
                       v-tooltip.bottom="$t('delete')"
-                      id="delParam"
+                      id="header"
                     >
                       <i class="material-icons">delete</i>
                     </button>
@@ -299,563 +762,95 @@
               </ul>
               <ul>
                 <li>
-                  <button class="icon" @click="addRequestBodyParam" name="addrequest">
+                  <button class="icon" @click="addRequestHeader">
                     <i class="material-icons">add</i>
                     <span>{{ $t("add_new") }}</span>
                   </button>
                 </li>
               </ul>
-            </div>
-            <div v-else>
+            </pw-section>
+          </tab>
+
+          <tab :id="'params'" :label="$t('parameters')">
+            <pw-section class="pink" label="Parameters" ref="parameters">
               <ul>
                 <li>
-                  <label for="rawBody">{{ $t("raw_request_body") }}</label>
-                  <Editor
-                    v-model="rawParams"
-                    :lang="rawInputEditorLang"
-                    :options="{
-                      maxLines: '16',
-                      minLines: '8',
-                      fontSize: '16px',
-                      autoScrollEditorIntoView: true,
-                      showPrintMargin: false,
-                      useWorker: false,
-                    }"
-                  />
+                  <div class="flex-wrap">
+                    <label for="paramList">{{ $t("parameter_list") }}</label>
+                    <div>
+                      <button
+                        class="icon"
+                        @click="clearContent('parameters', $event)"
+                        v-tooltip.bottom="$t('clear')"
+                      >
+                        <i class="material-icons">clear_all</i>
+                      </button>
+                    </div>
+                  </div>
+                  <textarea
+                    id="paramList"
+                    readonly
+                    v-textarea-auto-height="queryString"
+                    v-model="queryString"
+                    :placeholder="$t('add_one_parameter')"
+                    rows="1"
+                  ></textarea>
                 </li>
               </ul>
-            </div>
-          </div>
-          <div class="flex-wrap">
-            <span>
-              <button
-                class="icon"
-                id="show-modal"
-                @click="showModal = true"
-                v-tooltip.bottom="$t('import_curl')"
-              >
-                <i class="material-icons">import_export</i>
-              </button>
-              <button
-                class="icon"
-                id="code"
-                @click="isHidden = !isHidden"
-                :disabled="!isValidURL"
-                v-tooltip.bottom="{
-                  content: isHidden ? $t('show_code') : $t('hide_code'),
-                }"
-              >
-                <i class="material-icons">code</i>
-              </button>
-              <button
-                class="icon"
-                id="preRequestScriptButton"
-                v-tooltip.bottom="{
-                  content: !showPreRequestScript
-                    ? $t('show_prerequest_script')
-                    : $t('hide_prerequest_script'),
-                }"
-                @click="showPreRequestScript = !showPreRequestScript"
-              >
-                <i
-                  class="material-icons"
-                  :class="showPreRequestScript"
-                  v-if="!showPreRequestScript"
-                >
-                  playlist_add
-                </i>
-                <i class="material-icons" :class="showPreRequestScript" v-else>
-                  close
-                </i>
-              </button>
-              <button
-                class="icon"
-                id="preRequestScriptButto"
-                v-tooltip.bottom="{
-                  content: !testsEnabled ? 'Enable Tests' : 'Disable Tests',
-                }"
-                @click="testsEnabled = !testsEnabled"
-              >
-                <i class="material-icons" :class="testsEnabled" v-if="!testsEnabled">
-                  playlist_add_check
-                </i>
-                <i class="material-icons" :class="testsEnabled" v-else>close</i>
-              </button>
-            </span>
-            <span>
-              <button
-                class="icon"
-                @click="saveOpenapi"
-                :disabled="!isValidURL"
-                v-if="isLoggedIn"
-                v-tooltip.bottom="$t('openapi_spec_save')"
-              >
-                <i class="material-icons">folder</i>
-              </button>
-              <button
-                class="icon"
-                @click="copyRequest"
-                id="copyRequest"
-                ref="copyRequest"
-                :disabled="!isValidURL"
-                v-tooltip.bottom="$t('copy_request_link')"
-              >
-                <i v-if="navigatorShare" class="material-icons">share</i>
-                <i v-else class="material-icons">file_copy</i>
-              </button>
-              <button
-                class="icon"
-                @click="saveRequest"
-                id="saveRequest"
-                ref="saveRequest"
-                :disabled="!isValidURL"
-                v-tooltip.bottom="$t('save_to_collections')"
-              >
-                <i class="material-icons">save</i>
-              </button>
-              <button
-                class="icon"
-                @click="clearContent('', $event)"
-                v-tooltip.bottom="$t('clear_all')"
-                ref="clearAll"
-              >
-                <i class="material-icons">clear_all</i>
-              </button>
-            </span>
-          </div>
-        </pw-section>
-
-        <pw-section v-if="testsEnabled" class="orange" label="Tests" ref="postRequestTests">
-          <ul>
-            <li>
-              <div class="flex-wrap">
-                <label for="generatedCode">{{ $t("javascript_code") }}</label>
+              <ul v-for="(param, index) in params" :key="index">
+                <li>
+                  <input
+                    :placeholder="$t('parameter_count', { count: index + 1 })"
+                    :name="'param' + index"
+                    :value="param.key"
+                    @change="
+                      $store.commit('design/setKeyParams', {
+                        index,
+                        value: $event.target.value,
+                      })
+                    "
+                    autofocus
+                  />
+                </li>
+                <li>
+                  <input
+                    :placeholder="$t('value_count', { count: index + 1 })"
+                    :name="'value' + index"
+                    :value="param.value"
+                    @change="
+                      $store.commit('design/setValueParams', {
+                        index,
+                        value: $event.target.value,
+                      })
+                    "
+                  />
+                </li>
                 <div>
-                  <a
-                    href="https://github.com/liyasthomas/postwoman/wiki/Post-Requests-Tests"
-                    target="_blank"
-                    rel="noopener"
-                  >
-                    <button class="icon" v-tooltip="$t('wiki')">
-                      <i class="material-icons">help</i>
-                    </button>
-                  </a>
-                </div>
-              </div>
-              <Editor
-                v-model="testScript"
-                :lang="'javascript'"
-                :options="{
-                  maxLines: '16',
-                  minLines: '8',
-                  fontSize: '16px',
-                  autoScrollEditorIntoView: true,
-                  showPrintMargin: false,
-                  useWorker: false,
-                }"
-              />
-              <div v-if="testReports">
-                <div class="flex-wrap">
-                  <label>Test Reports</label>
-                  <div>
+                  <li>
                     <button
                       class="icon"
-                      @click="clearContent('tests', $event)"
-                      v-tooltip.bottom="$t('clear')"
+                      @click="removeRequestParam(index)"
+                      v-tooltip.bottom="$t('delete')"
+                      id="param"
                     >
-                      <i class="material-icons">clear_all</i>
+                      <i class="material-icons">delete</i>
                     </button>
-                  </div>
+                  </li>
                 </div>
-                <div v-for="(testReport, index) in testReports" :key="index">
-                  <div v-if="testReport.startBlock" class="info">
-                    <h4>{{ testReport.startBlock }}</h4>
-                  </div>
-                  <p v-else-if="testReport.result" class="flex-wrap info">
-                    <span :class="testReport.styles.class">
-                      <i class="material-icons">
-                        {{ testReport.styles.icon }}
-                      </i>
-                      <span>&nbsp; {{ testReport.result }}</span>
-                      <span v-if="testReport.message">
-                        <label>&nbsp; • &nbsp; {{ testReport.message }}</label>
-                      </span>
-                    </span>
-                  </p>
-                  <div v-else-if="testReport.endBlock"><hr /></div>
-                </div>
-              </div>
-            </li>
-          </ul>
-        </pw-section>
+              </ul>
+              <ul>
+                <li>
+                  <button class="icon" @click="addRequestParam">
+                    <i class="material-icons">add</i>
+                    <span>{{ $t("add_new") }}</span>
+                  </button>
+                </li>
+              </ul>
+            </pw-section>
+          </tab>
+        </tabs>
 
-        <section id="options">
-          <tabs>
-            <tab :id="'authentication'" :label="$t('authentication')" :selected="true">
-              <pw-section class="cyan" :label="$t('authentication')" ref="authentication">
-                <ul>
-                  <li>
-                    <div class="flex-wrap">
-                      <label for="auth">{{ $t("authentication") }}</label>
-                      <div>
-                        <button
-                          class="icon"
-                          @click="clearContent('auth', $event)"
-                          v-tooltip.bottom="$t('clear')"
-                        >
-                          <i class="material-icons">clear_all</i>
-                        </button>
-                      </div>
-                    </div>
-                    <span class="select-wrapper">
-                      <select id="auth" v-model="auth">
-                        <option>None</option>
-                        <option>Basic Auth</option>
-                        <option>Bearer Token</option>
-                        <option>OAuth 2.0</option>
-                      </select>
-                    </span>
-                  </li>
-                </ul>
-                <ul v-if="auth === 'Basic Auth'">
-                  <li>
-                    <input placeholder="User" name="http_basic_user" v-model="httpUser" />
-                  </li>
-                  <li>
-                    <input
-                      placeholder="Password"
-                      name="http_basic_passwd"
-                      :type="passwordFieldType"
-                      v-model="httpPassword"
-                    />
-                  </li>
-                  <div>
-                    <li>
-                      <button
-                        class="icon"
-                        id="switchVisibility"
-                        ref="switchVisibility"
-                        @click="switchVisibility"
-                      >
-                        <i class="material-icons" v-if="passwordFieldType === 'text'">visibility</i>
-                        <i class="material-icons" v-if="passwordFieldType !== 'text'"
-                          >visibility_off</i
-                        >
-                      </button>
-                    </li>
-                  </div>
-                </ul>
-                <ul v-if="auth === 'Bearer Token' || auth === 'OAuth 2.0'">
-                  <li>
-                    <div class="flex-wrap">
-                      <input placeholder="Token" name="bearer_token" v-model="bearerToken" />
-                      <button
-                        v-if="auth === 'OAuth 2.0'"
-                        class="icon"
-                        @click="showTokenList = !showTokenList"
-                        v-tooltip.bottom="$t('use_token')"
-                      >
-                        <i class="material-icons">open_in_new</i>
-                      </button>
-                      <button
-                        v-if="auth === 'OAuth 2.0'"
-                        class="icon"
-                        @click="showTokenRequest = !showTokenRequest"
-                        v-tooltip.bottom="$t('get_token')"
-                      >
-                        <i class="material-icons">vpn_key</i>
-                      </button>
-                    </div>
-                  </li>
-                </ul>
-                <div class="flex-wrap">
-                  <pw-toggle :on="!urlExcludes.auth" @change="setExclude('auth', !$event)">
-                    {{ $t("include_in_url") }}
-                  </pw-toggle>
-                </div>
-              </pw-section>
-              <pw-section
-                v-if="showTokenRequest"
-                class="red"
-                label="Access Token Request"
-                ref="accessTokenRequest"
-              >
-                <ul>
-                  <li>
-                    <div class="flex-wrap">
-                      <label for="token-name">{{ $t("token_name") }}</label>
-                      <div>
-                        <button
-                          class="icon"
-                          @click="showTokenRequestList = true"
-                          v-tooltip.bottom="$t('manage_token_req')"
-                        >
-                          <i class="material-icons">library_add</i>
-                        </button>
-                        <button
-                          class="icon"
-                          @click="clearContent('access_token', $event)"
-                          v-tooltip.bottom="$t('clear')"
-                        >
-                          <i class="material-icons">clear_all</i>
-                        </button>
-                        <button
-                          class="icon"
-                          @click="showTokenRequest = false"
-                          v-tooltip.bottom="$t('close')"
-                        >
-                          <i class="material-icons">close</i>
-                        </button>
-                      </div>
-                    </div>
-                    <input
-                      id="token-name"
-                      :placeholder="$t('optional')"
-                      name="token_name"
-                      v-model="accessTokenName"
-                      type="text"
-                    />
-                  </li>
-                </ul>
-                <ul>
-                  <li>
-                    <label for="oidc-discovery-url">
-                      {{ $t("oidc_discovery_url") }}
-                    </label>
-                    <input
-                      :disabled="this.authUrl !== '' || this.accessTokenUrl !== ''"
-                      id="oidc-discovery-url"
-                      name="oidc_discovery_url"
-                      type="url"
-                      v-model="oidcDiscoveryUrl"
-                      placeholder="https://example.com/.well-known/openid-configuration"
-                    />
-                  </li>
-                </ul>
-                <ul>
-                  <li>
-                    <label for="auth-url">{{ $t("auth_url") }}</label>
-                    <input
-                      :disabled="this.oidcDiscoveryUrl !== ''"
-                      id="auth-url"
-                      name="auth_url"
-                      type="url"
-                      v-model="authUrl"
-                      placeholder="https://example.com/login/oauth/authorize"
-                    />
-                  </li>
-                </ul>
-                <ul>
-                  <li>
-                    <label for="access-token-url">
-                      {{ $t("access_token_url") }}
-                    </label>
-                    <input
-                      :disabled="this.oidcDiscoveryUrl !== ''"
-                      id="access-token-url"
-                      name="access_token_url"
-                      type="url"
-                      v-model="accessTokenUrl"
-                      placeholder="https://example.com/login/oauth/access_token"
-                    />
-                  </li>
-                </ul>
-                <ul>
-                  <li>
-                    <label for="client-id">{{ $t("client_id") }}</label>
-                    <input
-                      id="client-id"
-                      name="client_id"
-                      type="text"
-                      v-model="clientId"
-                      placeholder="Client ID"
-                    />
-                  </li>
-                </ul>
-                <ul>
-                  <li>
-                    <label for="scope">{{ $t("scope") }}</label>
-                    <input
-                      id="scope"
-                      name="scope"
-                      type="text"
-                      v-model="scope"
-                      placeholder="e.g. read:org"
-                    />
-                  </li>
-                </ul>
-                <ul>
-                  <li>
-                    <button class="icon" @click="handleAccessTokenRequest">
-                      <i class="material-icons">vpn_key</i>
-                      <span>{{ $t("request_token") }}</span>
-                    </button>
-                  </li>
-                </ul>
-              </pw-section>
-            </tab>
-
-            <tab :id="'headers'" :label="$t('headers')">
-              <pw-section class="orange" label="Headers" ref="headers">
-                <ul>
-                  <li>
-                    <div class="flex-wrap">
-                      <label for="headerList">{{ $t("header_list") }}</label>
-                      <div>
-                        <button
-                          class="icon"
-                          @click="clearContent('headers', $event)"
-                          v-tooltip.bottom="$t('clear')"
-                        >
-                          <i class="material-icons">clear_all</i>
-                        </button>
-                      </div>
-                    </div>
-                    <textarea
-                      id="headerList"
-                      readonly
-                      v-textarea-auto-height="headerString"
-                      v-model="headerString"
-                      :placeholder="$t('add_one_header')"
-                      rows="1"
-                    ></textarea>
-                  </li>
-                </ul>
-                <ul v-for="(header, index) in headers" :key="index">
-                  <li>
-                    <autocomplete
-                      :placeholder="$t('header_count', { count: index + 1 })"
-                      :source="commonHeaders"
-                      :spellcheck="false"
-                      :value="header.key"
-                      @input="
-                        $store.commit('design/setKeyHeader', {
-                          index,
-                          value: $event,
-                        })
-                      "
-                      @keyup.prevent="setRouteQueryState"
-                      autofocus
-                    />
-                  </li>
-                  <li>
-                    <input
-                      :placeholder="$t('value_count', { count: index + 1 })"
-                      :name="'value' + index"
-                      :value="header.value"
-                      @change="
-                        $store.commit('design/setValueHeader', {
-                          index,
-                          value: $event.target.value,
-                        })
-                      "
-                      @keyup.prevent="setRouteQueryState"
-                    />
-                  </li>
-                  <div>
-                    <li>
-                      <button
-                        class="icon"
-                        @click="removeRequestHeader(index)"
-                        v-tooltip.bottom="$t('delete')"
-                        id="header"
-                      >
-                        <i class="material-icons">delete</i>
-                      </button>
-                    </li>
-                  </div>
-                </ul>
-                <ul>
-                  <li>
-                    <button class="icon" @click="addRequestHeader">
-                      <i class="material-icons">add</i>
-                      <span>{{ $t("add_new") }}</span>
-                    </button>
-                  </li>
-                </ul>
-              </pw-section>
-            </tab>
-
-            <tab :id="'params'" :label="$t('parameters')">
-              <pw-section class="pink" label="Parameters" ref="parameters">
-                <ul>
-                  <li>
-                    <div class="flex-wrap">
-                      <label for="paramList">{{ $t("parameter_list") }}</label>
-                      <div>
-                        <button
-                          class="icon"
-                          @click="clearContent('parameters', $event)"
-                          v-tooltip.bottom="$t('clear')"
-                        >
-                          <i class="material-icons">clear_all</i>
-                        </button>
-                      </div>
-                    </div>
-                    <textarea
-                      id="paramList"
-                      readonly
-                      v-textarea-auto-height="queryString"
-                      v-model="queryString"
-                      :placeholder="$t('add_one_parameter')"
-                      rows="1"
-                    ></textarea>
-                  </li>
-                </ul>
-                <ul v-for="(param, index) in params" :key="index">
-                  <li>
-                    <input
-                      :placeholder="$t('parameter_count', { count: index + 1 })"
-                      :name="'param' + index"
-                      :value="param.key"
-                      @change="
-                        $store.commit('design/setKeyParams', {
-                          index,
-                          value: $event.target.value,
-                        })
-                      "
-                      autofocus
-                    />
-                  </li>
-                  <li>
-                    <input
-                      :placeholder="$t('value_count', { count: index + 1 })"
-                      :name="'value' + index"
-                      :value="param.value"
-                      @change="
-                        $store.commit('design/setValueParams', {
-                          index,
-                          value: $event.target.value,
-                        })
-                      "
-                    />
-                  </li>
-                  <div>
-                    <li>
-                      <button
-                        class="icon"
-                        @click="removeRequestParam(index)"
-                        v-tooltip.bottom="$t('delete')"
-                        id="param"
-                      >
-                        <i class="material-icons">delete</i>
-                      </button>
-                    </li>
-                  </div>
-                </ul>
-                <ul>
-                  <li>
-                    <button class="icon" @click="addRequestParam">
-                      <i class="material-icons">add</i>
-                      <span>{{ $t("add_new") }}</span>
-                    </button>
-                  </li>
-                </ul>
-              </pw-section>
-            </tab>
-          </tabs>
-
-          <!-- <div class="flex-wrap">
+        <!-- <div class="flex-wrap">
             <span></span>
             <button
               class="icon hide-on-small-screen"
@@ -869,402 +864,380 @@
               </i>
             </button>
           </div> -->
-        </section>
+      </section>
 
-        <pw-section class="purple" id="response" :label="$t('response')" ref="response">
-          <ul>
-            <li>
-              <label for="status">{{ $t("status") }}</label>
-              <input
-                :class="statusCategory ? statusCategory.className : ''"
-                :value="response.status || $t('waiting_send_req')"
-                ref="status"
-                id="status"
-                name="status"
-                readonly
-                type="text"
-              />
-            </li>
-          </ul>
+      <pw-section class="purple" id="response" ref="saveresponse" :label="$t('response')">
+        <ul>
+          <li>
+            <label for="responseLabel">Response Label</label>
+            <input id="responseLabel" v-model="response.label" name="responseLabel" />
+          </li>
+        </ul>
+        <ul>
+          <li>
+            <label for="status">{{ $t("status") }}</label>
+            <input
+              :class="statusCategory ? statusCategory.className : ''"
+              v-model="response.status"
+              ref="status"
+              id="status"
+              name="status"
+              type="text"
+            />
+          </li>
+        </ul>
+        <div v-if="response.headers.length">
           <ul v-for="(value, key) in response.headers" :key="key">
             <li>
               <label :for="key">{{ key }}</label>
-              <input :id="key" :value="value" :name="key" readonly />
+              <input :id="key" :value="value" :name="key" />
             </li>
           </ul>
-          <ul v-if="response.body">
+        </div>
+        <div v-else>
+          <ul>
             <li>
-              <div class="flex-wrap">
-                <label for="body">{{ $t("response") }}</label>
-                <div>
-                  <button
-                    class="icon"
-                    @click="ToggleExpandResponse"
-                    ref="ToggleExpandResponse"
-                    v-if="response.body"
-                    v-tooltip="{
-                      content: !expandResponse ? $t('expand_response') : $t('collapse_response'),
-                    }"
-                  >
-                    <i class="material-icons">
-                      {{ !expandResponse ? "unfold_more" : "unfold_less" }}
-                    </i>
-                  </button>
-                  <button
-                    class="icon"
-                    @click="downloadResponse"
-                    ref="downloadResponse"
-                    v-if="response.body"
-                    v-tooltip="$t('download_file')"
-                  >
-                    <i class="material-icons">get_app</i>
-                  </button>
-                  <button
-                    class="icon"
-                    @click="copyResponse"
-                    ref="copyResponse"
-                    v-if="response.body"
-                    v-tooltip="$t('copy_response')"
-                  >
-                    <i class="material-icons">file_copy</i>
-                  </button>
-                </div>
-              </div>
-              <div id="response-details-wrapper">
-                <Editor
-                  :value="responseBodyText"
-                  :lang="responseBodyType"
-                  :options="{
-                    maxLines: responseBodyMaxLines,
-                    minLines: '16',
-                    fontSize: '16px',
-                    autoScrollEditorIntoView: true,
-                    readOnly: true,
-                    showPrintMargin: false,
-                    useWorker: false,
-                  }"
-                />
-                <iframe
-                  :class="{ hidden: !previewEnabled }"
-                  class="covers-response"
-                  ref="previewFrame"
-                  src="about:blank"
-                ></iframe>
-              </div>
-              <div class="align-right" v-if="response.body && responseType === 'text/html'">
-                <button class="icon" @click.prevent="togglePreview">
-                  <i class="material-icons">
-                    {{ !previewEnabled ? "visibility" : "visibility_off" }}
-                  </i>
-                  <span>
-                    {{ previewEnabled ? $t("hide_preview") : $t("preview_html") }}
-                  </span>
+              <label for="content-type">content-type</label>
+              <select v-model="responseBodyType">
+                <option value="json">Json</option>
+                <option value="text">Text</option>
+                <option value="html">Html</option>
+              </select>
+              <!-- <input v-model="responseType" name="content-type" /> -->
+            </li>
+          </ul>
+        </div>
+        <ul>
+          <li>
+            <div id="response-details-wrapper">
+              <Editor
+                v-model="response.body"
+                :lang="responseBodyType"
+                :options="{
+                  maxLines: responseBodyMaxLines,
+                  minLines: '16',
+                  fontSize: '16px',
+                  autoScrollEditorIntoView: true,
+                  readOnly: false,
+                  showPrintMargin: false,
+                  useWorker: false,
+                }"
+              />
+              <iframe
+                :class="{ hidden: !previewEnabled }"
+                class="covers-response"
+                ref="previewFrame"
+                src="about:blank"
+              ></iframe>
+            </div>
+            <div class="align-left">
+              <button
+                v-if="response.body && responseType === 'text/html'"
+                class="icon"
+                @click.prevent="togglePreview"
+              >
+                <i class="material-icons">
+                  {{ !previewEnabled ? "visibility" : "visibility_off" }}
+                </i>
+                <span>
+                  {{ previewEnabled ? $t("hide_preview") : $t("preview_html") }}
+                </span>
+              </button>
+            </div>
+          </li>
+        </ul>
+      </pw-section>
+    </div>
+
+    <aside v-if="activeSidebar" class="sticky-inner inner-right">
+      <section>
+        <tabs>
+          <tab :id="'requests'" :icon="'watch_later'" :label="$t('requests')" :selected="true">
+            <requests :specid="$route.params.id" ref="responseComponent" />
+          </tab>
+
+          <tab :id="'env'" :icon="'style'" :label="$t('environments')">
+            <environments @use-environment="useSelectedEnvironment($event)" />
+          </tab>
+        </tabs>
+      </section>
+    </aside>
+
+    <save-request-as
+      :show="showRequestModal"
+      @hide-model="hideRequestModal"
+      :editing-request="editRequest"
+    />
+
+    <saveRequestOpenapi :show="showOasModal" @hide-modal="hideOpenapiModal" />
+
+    <pw-modal v-if="showModal" @close="showModal = false">
+      <div slot="header">
+        <ul>
+          <li>
+            <div class="flex-wrap">
+              <h3 class="title">{{ $t("import_curl") }}</h3>
+              <div>
+                <button class="icon" @click="showModal = false">
+                  <i class="material-icons">close</i>
                 </button>
               </div>
-            </li>
-          </ul>
-        </pw-section>
+            </div>
+          </li>
+        </ul>
       </div>
-
-      <aside v-if="activeSidebar" class="sticky-inner inner-right">
-        <section>
-          <tabs>
-            <tab :id="'requests'" :icon="'watch_later'" :label="$t('requests')" :selected="true">
-              <requests :specid="$route.params.id" ref="responseComponent" />
-            </tab>
-
-            <tab :id="'env'" :icon="'style'" :label="$t('environments')">
-              <environments @use-environment="useSelectedEnvironment($event)" />
-            </tab>
-          </tabs>
-        </section>
-      </aside>
-
-      <save-request-as
-        :show="showRequestModal"
-        @hide-model="hideRequestModal"
-        :editing-request="editRequest"
-      />
-
-      <saveRequestOpenapi :show="showOasModal" @hide-modal="hideOpenapiModal" />
-
-      <pw-modal v-if="showModal" @close="showModal = false">
-        <div slot="header">
-          <ul>
-            <li>
-              <div class="flex-wrap">
-                <h3 class="title">{{ $t("import_curl") }}</h3>
-                <div>
-                  <button class="icon" @click="showModal = false">
-                    <i class="material-icons">close</i>
-                  </button>
-                </div>
-              </div>
-            </li>
-          </ul>
+      <div slot="body">
+        <ul>
+          <li>
+            <textarea
+              id="import-text"
+              autofocus
+              rows="8"
+              :placeholder="$t('enter_curl')"
+            ></textarea>
+          </li>
+        </ul>
+      </div>
+      <div slot="footer">
+        <div class="flex-wrap">
+          <span></span>
+          <span>
+            <button class="icon" @click="showModal = false">
+              {{ $t("cancel") }}
+            </button>
+            <button class="icon primary" @click="handleImport">
+              {{ $t("import") }}
+            </button>
+          </span>
         </div>
-        <div slot="body">
-          <ul>
-            <li>
-              <textarea
-                id="import-text"
-                autofocus
-                rows="8"
-                :placeholder="$t('enter_curl')"
-              ></textarea>
-            </li>
-          </ul>
-        </div>
-        <div slot="footer">
-          <div class="flex-wrap">
-            <span></span>
-            <span>
-              <button class="icon" @click="showModal = false">
-                {{ $t("cancel") }}
-              </button>
-              <button class="icon primary" @click="handleImport">
-                {{ $t("import") }}
-              </button>
-            </span>
-          </div>
-        </div>
-      </pw-modal>
+      </div>
+    </pw-modal>
 
-      <pw-modal v-if="!isHidden" @close="isHidden = true">
-        <div slot="header">
-          <ul>
-            <li>
-              <div class="flex-wrap">
-                <h3 class="title">{{ $t("generate_code") }}</h3>
-                <div>
-                  <button class="icon" @click="isHidden = true">
-                    <i class="material-icons">close</i>
-                  </button>
-                </div>
-              </div>
-            </li>
-          </ul>
-        </div>
-        <div slot="body">
-          <ul>
-            <li>
-              <label for="requestType">{{ $t("request_type") }}</label>
-              <span class="select-wrapper">
-                <select id="requestType" v-model="requestType">
-                  <option>JavaScript XHR</option>
-                  <option>Fetch</option>
-                  <option>cURL</option>
-                </select>
-              </span>
-            </li>
-          </ul>
-          <ul>
-            <li>
-              <div class="flex-wrap">
-                <label for="generatedCode">{{ $t("generated_code") }}</label>
-                <div>
-                  <button
-                    class="icon"
-                    @click="copyRequestCode"
-                    id="copyRequestCode"
-                    ref="copyRequestCode"
-                    v-tooltip="$t('copy_code')"
-                  >
-                    <i class="material-icons">file_copy</i>
-                  </button>
-                </div>
-              </div>
-              <textarea
-                id="generatedCode"
-                ref="generatedCode"
-                name="generatedCode"
-                rows="8"
-                v-model="requestCode"
-              ></textarea>
-            </li>
-          </ul>
-        </div>
-        <div slot="footer"></div>
-      </pw-modal>
-
-      <pw-modal v-if="showTokenList" @close="showTokenList = false">
-        <div slot="header">
-          <ul>
-            <li>
-              <div class="flex-wrap">
-                <h3 class="title">{{ $t("manage_token") }}</h3>
-                <div>
-                  <button class="icon" @click="showTokenList = false">
-                    <i class="material-icons">close</i>
-                  </button>
-                </div>
-              </div>
-            </li>
-          </ul>
-        </div>
-        <div slot="body">
-          <ul>
-            <li>
-              <div class="flex-wrap">
-                <label for="token-list">{{ $t("token_list") }}</label>
-                <div v-if="tokens.length != 0">
-                  <button
-                    class="icon"
-                    @click="clearContent('tokens', $event)"
-                    v-tooltip.bottom="$t('clear')"
-                  >
-                    <i class="material-icons">clear_all</i>
-                  </button>
-                </div>
-              </div>
-            </li>
-          </ul>
-          <ul id="token-list" v-for="(token, index) in tokens" :key="index">
-            <li>
-              <input
-                :placeholder="'name ' + (index + 1)"
-                :value="token.name"
-                @change="
-                  $store.commit('design/setOAuthTokenName', {
-                    index,
-                    value: $event.target.value,
-                  })
-                "
-              />
-            </li>
-            <li>
-              <input :value="token.value" readonly />
-            </li>
+    <pw-modal v-if="!isHidden" @close="isHidden = true">
+      <div slot="header">
+        <ul>
+          <li>
             <div class="flex-wrap">
-              <li>
+              <h3 class="title">{{ $t("generate_code") }}</h3>
+              <div>
+                <button class="icon" @click="isHidden = true">
+                  <i class="material-icons">close</i>
+                </button>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div slot="body">
+        <ul>
+          <li>
+            <label for="requestType">{{ $t("request_type") }}</label>
+            <span class="select-wrapper">
+              <select id="requestType" v-model="requestType">
+                <option>JavaScript XHR</option>
+                <option>Fetch</option>
+                <option>cURL</option>
+              </select>
+            </span>
+          </li>
+        </ul>
+        <ul>
+          <li>
+            <div class="flex-wrap">
+              <label for="generatedCode">{{ $t("generated_code") }}</label>
+              <div>
                 <button
                   class="icon"
-                  @click="useOAuthToken(token.value)"
-                  v-tooltip.bottom="$t('use_token')"
+                  @click="copyRequestCode"
+                  id="copyRequestCode"
+                  ref="copyRequestCode"
+                  v-tooltip="$t('copy_code')"
+                >
+                  <i class="material-icons">file_copy</i>
+                </button>
+              </div>
+            </div>
+            <textarea
+              id="generatedCode"
+              ref="generatedCode"
+              name="generatedCode"
+              rows="8"
+              v-model="requestCode"
+            ></textarea>
+          </li>
+        </ul>
+      </div>
+      <div slot="footer"></div>
+    </pw-modal>
+
+    <pw-modal v-if="showTokenList" @close="showTokenList = false">
+      <div slot="header">
+        <ul>
+          <li>
+            <div class="flex-wrap">
+              <h3 class="title">{{ $t("manage_token") }}</h3>
+              <div>
+                <button class="icon" @click="showTokenList = false">
+                  <i class="material-icons">close</i>
+                </button>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div slot="body">
+        <ul>
+          <li>
+            <div class="flex-wrap">
+              <label for="token-list">{{ $t("token_list") }}</label>
+              <div v-if="tokens.length != 0">
+                <button
+                  class="icon"
+                  @click="clearContent('tokens', $event)"
+                  v-tooltip.bottom="$t('clear')"
+                >
+                  <i class="material-icons">clear_all</i>
+                </button>
+              </div>
+            </div>
+          </li>
+        </ul>
+        <ul id="token-list" v-for="(token, index) in tokens" :key="index">
+          <li>
+            <input
+              :placeholder="'name ' + (index + 1)"
+              :value="token.name"
+              @change="
+                $store.commit('design/setOAuthTokenName', {
+                  index,
+                  value: $event.target.value,
+                })
+              "
+            />
+          </li>
+          <li>
+            <input :value="token.value" readonly />
+          </li>
+          <div class="flex-wrap">
+            <li>
+              <button
+                class="icon"
+                @click="useOAuthToken(token.value)"
+                v-tooltip.bottom="$t('use_token')"
+              >
+                <i class="material-icons">input</i>
+              </button>
+            </li>
+            <li>
+              <button class="icon" @click="removeOAuthToken(index)" v-tooltip.bottom="$t('delete')">
+                <i class="material-icons">delete</i>
+              </button>
+            </li>
+          </div>
+        </ul>
+        <p v-if="tokens.length === 0" class="info">
+          {{ $t("empty") }}
+        </p>
+      </div>
+      <div slot="footer"></div>
+    </pw-modal>
+
+    <pw-modal v-if="showTokenRequestList" @close="showTokenRequestList = false">
+      <div slot="header">
+        <ul>
+          <li>
+            <div class="flex-wrap">
+              <h3 class="title">{{ $t("manage_token_req") }}</h3>
+              <div>
+                <button class="icon" @click="showTokenRequestList = false">
+                  <i class="material-icons">close</i>
+                </button>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div slot="body">
+        <ul>
+          <li>
+            <div class="flex-wrap">
+              <label for="token-req-list">{{ $t("token_req_list") }}</label>
+              <div>
+                <button
+                  :disabled="this.tokenReqs.length === 0"
+                  class="icon"
+                  @click="showTokenRequestList = false"
+                  v-tooltip.bottom="$t('use_token_req')"
                 >
                   <i class="material-icons">input</i>
                 </button>
-              </li>
-              <li>
                 <button
+                  :disabled="this.tokenReqs.length === 0"
                   class="icon"
-                  @click="removeOAuthToken(index)"
+                  @click="removeOAuthTokenReq"
                   v-tooltip.bottom="$t('delete')"
                 >
                   <i class="material-icons">delete</i>
                 </button>
-              </li>
+              </div>
             </div>
-          </ul>
-          <p v-if="tokens.length === 0" class="info">
-            {{ $t("empty") }}
-          </p>
-        </div>
-        <div slot="footer"></div>
-      </pw-modal>
-
-      <pw-modal v-if="showTokenRequestList" @close="showTokenRequestList = false">
-        <div slot="header">
-          <ul>
-            <li>
-              <div class="flex-wrap">
-                <h3 class="title">{{ $t("manage_token_req") }}</h3>
-                <div>
-                  <button class="icon" @click="showTokenRequestList = false">
-                    <i class="material-icons">close</i>
-                  </button>
-                </div>
-              </div>
-            </li>
-          </ul>
-        </div>
-        <div slot="body">
-          <ul>
-            <li>
-              <div class="flex-wrap">
-                <label for="token-req-list">{{ $t("token_req_list") }}</label>
-                <div>
-                  <button
-                    :disabled="this.tokenReqs.length === 0"
-                    class="icon"
-                    @click="showTokenRequestList = false"
-                    v-tooltip.bottom="$t('use_token_req')"
-                  >
-                    <i class="material-icons">input</i>
-                  </button>
-                  <button
-                    :disabled="this.tokenReqs.length === 0"
-                    class="icon"
-                    @click="removeOAuthTokenReq"
-                    v-tooltip.bottom="$t('delete')"
-                  >
-                    <i class="material-icons">delete</i>
-                  </button>
-                </div>
-              </div>
-              <span class="select-wrapper">
-                <select
-                  id="token-req-list"
-                  v-model="tokenReqSelect"
-                  :disabled="this.tokenReqs.length === 0"
-                  @change="tokenReqChange($event)"
-                >
-                  <option v-for="(req, index) in tokenReqs" :key="index" :value="req.name">
-                    {{ req.name }}
-                  </option>
-                </select>
-              </span>
-            </li>
-          </ul>
-          <ul>
-            <li>
-              <label for="token-req-name">{{ $t("token_req_name") }}</label>
-              <input v-model="tokenReqName" />
-            </li>
-          </ul>
-          <ul>
-            <li>
-              <label for="token-req-details">
-                {{ $t("token_req_details") }}
-              </label>
-              <textarea
-                id="token-req-details"
-                readonly
-                rows="7"
-                v-model="tokenReqDetails"
-              ></textarea>
-            </li>
-          </ul>
-        </div>
-        <div slot="footer">
-          <div class="flex-wrap">
-            <span></span>
-            <span>
-              <button class="icon primary" @click="addOAuthTokenReq">
-                {{ $t("save_token_req") }}
-              </button>
+            <span class="select-wrapper">
+              <select
+                id="token-req-list"
+                v-model="tokenReqSelect"
+                :disabled="this.tokenReqs.length === 0"
+                @change="tokenReqChange($event)"
+              >
+                <option v-for="(req, index) in tokenReqs" :key="index" :value="req.name">
+                  {{ req.name }}
+                </option>
+              </select>
             </span>
-          </div>
+          </li>
+        </ul>
+        <ul>
+          <li>
+            <label for="token-req-name">{{ $t("token_req_name") }}</label>
+            <input v-model="tokenReqName" />
+          </li>
+        </ul>
+        <ul>
+          <li>
+            <label for="token-req-details">
+              {{ $t("token_req_details") }}
+            </label>
+            <textarea id="token-req-details" readonly rows="7" v-model="tokenReqDetails"></textarea>
+          </li>
+        </ul>
+      </div>
+      <div slot="footer">
+        <div class="flex-wrap">
+          <span></span>
+          <span>
+            <button class="icon primary" @click="addOAuthTokenReq">
+              {{ $t("save_token_req") }}
+            </button>
+          </span>
         </div>
-      </pw-modal>
-    </div>
+      </div>
+    </pw-modal>
   </div>
 </template>
 
 <script>
-import section from "../../components/layout/section"
+import section from "../../../components/layout/section"
 import url from "url"
 import querystring from "querystring"
-import { commonHeaders } from "../../functions/headers"
-import textareaAutoHeight from "../../directives/textareaAutoHeight"
-import parseCurlCommand from "../../assets/js/curlparser.js"
-import getEnvironmentVariablesFromScript from "../../functions/preRequest"
-import runTestScriptWithVariables from "../../functions/postwomanTesting"
-import parseTemplateString from "../../functions/templating"
-import AceEditor from "../../components/ui/ace-editor"
-import { tokenRequest, oauthRedirect } from "../../assets/js/oauth"
-import { sendNetworkRequest } from "../../functions/network"
-import { fb } from "../../functions/fb"
+import { commonHeaders } from "../../../functions/headers"
+import textareaAutoHeight from "../../../directives/textareaAutoHeight"
+import parseCurlCommand from "../../../assets/js/curlparser.js"
+import getEnvironmentVariablesFromScript from "../../../functions/preRequest"
+import runTestScriptWithVariables from "../../../functions/postwomanTesting"
+import parseTemplateString from "../../../functions/templating"
+import AceEditor from "../../../components/ui/ace-editor"
+import { tokenRequest, oauthRedirect } from "../../../assets/js/oauth"
+import { sendNetworkRequest } from "../../../functions/network"
+import { fb } from "../../../functions/fb"
 import { getEditorLangForMimeType } from "~/functions/editorutils"
 import { cloneDeep } from "lodash"
 const statusCategories = [
@@ -1322,28 +1295,23 @@ export default {
   },
   components: {
     "pw-section": section,
-    "pw-toggle": () => import("../../components/ui/toggle"),
-    "pw-modal": () => import("../../components/ui/modal"),
-    autocomplete: () => import("../../components/ui/autocomplete"),
-    requests: () => import("../../components/requests"),
-    collections: () => import("../../components/collections"),
-    saveRequestAs: () => import("../../components/collections/saveRequestAs"),
+    "pw-toggle": () => import("../../../components/ui/toggle"),
+    "pw-modal": () => import("../../../components/ui/modal"),
+    autocomplete: () => import("../../../components/ui/autocomplete"),
+    requests: () => import("../../../components/requests"),
+    collections: () => import("../../../components/collections"),
+    saveRequestAs: () => import("../../../components/collections/saveRequestAs"),
     Editor: AceEditor,
-    environments: () => import("../../components/design/environments"),
-    inputform: () => import("../../components/firebase/inputform"),
-    notes: () => import("../../components/firebase/feeds"),
-    login: () => import("../../components/firebase/login"),
-    tabs: () => import("../../components/ui/tabs"),
-    tab: () => import("../../components/ui/tab"),
-    saveRequestOpenapi: () => import("../../components/openapi/saveRequest"),
+    environments: () => import("../../../components/design/environments"),
+    inputform: () => import("../../../components/firebase/inputform"),
+    notes: () => import("../../../components/firebase/feeds"),
+    login: () => import("../../../components/firebase/login"),
+    tabs: () => import("../../../components/ui/tabs"),
+    tab: () => import("../../../components/ui/tab"),
+    saveRequestOpenapi: () => import("../../../components/openapi/saveRequest"),
   },
   props: {
     spec: Object,
-  },
-  async asyncData({ params, store }) {
-    if (store.state.mock.mock === undefined && params.id)
-      await store.dispatch("mock/getMock", params.id)
-    return {}
   },
   data() {
     return {
@@ -1382,7 +1350,6 @@ export default {
       validContentTypes: [
         "application/json",
         "application/hal+json",
-        "application/problem+json",
         "application/xml",
         "application/x-www-form-urlencoded",
         "text/html",
@@ -1411,30 +1378,16 @@ export default {
     }
   },
   watch: {
-    "response.body": function(val) {
-      if (
-        this.response.body === this.$t("waiting_send_req") ||
-        this.response.body === this.$t("loading")
-      ) {
-        this.responseBodyText = this.response.body
-        this.responseBodyType = "text"
+    currentResponse(val) {
+      if (val) {
+        this.copyResponseObject(val)
       } else {
-        console.log("here", this.responseType)
-        if (
-          this.responseType === "application/json" ||
-          this.responseType === "application/hal+json" ||
-          this.responseType === "application/problem+json"
-        ) {
-          this.responseBodyText = JSON.stringify(this.response.body, null, 2)
-          this.responseBodyType = "json"
-        } else if (this.responseType === "text/html") {
-          this.responseBodyText = this.response.body
-          this.responseBodyType = "html"
-        } else {
-          this.responseBodyText = this.response.body
-          this.responseBodyType = "text"
+        this.response = {
+          label: "",
+          status: "",
+          headers: { "content-type": "text/plain" },
+          body: "",
         }
-        console.log("here2", this.responseBodyText, this.response.body)
       }
     },
     urlExcludes: {
@@ -1508,11 +1461,12 @@ export default {
     },
   },
   computed: {
-    mock() {
-      return this.$store.state.mock.mock
-    },
     basePath() {
-      return this.mock && this.mock.servers[0]
+      const server = this.spec.servers[0]
+      return server && server.url
+    },
+    currentResponse() {
+      return this.$store.state.design.response
     },
     isLoggedIn() {
       return this.$store.state.auth.loggedIn === true
@@ -1974,6 +1928,72 @@ export default {
         this.path = path
       }
     },
+    copyResponseObject(originalResponse) {
+      let pp = cloneDeep(originalResponse)
+      if (!pp || !pp.hasOwnProperty("status")) {
+        return
+      }
+      this.response = {
+        label: pp.label,
+        status: pp.status,
+        headers: Object.assign({}, { "content-type": "text/plain" }, pp.headers),
+      }
+
+      if (pp.headers.hasOwnProperty("content-type")) {
+        switch (pp.headers["content-type"]) {
+          case "application/json":
+            this.response.body = JSON.stringify(pp.body, null, 2)
+            this.responseBodyType = "json"
+            break
+          case "application/hal+json":
+            this.response.body = JSON.stringify(pp.body, null, 2)
+            this.responseBodyType = "json"
+            break
+          case "text/html":
+            this.response.body = pp.body
+            this.responseBodyType = "html"
+            break
+          case "text/plain":
+            this.response.body = pp.body
+            this.responseBodyType = "text"
+            break
+          default:
+            this.response.body = pp.body
+            this.responseBodyType = "text"
+            break
+        }
+      }
+    },
+    getResponseContentType() {
+      let contentType = "text/plain" //Default text
+      switch (this.responseBodyType) {
+        case "json":
+          contentType = "application/json"
+          break
+        case "text":
+          contentType = "text/plain"
+          break
+        case "html":
+          contentType = "text/html"
+          break
+        default:
+          contentType = "text/plain"
+          break
+      }
+      return contentType
+    },
+    saveResponse() {
+      if (!this.response.headers.hasOwnProperty("content-type")) {
+        this.response.headers["content-type"] = this.getResponseContentType()
+      }
+      this.$data.response["date"] = new Date().toLocaleDateString()
+      this.$data.response["time"] = new Date().toLocaleTimeString()
+      this.$store.commit("design/addResponse", cloneDeep(this.$data.response))
+    },
+    // changeRepsonseContentType(event) {
+    //   event.preventDefault()
+    //   this.$data.response.headers["content-type"] = this.getResponseContentType()
+    // },
     saveOpenapi() {
       this.$data.showOasModal = true
     },
@@ -2019,7 +2039,7 @@ export default {
     async makeRequest(auth, headers, requestBody, preRequestScript) {
       const requestOptions = {
         method: this.method,
-        url: this.basePath + this.pathName + this.queryString,
+        url: this.url + this.pathName + this.queryString,
         auth,
         headers,
         data: requestBody,
@@ -2070,7 +2090,16 @@ export default {
         return
       }
 
-      if (this.settings.SCROLL_INTO_ENABLED) this.scrollInto("response")
+      //Need a valid response for saving this request
+      if (!this.response.status || !this.responseBodyType) {
+        this.$toast.error(this.$t("invalid_response"), {
+          icon: "error",
+        })
+        if (this.settings.SCROLL_INTO_ENABLED) this.scrollInto("saveresponse")
+        return
+      }
+
+      if (this.settings.SCROLL_INTO_ENABLED) this.scrollInto("saveresponse")
 
       let request = {
         label: this.label,
@@ -2092,7 +2121,28 @@ export default {
         requestType: this.requestType,
       }
 
-      this.$store.commit("setRequest", request)
+      this.response.headers["content-type"] = this.getResponseContentType()
+      this.$store
+        .dispatch("design/addRequest", {
+          specid: this.spec["x-internal-id"],
+          request,
+          response: this.response,
+          version: this.$route.params.apiversion,
+        })
+        .then(
+          res => {
+            this.$toast.success(this.$t("request_saved"), {
+              icon: "done",
+            })
+          },
+          err => {
+            console.error(err)
+            this.$toast.error(this.$t("check_console_details"), {
+              icon: "error",
+            })
+          }
+        )
+      return
 
       // Start showing the loading bar as soon as possible.
       // The nuxt axios module will hide it when the request is made.
@@ -2167,8 +2217,7 @@ export default {
           const body = (this.response.body = payload.data)
           const date = new Date().toLocaleDateString()
           const time = new Date().toLocaleTimeString()
-          console.log("respsonse", this.response)
-          //this.$store.commit("openapi/addResponse", Object.assign({}, this.response))
+          this.$store.commit("openapi/addResponse", Object.assign({}, this.response))
           // Addition of an entry to the history component.
           const entry = {
             label: this.requestName,
@@ -2183,7 +2232,7 @@ export default {
             duration,
             star: false,
           }
-          // this.$refs.historyComponent.addEntry(entry)
+          this.$refs.historyComponent.addEntry(entry)
           if (fb.currentUser !== null) {
             if (fb.currentSettings[2].value) {
               fb.writeHistory(entry)
@@ -2209,7 +2258,7 @@ export default {
             usesScripts: Boolean(this.preRequestScript),
             preRequestScript: this.preRequestScript,
           }
-          // this.$refs.historyComponent.addEntry(entry)
+          this.$refs.historyComponent.addEntry(entry)
           if (fb.currentUser !== null) {
             if (fb.currentSettings[2].value) {
               fb.writeHistory(entry)
@@ -2787,6 +2836,7 @@ export default {
     }
     document.addEventListener("keydown", this._keyListener.bind(this))
     this.$data._uri = decodeURIComponent(this.path)
+    this.copyResponseObject(this.currentResponse)
     await this.oauthRedirectReq()
   },
   created() {

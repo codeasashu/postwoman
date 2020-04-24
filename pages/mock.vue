@@ -1,20 +1,26 @@
 <template>
   <div class="page">
-    <div class="content">
-      <div v-if="onSpecPage">
+    <div class="content" v-if="onSpecPage && selectedSpec && mockRunning">
+      <div>
         <nuxt-link class="button" to="/mock">Back</nuxt-link>
-      </div>
-      <div v-if="onSpecPage && selectedSpec">
         <button @click="stopMock">Stop Mock</button>
         <button @click="restartMock">Restart Mock</button>
-        <nuxt-link class="button" :to="`/design/${selectedSpec['x-internal-id']}`">
+        <nuxt-link class="button" :to="designpagelink">
           {{ $t("design") }}
         </nuxt-link>
+        <apiversion
+          v-if="!mockInProgress"
+          :addButton="false"
+          :remButton="false"
+          :setDefaultButton="false"
+          :version="selectedMockVersion"
+          @change-version="changeMockVersion"
+        />
       </div>
     </div>
     <div class="content">
       <div class="page-columns inner-left">
-        <pw-section class="orange" label="Select-spec">
+        <pw-section v-if="!onSpecPage" class="orange" label="Select-spec">
           <ul>
             <li>
               <label for="selectSpec">{{ $t("select_spec") }}</label>
@@ -29,9 +35,38 @@
             </li>
           </ul>
         </pw-section>
-        <pw-section class="blue" v-if="selectedSpec">
+        <pw-section class="blue" v-else-if="onSpecPage && selectedSpec && mockRunning">
           <nuxt-child :spec="selectedSpec" />
         </pw-section>
+        <div class="page-mock" v-else-if="onSpecPage && selectedSpec && !mockRunning">
+          <img src="~static/images/fork.png" :alt="$t('fork')" class="fork_banner" />
+          <h2>
+            Mock : &nbsp; <span>{{ selectedSpec.info.title }}</span>
+          </h2>
+          <div>
+            <pre>
+                Spec id (rev: {{ selectedMockVersion || $route.params.apiversion || selectedSpec.info.version }}) <br /> 
+                <u>{{ selectedSpec['x-internal-id'] }}</u>
+              </pre>
+            <apiversion
+              v-if="!mockInProgress"
+              :addButton="false"
+              :remButton="false"
+              :setDefaultButton="false"
+              :version="selectedMockVersion"
+              @change-version="changeMockVersion"
+            />
+            <p>
+              <button :disabled="mockInProgress" @click.prevent="startMock">
+                {{ $t("start_mock") }}
+              </button>
+            </p>
+            <p v-if="mockInProgress"><span>Please wait while mock is getting ready...</span></p>
+            <nuxt-link class="button" v-if="!mockInProgress" to="/mock/">
+              {{ $t("back") }}
+            </nuxt-link>
+          </div>
+        </div>
       </div>
       <pw-modal v-if="showShareModal && selectedSpec" @close="showShareModal = false">
         <div slot="header">
@@ -98,30 +133,60 @@
   fill: var(--act-color);
   cursor: pointer;
 }
+.page-mock {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+}
+.mock_banner {
+  width: 256px;
+}
+.simple button {
+  background-color: transparent;
+  color: #fff;
+}
 </style>
 <script>
 import section from "../components/layout/section"
+import apiversion from "../components/openapi/version"
 export default {
   async asyncData({ params, store, $axios, $nuxt, error }) {
+    // Use cached
+    if (!store.state.openapi.specs.length) {
+      await store.dispatch("openapi/fetchSpecs")
+    }
+
     let onSpecPage = false
     let specs = store.state.openapi.specs
     let spec = undefined
-    if (params.hasOwnProperty("id") && typeof params.id !== "undefined") {
-      await store.dispatch("mock/getMock", params.id)
+    let mockRunning = false
+
+    if (params.id) {
+      console.log("here")
       onSpecPage = true
       spec = specs.filter(_spec => _spec["x-internal-id"] == params.id).pop()
+      if (!spec) error("Spec not found", 404)
+      const mock = await store.dispatch("mock/getMockStatus", {
+        specid: params.id,
+        version: params.apiversion || spec.info.version,
+      })
+      mockRunning = mock && mock.running == true
     }
-    await store.dispatch("openapi/fetchSpecs")
-    return { selectedSpec: spec, onSpecPage }
+    return { selectedSpec: spec, onSpecPage, mockRunning }
   },
   watch: {
-    "$route.path": function(val) {
+    "$route.path": async function(val) {
+      this.mockRunning = await this.isMockRunning()
+      this.selectedMockVersion = undefined
       this.onSpecPage = /\/mock\/(.{1,})+/g.test(val)
 
       if (this.$route.params.hasOwnProperty("id") && typeof this.$route.params.id !== "undefined") {
         this.selectedSpec = this.specs
           .filter(_spec => _spec["x-internal-id"] == this.$route.params.id)
           .pop()
+        this.selectedMockVersion = this.apiversion
       } else {
         this.selectedSpec = undefined
       }
@@ -131,8 +196,12 @@ export default {
   components: {
     "pw-section": section,
     "pw-modal": () => import("../components/ui/modal"),
+    apiversion,
   },
   computed: {
+    mocks() {
+      return this.$store.state.mock.mocks
+    },
     specs() {
       return this.$store.state.openapi.specs
     },
@@ -140,22 +209,40 @@ export default {
       return window.location.protocol.concat("//") + window.location.host
     },
     docurl() {
-      return `${this.$axios.defaults.baseURL}/docs/${this.selectedSpec["x-internal-id"]}`
+      return `${this.$axios.defaults.baseURL}/docs/${this.selectedSpec["x-internal-id"]}/${this.apiversion}`
+    },
+    apiversion() {
+      return this.$route.params.apiversion || this.selectedSpec.info.version
+    },
+    designpagelink() {
+      return `/design/${this.selectedSpec["x-internal-id"]}/${this.apiversion}`
     },
   },
   data() {
     return {
+      mockInProgress: false,
+      selectedMockVersion: this.$route.params.apiversion,
       selectedSpec: undefined,
       onSpecPage: false,
       showShareModal: false,
     }
   },
-  //   computed: {
-  //       specs() {
-  //           return this.$store.state.openapi.specs
-  //       }
-  //   },
   methods: {
+    async startMock() {
+      this.mockInProgress = true
+      const version = this.$data.selectedMockVersion || this.$route.params.apiversion
+      const specid = this.selectedSpec["x-internal-id"]
+      await this.$store.dispatch("mock/restart", { specid, version })
+      this.mockInProgress = false
+      console.log("retrying...")
+      window.location.reload()
+    },
+    changeMockVersion(version) {
+      this.selectedMockVersion = version || this.selectedSpec.info.version
+      window.location.replace(
+        `/mock/${this.selectedSpec["x-internal-id"]}/${this.selectedMockVersion}`
+      )
+    },
     resetRequestResponse() {
       this.$store.commit("resetRequest")
     },
@@ -179,18 +266,36 @@ export default {
     },
     stopMock() {
       this.$store
-        .dispatch("mock/stop", this.selectedSpec["x-internal-id"])
+        .dispatch("mock/stop", {
+          specid: this.selectedSpec["x-internal-id"],
+          version: this.selectedMockVersion,
+        })
         .then(() => this.$router.replace("/mock/"))
     },
     restartMock() {
       this.$store
-        .dispatch("mock/restart", this.selectedSpec["x-internal-id"])
+        .dispatch("mock/restart", {
+          specid: this.selectedSpec["x-internal-id"],
+          version: this.selectedMockVersion,
+        })
         .then(() => window.location.reload())
     },
+    async isMockRunning() {
+      let mock = false
+      console.log("1", this.selectedSpec)
+      if (this.selectedSpec) {
+        console.log("2", this.selectedSpec)
+        mock = await this.$store.dispatch("mock/getMockStatus", {
+          specid: this.selectedSpec["x-internal-id"],
+          version: this.selectedSpec.info.version,
+        })
+      }
+      return mock && mock.running == true
+    },
     async selectSpec() {
-      if (this.selectedSpec)
+      if (this.selectedSpec) {
         this.$router.push({ path: `/mock/${this.selectedSpec["x-internal-id"]}` })
-      else if (this.$route.path != "/mock/") {
+      } else if (this.$route.path != "/mock/") {
         this.$router.replace("/mock/")
       }
     },

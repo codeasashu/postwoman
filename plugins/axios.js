@@ -85,26 +85,45 @@ class SpecApi extends Api {
   }
 
   // Spec related APIs
-  addSpec = async data => await this.client.post("spec/", data)
-  getSpec = async specid => await this.client.get(`spec/${specid}?format=json`)
   getSpecs = async () => await this.client.get("spec/")
-  updateSpec = async (data, specid) => await this.client.put(`spec/${specid}`, data)
+  addSpec = async data => await this.client.post("spec/", data)
+  //Version specific
+  getSpec = async (specid, version) =>
+    await this.client.get(`spec/${specid}`, { params: { format: "json", version } })
+  updateSpec = async (data, specid, version) =>
+    await this.client.put(`spec/${specid}`, data, { params: { version } })
   deleteSpec = async specid => await this.client.delete(`spec/${specid}`)
 
   // Design specific APIs
-  addRequest = async (specid, { title, request, response }) =>
-    await this.client.post(`spec/${specid}`, { title, request, response })
-  deleteRequest = async (specid, operationid) =>
-    await this.client.delete(`spec/${specid}/operation/${operationid}`)
-  deleteResponse = async (specid, operationid, { code, contentType }) =>
-    await this.client.put(`spec/${specid}/operation/${operationid}`, { code, contentType })
+  addRequest = async (specid, { title, request, response, version }) =>
+    await this.client.post(`spec/${specid}`, { title, request, response }, { params: { version } })
+  deleteRequest = async (specid, operationid, version) =>
+    await this.client.delete(`spec/${specid}/operation/${operationid}`, { params: { version } })
+  deleteResponse = async (specid, operationid, version, { code, contentType }) =>
+    await this.client.put(
+      `spec/${specid}/operation/${operationid}`,
+      { code, contentType },
+      { params: { version } }
+    )
 
   // Fork related APIs
   getFork = async specid => await this.client.get(`fork/${specid}`)
   forkSpec = async specid => await this.client.post(`fork/${specid}`)
 
   // Mock APIs
-  getMock = async specid => await this.retry(res => !!res.data.taskid).get(`mock/${specid}`)
-  restartMock = async specid => await this.client.post(`mock/${specid}/restart`)
-  stopMock = async specid => await this.client.post(`mock/${specid}/stop`)
+  getMock = async (specid, version) =>
+    await this.retry(res => !res.data.running).get(`mock/${specid}`, { params: { version } })
+  getMockStatus = async (specid, version) =>
+    await this.client.get(`mock/${specid}`, { params: { version } })
+  restartMock = async (specid, version) =>
+    await this.client.post(`mock/${specid}/restart`, {}, { params: { version } })
+  stopMock = async (specid, version) =>
+    await this.client.post(`mock/${specid}/stop`, {}, { params: { version } })
+
+  //Version APIs
+  addVersion = async (specid, version, isdefault, from) =>
+    await this.client.post(`spec/${specid}/version/${version}`, { default: isdefault, from })
+  removeVersion = async (specid, version) =>
+    await this.client.delete(`spec/${specid}/version/${version}`)
+  setDefaultVersion = async (specid, version) => await this.addVersion(specid, version, true)
 }

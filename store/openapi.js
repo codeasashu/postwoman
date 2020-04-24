@@ -2,6 +2,7 @@ import Vue from "vue"
 
 export const state = () => ({
   response: undefined,
+  selectedVersion: {},
   specs: [],
 })
 
@@ -37,11 +38,31 @@ export const mutations = {
       }
     })
   },
+
+  setVersion(state, { specid, version }) {
+    state.selectedVersion[specid] = version
+  },
+
+  setDefaultVersion(state, specid) {
+    let spec = this.$store.state.openapi.specs.filter(spec => spec["x-internal-id"] == specid).pop()
+    state.selectedVersion[specid] = spec["info"]["version"]
+  },
+
+  resetVersion(state, specid) {
+    let spec = this.$store.state.openapi.specs.filter(spec => spec["x-internal-id"] == specid).pop()
+    state.selectedVersion[specid] = spec["info"]["version"]
+  },
 }
 
 export const actions = {
-  async fetchSpec({ commit }, specid) {
-    return await this.$api.getSpec(specid).then(
+  async fetchSpec({ state, commit }, params) {
+    let { specid, version } = params
+    if (!specid) {
+      specid = params
+      let spec = state.specs.filter(spec => spec["x-internal-id"] == specid).pop()
+      version = spec["info"]["version"]
+    }
+    return await this.$api.getSpec(specid, version).then(
       resp => {
         commit("update", {
           id: specid,
@@ -69,18 +90,19 @@ export const actions = {
     )
   },
 
-  async deleteOperation({ dispatch }, { specid, operationid }) {
-    return await this.$api.deleteRequest(specid, operationid).then(res => {
+  async deleteOperation({ dispatch }, { specid, operationid, version }) {
+    return await this.$api.deleteRequest(specid, operationid, version).then(res => {
       if (res.data.deleted && res.data.deleted == true) {
         //Refresh thiss spec
-        return dispatch("fetchSpec", specid)
+        return dispatch("fetchSpec", { specid, version })
       }
     })
   },
 
-  async deleteResponse({ dispatch }, { specid, operationid, data }) {
-    return await this.$api.deleteResponse(specid, operationid, data).then(
-      () => dispatch("fetchSpec", specid),
+  async deleteResponse({ dispatch }, { specid, operationid, version, data }) {
+    console.log("del respponse", specid, operationid, version)
+    return await this.$api.deleteResponse(specid, operationid, version, data).then(
+      () => dispatch("fetchSpec", { specid, version }),
       err => console.error("[APIERROR]", err)
     )
   },
@@ -100,9 +122,9 @@ export const actions = {
     )
   },
 
-  async updateSpec({ commit }, { specid, data: { title, url, description } }) {
+  async updateSpec({ commit }, { specid, data: { title, url, description, version } }) {
     description = description || ""
-    return await this.$api.updateSpec({ title, url, description }).then(
+    return await this.$api.updateSpec({ title, url, description }, specid, version).then(
       res => commit("update", { id: specid, spec: res.data }),
       err => console.error("[APIERROR]", err)
     )
@@ -124,6 +146,36 @@ export const actions = {
 
   async forkSpec({ dispatch }, specid) {
     return await this.$api.forkSpec(specid).then(
+      async res => {
+        await dispatch("fetchSpec", res.data["x-internal-id"])
+        return res
+      },
+      err => console.error("[APIERROR]", err)
+    )
+  },
+
+  async addVersion({ dispatch }, { specid, version, from }) {
+    return await this.$api.addVersion(specid, version, false, from).then(
+      async res => {
+        await dispatch("fetchSpec", res.data["x-internal-id"])
+        return res
+      },
+      err => console.error("[APIERROR]", err)
+    )
+  },
+
+  async removeVersion({ dispatch }, { specid, version }) {
+    return await this.$api.removeVersion(specid, version).then(
+      async res => {
+        await dispatch("fetchSpec", specid)
+        return res
+      },
+      err => console.error("[APIERROR]", err)
+    )
+  },
+
+  async setDefaultVersion({ dispatch }, { specid, version }) {
+    return await this.$api.setDefaultVersion(specid, version).then(
       async res => {
         await dispatch("fetchSpec", res.data["x-internal-id"])
         return res

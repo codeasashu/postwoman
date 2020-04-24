@@ -6,11 +6,22 @@
       </div>
       <div v-if="onSpecPage && selectedSpec">
         <button @click="deleteSpec">Delete spec</button>
-        <button @click="showShareModalWindow()">{{ $t("share") }}</button>
+        <button @click="showShareModalWindow">{{ $t("share") }}</button>
         <a class="button" :href="docurl" target="_blank">{{ $t("documentation") }}</a>
-        <nuxt-link class="button" :to="`/mock/${selectedSpec['x-internal-id']}`">
+        <nuxt-link
+          class="button"
+          :to="`/mock/${selectedSpec['x-internal-id']}/${$route.params.apiversion}`"
+        >
           {{ $t("mock") }}
         </nuxt-link>
+        <apiversion
+          :addButton="true"
+          :remButton="true"
+          :setDefaultButton="true"
+          :version="$route.params.apiversion"
+          @change-version="changeVersion"
+          @add-version="addNewVersion"
+        />
       </div>
     </div>
     <div class="content">
@@ -30,10 +41,18 @@
             </li>
           </ul>
         </pw-section>
-        <pw-section class="blue">
+        <pw-section class="blue" v-if="selectedSpec && onSpecPage">
           <nuxt-child :spec="selectedSpec" />
         </pw-section>
+        <pw-section class="blue" v-else>
+          <p>Please Select a spec above or</p>
+          <button @click="createSpec" id="createSpec">
+            {{ $t("create_spec") }}
+            <span><i class="material-icons">send</i></span>
+          </button>
+        </pw-section>
       </div>
+      <addOpenapi :show="showModalAdd" @hide-modal="showModalAdd = !showModalAdd" />
       <pw-modal v-if="showShareModal && selectedSpec" @close="showShareModal = false">
         <div slot="header">
           <ul>
@@ -102,23 +121,39 @@
 </style>
 <script>
 import section from "../components/layout/section"
+import version from "../components/openapi/version"
+import modal from "../components/ui/modal"
 export default {
   async asyncData({ params, store, $axios, $nuxt, error }) {
+    await store.dispatch("openapi/fetchSpecs")
+
     let onSpecPage = false
     let specs = store.state.openapi.specs
     let spec = undefined
+    let apiversion = params.apiversion
+
     if (params.hasOwnProperty("id")) {
       onSpecPage = true
       spec = specs.filter(_spec => _spec["x-internal-id"] == params.id).pop()
+      if (
+        !!apiversion &&
+        apiversion != spec["info"]["version"] &&
+          spec["info"]["x-versions"] && spec["info"]["x-versions"].indexOf(apiversion) < 0
+      )
+        error("Version not found", 404)
+
+      await store.dispatch("openapi/fetchSpec", {
+        specid: spec["x-internal-id"],
+        version: apiversion,
+      })
     }
-    await store.dispatch("openapi/fetchSpecs")
     return { selectedSpec: spec, onSpecPage }
   },
   watch: {
     "$route.path": function(val) {
       this.onSpecPage = /\/design\/(.{1,})+/g.test(val)
 
-      if (this.$route.params.hasOwnProperty("id")) {
+      if (this.$route.params.id) {
         this.selectedSpec = this.specs
           .filter(_spec => _spec["x-internal-id"] == this.$route.params.id)
           .pop()
@@ -130,7 +165,9 @@ export default {
   },
   components: {
     "pw-section": section,
-    "pw-modal": () => import("../components/ui/modal"),
+    "pw-modal": modal,
+    apiversion: version,
+    addOpenapi: () => import("../components/openapi/add"),
   },
   computed: {
     specs() {
@@ -140,7 +177,10 @@ export default {
       return window.location.protocol.concat("//") + window.location.host
     },
     docurl() {
-      return `${this.$axios.defaults.baseURL}/docs/${this.selectedSpec["x-internal-id"]}`
+      return `${this.$axios.defaults.baseURL}/docs/${this.selectedSpec["x-internal-id"]}/${this.$route.params.apiversion}`
+    },
+    specid() {
+      return this.selectedSpec && this.selectedSpec["x-internal-id"]
     },
   },
   data() {
@@ -148,6 +188,7 @@ export default {
       selectedSpec: undefined,
       onSpecPage: false,
       showShareModal: false,
+      showModalAdd: false,
     }
   },
   //   computed: {
@@ -156,6 +197,33 @@ export default {
   //       }
   //   },
   methods: {
+    createSpec() {
+      this.showModalAdd = true
+    },
+    async changeVersion(version) {
+      this.$nuxt.$loading.start()
+      await this.$store.dispatch("openapi/fetchSpec", {
+        specid: this.specid,
+        version,
+      })
+      this.$nuxt.$loading.finish()
+      this.$router.replace(`/design/${this.specid}/${version}`)
+    },
+    addNewVersion({ version, from }) {
+      this.$store
+        .dispatch("openapi/addVersion", {
+          specid: this.selectedSpec["x-internal-id"],
+          version,
+          from: from || this.$route.params.apiversion,
+        })
+        .then(
+          () =>
+            this.$toast.success(this.$t("success"), {
+              icon: "done",
+            }),
+          err => console.error(err)
+        )
+    },
     resetRequestResponse() {
       this.$store.dispatch("design/reset")
     },
@@ -175,7 +243,9 @@ export default {
       }
     },
     showShareModalWindow() {
-      this.showShareModal = true
+      this.$nextTick(() => {
+        this.showShareModal = true
+      })
     },
     selectSpec() {
       if (this.selectedSpec)

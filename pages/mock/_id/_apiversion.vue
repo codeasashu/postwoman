@@ -1,6 +1,6 @@
 <template>
   <div class="page">
-    <div class="content">
+    <div class="content" v-if="spec && mock">
       <div class="page-columns inner-left" v-if="spec">
         <pw-section class="blue" :label="$t('request')" ref="request">
           <div class="blue">
@@ -871,59 +871,75 @@
           </div> -->
         </section>
 
-        <pw-section class="purple" id="response" ref="saveresponse" :label="$t('response')">
-          <ul>
-            <li>
-              <label for="responseLabel">Response Label</label>
-              <input id="responseLabel" v-model="response.label" name="responseLabel" />
-            </li>
-          </ul>
+        <pw-section class="purple" id="response" :label="$t('response')" ref="response">
           <ul>
             <li>
               <label for="status">{{ $t("status") }}</label>
               <input
                 :class="statusCategory ? statusCategory.className : ''"
-                v-model="response.status"
+                :value="response.status || $t('waiting_send_req')"
                 ref="status"
                 id="status"
                 name="status"
+                readonly
                 type="text"
               />
             </li>
           </ul>
-          <div v-if="response.headers.length">
-            <ul v-for="(value, key) in response.headers" :key="key">
-              <li>
-                <label :for="key">{{ key }}</label>
-                <input :id="key" :value="value" :name="key" />
-              </li>
-            </ul>
-          </div>
-          <div v-else>
-            <ul>
-              <li>
-                <label for="content-type">content-type</label>
-                <select v-model="responseBodyType">
-                  <option value="json">Json</option>
-                  <option value="text">Text</option>
-                  <option value="html">Html</option>
-                </select>
-                <!-- <input v-model="responseType" name="content-type" /> -->
-              </li>
-            </ul>
-          </div>
-          <ul>
+          <ul v-for="(value, key) in response.headers" :key="key">
             <li>
+              <label :for="key">{{ key }}</label>
+              <input :id="key" :value="value" :name="key" readonly />
+            </li>
+          </ul>
+          <ul v-if="response.body">
+            <li>
+              <div class="flex-wrap">
+                <label for="body">{{ $t("response") }}</label>
+                <div>
+                  <button
+                    class="icon"
+                    @click="ToggleExpandResponse"
+                    ref="ToggleExpandResponse"
+                    v-if="response.body"
+                    v-tooltip="{
+                      content: !expandResponse ? $t('expand_response') : $t('collapse_response'),
+                    }"
+                  >
+                    <i class="material-icons">
+                      {{ !expandResponse ? "unfold_more" : "unfold_less" }}
+                    </i>
+                  </button>
+                  <button
+                    class="icon"
+                    @click="downloadResponse"
+                    ref="downloadResponse"
+                    v-if="response.body"
+                    v-tooltip="$t('download_file')"
+                  >
+                    <i class="material-icons">get_app</i>
+                  </button>
+                  <button
+                    class="icon"
+                    @click="copyResponse"
+                    ref="copyResponse"
+                    v-if="response.body"
+                    v-tooltip="$t('copy_response')"
+                  >
+                    <i class="material-icons">file_copy</i>
+                  </button>
+                </div>
+              </div>
               <div id="response-details-wrapper">
                 <Editor
-                  v-model="response.body"
+                  :value="responseBodyText"
                   :lang="responseBodyType"
                   :options="{
                     maxLines: responseBodyMaxLines,
                     minLines: '16',
                     fontSize: '16px',
                     autoScrollEditorIntoView: true,
-                    readOnly: false,
+                    readOnly: true,
                     showPrintMargin: false,
                     useWorker: false,
                   }"
@@ -935,12 +951,8 @@
                   src="about:blank"
                 ></iframe>
               </div>
-              <div class="align-left">
-                <button
-                  v-if="response.body && responseType === 'text/html'"
-                  class="icon"
-                  @click.prevent="togglePreview"
-                >
+              <div class="align-right" v-if="response.body && responseType === 'text/html'">
+                <button class="icon" @click.prevent="togglePreview">
                   <i class="material-icons">
                     {{ !previewEnabled ? "visibility" : "visibility_off" }}
                   </i>
@@ -1240,21 +1252,22 @@
 </template>
 
 <script>
-import section from "../../components/layout/section"
+import section from "../../../components/layout/section"
 import url from "url"
 import querystring from "querystring"
-import { commonHeaders } from "../../functions/headers"
-import textareaAutoHeight from "../../directives/textareaAutoHeight"
-import parseCurlCommand from "../../assets/js/curlparser.js"
-import getEnvironmentVariablesFromScript from "../../functions/preRequest"
-import runTestScriptWithVariables from "../../functions/postwomanTesting"
-import parseTemplateString from "../../functions/templating"
-import AceEditor from "../../components/ui/ace-editor"
-import { tokenRequest, oauthRedirect } from "../../assets/js/oauth"
-import { sendNetworkRequest } from "../../functions/network"
-import { fb } from "../../functions/fb"
+import { commonHeaders } from "../../../functions/headers"
+import textareaAutoHeight from "../../../directives/textareaAutoHeight"
+import parseCurlCommand from "../../../assets/js/curlparser.js"
+import getEnvironmentVariablesFromScript from "../../../functions/preRequest"
+import runTestScriptWithVariables from "../../../functions/postwomanTesting"
+import parseTemplateString from "../../../functions/templating"
+import AceEditor from "../../../components/ui/ace-editor"
+import { tokenRequest, oauthRedirect } from "../../../assets/js/oauth"
+import { sendNetworkRequest } from "../../../functions/network"
+import { fb } from "../../../functions/fb"
 import { getEditorLangForMimeType } from "~/functions/editorutils"
 import { cloneDeep } from "lodash"
+
 const statusCategories = [
   {
     name: "informational",
@@ -1310,20 +1323,20 @@ export default {
   },
   components: {
     "pw-section": section,
-    "pw-toggle": () => import("../../components/ui/toggle"),
-    "pw-modal": () => import("../../components/ui/modal"),
-    autocomplete: () => import("../../components/ui/autocomplete"),
-    requests: () => import("../../components/requests"),
-    collections: () => import("../../components/collections"),
-    saveRequestAs: () => import("../../components/collections/saveRequestAs"),
+    "pw-toggle": () => import("../../../components/ui/toggle"),
+    "pw-modal": () => import("../../../components/ui/modal"),
+    autocomplete: () => import("../../../components/ui/autocomplete"),
+    requests: () => import("../../../components/requests"),
+    collections: () => import("../../../components/collections"),
+    saveRequestAs: () => import("../../../components/collections/saveRequestAs"),
     Editor: AceEditor,
-    environments: () => import("../../components/design/environments"),
-    inputform: () => import("../../components/firebase/inputform"),
-    notes: () => import("../../components/firebase/feeds"),
-    login: () => import("../../components/firebase/login"),
-    tabs: () => import("../../components/ui/tabs"),
-    tab: () => import("../../components/ui/tab"),
-    saveRequestOpenapi: () => import("../../components/openapi/saveRequest"),
+    environments: () => import("../../../components/design/environments"),
+    inputform: () => import("../../../components/firebase/inputform"),
+    notes: () => import("../../../components/firebase/feeds"),
+    login: () => import("../../../components/firebase/login"),
+    tabs: () => import("../../../components/ui/tabs"),
+    tab: () => import("../../../components/ui/tab"),
+    saveRequestOpenapi: () => import("../../../components/openapi/saveRequest"),
   },
   props: {
     spec: Object,
@@ -1365,6 +1378,7 @@ export default {
       validContentTypes: [
         "application/json",
         "application/hal+json",
+        "application/problem+json",
         "application/xml",
         "application/x-www-form-urlencoded",
         "text/html",
@@ -1393,16 +1407,30 @@ export default {
     }
   },
   watch: {
-    currentResponse(val) {
-      if (val) {
-        this.copyResponseObject(val)
+    "response.body": function(val) {
+      if (
+        this.response.body === this.$t("waiting_send_req") ||
+        this.response.body === this.$t("loading")
+      ) {
+        this.responseBodyText = this.response.body
+        this.responseBodyType = "text"
       } else {
-        this.response = {
-          label: "",
-          status: "",
-          headers: { "content-type": "text/plain" },
-          body: "",
+        console.log("here", this.responseType)
+        if (
+          this.responseType === "application/json" ||
+          this.responseType === "application/hal+json" ||
+          this.responseType === "application/problem+json"
+        ) {
+          this.responseBodyText = JSON.stringify(this.response.body, null, 2)
+          this.responseBodyType = "json"
+        } else if (this.responseType === "text/html") {
+          this.responseBodyText = this.response.body
+          this.responseBodyType = "html"
+        } else {
+          this.responseBodyText = this.response.body
+          this.responseBodyType = "text"
         }
+        console.log("here2", this.responseBodyText, this.response.body)
       }
     },
     urlExcludes: {
@@ -1476,12 +1504,23 @@ export default {
     },
   },
   computed: {
-    basePath() {
-      const server = this.spec.servers[0]
-      return server && server.url
+    specid() {
+      return this.spec["x-internal-id"]
     },
-    currentResponse() {
-      return this.$store.state.design.response
+    apiversion() {
+      return this.$route.params.apiversion || this.spec.info.version
+    },
+    mock() {
+      let mock = this.$store.state.mock.mocks
+        .filter(
+          mock =>
+            mock.hasOwnProperty(this.specid) && mock[this.specid].hasOwnProperty(this.apiversion)
+        )
+        .pop()
+      return mock[this.specid][this.apiversion]
+    },
+    basePath() {
+      return this.mock && this.mock.servers[0]
     },
     isLoggedIn() {
       return this.$store.state.auth.loggedIn === true
@@ -1943,72 +1982,6 @@ export default {
         this.path = path
       }
     },
-    copyResponseObject(originalResponse) {
-      let pp = cloneDeep(originalResponse)
-      if (!pp || !pp.hasOwnProperty("status")) {
-        return
-      }
-      this.response = {
-        label: pp.label,
-        status: pp.status,
-        headers: Object.assign({}, { "content-type": "text/plain" }, pp.headers),
-      }
-
-      if (pp.headers.hasOwnProperty("content-type")) {
-        switch (pp.headers["content-type"]) {
-          case "application/json":
-            this.response.body = JSON.stringify(pp.body, null, 2)
-            this.responseBodyType = "json"
-            break
-          case "application/hal+json":
-            this.response.body = JSON.stringify(pp.body, null, 2)
-            this.responseBodyType = "json"
-            break
-          case "text/html":
-            this.response.body = pp.body
-            this.responseBodyType = "html"
-            break
-          case "text/plain":
-            this.response.body = pp.body
-            this.responseBodyType = "text"
-            break
-          default:
-            this.response.body = pp.body
-            this.responseBodyType = "text"
-            break
-        }
-      }
-    },
-    getResponseContentType() {
-      let contentType = "text/plain" //Default text
-      switch (this.responseBodyType) {
-        case "json":
-          contentType = "application/json"
-          break
-        case "text":
-          contentType = "text/plain"
-          break
-        case "html":
-          contentType = "text/html"
-          break
-        default:
-          contentType = "text/plain"
-          break
-      }
-      return contentType
-    },
-    saveResponse() {
-      if (!this.response.headers.hasOwnProperty("content-type")) {
-        this.response.headers["content-type"] = this.getResponseContentType()
-      }
-      this.$data.response["date"] = new Date().toLocaleDateString()
-      this.$data.response["time"] = new Date().toLocaleTimeString()
-      this.$store.commit("design/addResponse", cloneDeep(this.$data.response))
-    },
-    // changeRepsonseContentType(event) {
-    //   event.preventDefault()
-    //   this.$data.response.headers["content-type"] = this.getResponseContentType()
-    // },
     saveOpenapi() {
       this.$data.showOasModal = true
     },
@@ -2054,7 +2027,7 @@ export default {
     async makeRequest(auth, headers, requestBody, preRequestScript) {
       const requestOptions = {
         method: this.method,
-        url: this.url + this.pathName + this.queryString,
+        url: this.basePath + this.pathName + this.queryString,
         auth,
         headers,
         data: requestBody,
@@ -2105,16 +2078,7 @@ export default {
         return
       }
 
-      //Need a valid response for saving this request
-      if (!this.response.status || !this.responseBodyType) {
-        this.$toast.error(this.$t("invalid_response"), {
-          icon: "error",
-        })
-        if (this.settings.SCROLL_INTO_ENABLED) this.scrollInto("saveresponse")
-        return
-      }
-
-      if (this.settings.SCROLL_INTO_ENABLED) this.scrollInto("saveresponse")
+      if (this.settings.SCROLL_INTO_ENABLED) this.scrollInto("response")
 
       let request = {
         label: this.label,
@@ -2136,27 +2100,7 @@ export default {
         requestType: this.requestType,
       }
 
-      this.response.headers["content-type"] = this.getResponseContentType()
-      this.$store
-        .dispatch("design/addRequest", {
-          specid: this.spec["x-internal-id"],
-          request,
-          response: this.response,
-        })
-        .then(
-          res => {
-            this.$toast.success(this.$t("request_saved"), {
-              icon: "done",
-            })
-          },
-          err => {
-            console.error(err)
-            this.$toast.error(this.$t("check_console_details"), {
-              icon: "error",
-            })
-          }
-        )
-      return
+      this.$store.commit("setRequest", request)
 
       // Start showing the loading bar as soon as possible.
       // The nuxt axios module will hide it when the request is made.
@@ -2231,7 +2175,8 @@ export default {
           const body = (this.response.body = payload.data)
           const date = new Date().toLocaleDateString()
           const time = new Date().toLocaleTimeString()
-          this.$store.commit("openapi/addResponse", Object.assign({}, this.response))
+          console.log("respsonse", this.response)
+          //this.$store.commit("openapi/addResponse", Object.assign({}, this.response))
           // Addition of an entry to the history component.
           const entry = {
             label: this.requestName,
@@ -2246,7 +2191,7 @@ export default {
             duration,
             star: false,
           }
-          this.$refs.historyComponent.addEntry(entry)
+          // this.$refs.historyComponent.addEntry(entry)
           if (fb.currentUser !== null) {
             if (fb.currentSettings[2].value) {
               fb.writeHistory(entry)
@@ -2272,7 +2217,7 @@ export default {
             usesScripts: Boolean(this.preRequestScript),
             preRequestScript: this.preRequestScript,
           }
-          this.$refs.historyComponent.addEntry(entry)
+          // this.$refs.historyComponent.addEntry(entry)
           if (fb.currentUser !== null) {
             if (fb.currentSettings[2].value) {
               fb.writeHistory(entry)
@@ -2828,7 +2773,7 @@ export default {
     },
   },
   async mounted() {
-    this.$nextTick(() => this.observeRequestButton())
+    //this.$nextTick(() => this.observeRequestButton())
     this._keyListener = function(e) {
       if (e.key === "g" && (e.ctrlKey || e.metaKey)) {
         e.preventDefault()
@@ -2850,7 +2795,6 @@ export default {
     }
     document.addEventListener("keydown", this._keyListener.bind(this))
     this.$data._uri = decodeURIComponent(this.path)
-    this.copyResponseObject(this.currentResponse)
     await this.oauthRedirectReq()
   },
   created() {
