@@ -10,6 +10,10 @@ export default {
     const spec = store.state.openapi.specs.filter(spec => spec["x-internal-id"] == specid).pop()
     if (!spec) error("Spec not found", 404)
     const apiversion = spec["info"]["version"]
+    await store.dispatch("openapi/fetchSpec", {
+      specid: spec["x-internal-id"],
+      version: apiversion,
+    })
     redirect(`/browse/${specid}/${apiversion}`)
   },
 }

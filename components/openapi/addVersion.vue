@@ -19,6 +19,9 @@
         <li>
           <label for="newversion">{{ $t("version_name") }}</label>
           <input id="newversion" type="text" v-model="newversion" placeholder="1.0.1" />
+          <span v-if="versionerror" class="error"
+            >Version can not be same as existing versions</span
+          >
         </li>
         <li>
           <span class="select-wrapper">
@@ -40,7 +43,7 @@
           <button class="icon" @click="hideModal">
             {{ $t("cancel") }}
           </button>
-          <button class="icon primary" @click="addNewVersion">
+          <button class="icon primary" :disabled="versionerror" @click="addNewVersion">
             {{ $t("save") }}
           </button>
         </span>
@@ -60,6 +63,7 @@ export default {
     return {
       newversion: undefined,
       selectedVersion: undefined,
+      versionerror: false,
     }
   },
   computed: {
@@ -79,6 +83,9 @@ export default {
       if (shown) {
         this.$data.selectedVersion = this.$route.params.apiversion
       }
+    },
+    newversion(val) {
+      this.versionerror = this.versions.indexOf(val) >= 0
     },
   },
   methods: {

@@ -5,7 +5,6 @@ async function refreshTokenF($auth, $axios, $authapi, token, refreshToken) {
   if (token && refreshToken) {
     try {
       const { data } = await $authapi.refreshToken(refreshToken)
-      console.log("setting 2", data)
       token = data.access
       $auth.setToken(strategy, token)
       $auth.setRefreshToken(strategy, refreshToken)
@@ -21,7 +20,6 @@ async function refreshTokenF($auth, $axios, $authapi, token, refreshToken) {
 const setAccessToken = async ($auth, $authapi, $axios, token) => {
   try {
     const { data } = await $authapi.getToken(token)
-    console.log("setting 1", data)
     let access_token = data.access_token
     return {
       access_token,

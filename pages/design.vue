@@ -2,12 +2,23 @@
   <div class="page">
     <div class="content">
       <div v-if="onSpecPage">
-        <nuxt-link class="button" to="/design">Back</nuxt-link>
+        <nuxt-link to="/design">
+          <button class="rounded">
+            <i class="material-icons">arrow_back</i>
+          </button>
+        </nuxt-link>
       </div>
       <div v-if="onSpecPage && selectedSpec">
-        <button @click="deleteSpec">Delete spec</button>
-        <button @click="showShareModalWindow">{{ $t("share") }}</button>
-        <a class="button" :href="docurl" target="_blank">{{ $t("documentation") }}</a>
+        <button @click="deleteSpec" v-tooltip="$t('delete_spec')">
+          <i class="material-icons">delete</i>
+        </button>
+        <button @click="showShareModalWindow" v-tooltip="$t('share')">
+          <i class="material-icons">share</i>
+        </button>
+        <a class="button" :href="docurl" target="_blank" v-tooltip="$t('documentation')">
+          <i class="material-icons">import_contacts</i>
+        </a>
+        <button @click="commitSpec">{{ $t("commit") }}</button>
         <nuxt-link
           class="button"
           :to="`/mock/${selectedSpec['x-internal-id']}/${$route.params.apiversion}`"
@@ -118,6 +129,14 @@
   fill: var(--act-color);
   cursor: pointer;
 }
+.rounded {
+  background-color: var(--bg-color);
+  border-color: var(--ac-color);
+
+  i {
+    color: var(--ac-color);
+  }
+}
 </style>
 <script>
 import section from "../components/layout/section"
@@ -184,6 +203,9 @@ export default {
     specid() {
       return this.selectedSpec && this.selectedSpec["x-internal-id"]
     },
+    selectedVersion() {
+      return this.$route.params.apiversion || (this.selectedSpec && this.selectedSpec.info.version)
+    },
   },
   data() {
     return {
@@ -201,6 +223,16 @@ export default {
   methods: {
     createSpec() {
       this.showModalAdd = true
+    },
+    async commitSpec() {
+      if (this.specid) {
+        this.$nuxt.$loading.start()
+        await this.$store.dispatch("integration/commitSpecGitlab", {
+          specid: this.specid,
+          version: this.selectedVersion,
+        })
+        this.$nuxt.$loading.finish()
+      }
     },
     async changeVersion(version) {
       this.$nuxt.$loading.start()

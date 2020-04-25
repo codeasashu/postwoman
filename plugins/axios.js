@@ -9,6 +9,7 @@ class Api {
   API_PREFIX = "/api/v1"
 
   constructor($axios) {
+    this.apibase = $axios.defaults.baseURL
     this.client = $axios.create({
       baseURL: `${$axios.defaults.baseURL}${this.API_PREFIX}`,
     })
@@ -62,6 +63,9 @@ class SpecApi extends Api {
       }
       return Promise.reject(error)
     })
+  }
+  get integrationclient() {
+    return this.client.create({ baseURL: this.apibase + "/integrations" })
   }
 
   timeout = ms => new Promise(resolve => setTimeout(resolve, ms))
@@ -126,4 +130,14 @@ class SpecApi extends Api {
   removeVersion = async (specid, version) =>
     await this.client.delete(`spec/${specid}/version/${version}`)
   setDefaultVersion = async (specid, version) => await this.addVersion(specid, version, true)
+
+  //Integration APIs
+  //Gitlab
+  gitlab = {
+    listRepos: async () => await this.integrationclient.get("gitlab"),
+    setRepo: async (project_id, branch) =>
+      await this.integrationclient.post("gitlab", { project_id, branch }),
+    commitSpec: async (specid, version) =>
+      await this.integrationclient.post(`gitlab/commit/${specid}/${version}`),
+  }
 }
