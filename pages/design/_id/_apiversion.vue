@@ -152,21 +152,34 @@
               </span>
             </li>
           </div>
-          <li>
-            <label for="url">{{ $t("url") }}</label>
-            <small>{{ basePath }}</small>
-            <input
-              :class="{ error: !isValidURL }"
-              @keyup.enter="sendRequest()"
-              id="url"
-              name="url"
-              type="url"
-              @change="pathInputHandler()"
-              @blur="setUri"
-              v-model="$data._uri"
-              spellcheck="false"
-            />
-          </li>
+          <div>
+            <li>
+              <label for="url">{{ $t("url") }}</label>
+              <span class="select-wrapper">
+                <select id="basepaths" v-model="basePath">
+                  <option v-for="(bpath, index) in basePaths" :key="index" :value="bpath.url">
+                    {{ bpath.url }}
+                  </option>
+                </select>
+              </span>
+            </li>
+          </div>
+          <div>
+            <li>
+              <label for="url">{{ $t("path") }}</label>
+              <input
+                :class="{ error: !isValidURL }"
+                @keyup.enter="sendRequest()"
+                id="url"
+                name="url"
+                type="url"
+                @change="pathInputHandler()"
+                @blur="setUri"
+                v-model="$data._uri"
+                spellcheck="false"
+              />
+            </li>
+          </div>
           <div>
             <li>
               <label class="hide-on-small-screen" for="send">&nbsp;</label>
@@ -1231,6 +1244,7 @@ export default {
   },
   data() {
     return {
+      basePath: undefined,
       _uri: undefined,
       showModal: false,
       showPreRequestScript: false,
@@ -1376,9 +1390,8 @@ export default {
     },
   },
   computed: {
-    basePath() {
-      const server = this.spec.servers[0]
-      return server && server.url
+    basePaths() {
+      return this.spec.servers
     },
     currentResponse() {
       return this.$store.state.design.response
@@ -2739,6 +2752,7 @@ export default {
     document.addEventListener("keydown", this._keyListener.bind(this))
     this.$data._uri = decodeURIComponent(this.path)
     this.copyResponseObject(this.currentResponse)
+    this.basePath = this.basePaths[0].url
     await this.oauthRedirectReq()
   },
   created() {

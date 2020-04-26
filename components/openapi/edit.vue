@@ -17,16 +17,37 @@
     <div slot="body">
       <ul>
         <li>
-          <input type="text" v-model="title" :placeholder="$t('my_new_spec')" />
+          <label for="spectitle">{{ $t("spec_title") }}</label>
+          <div>
+            <input type="text" id="spectitle" v-model="title" :placeholder="$t('my_new_spec')" />
+          </div>
         </li>
+      </ul>
+      <label for="specservers">{{ $t("spec_servers") }}</label>
+      <ul v-for="(server, index) in servers" :key="index">
         <li>
           <input
-            type="url"
-            v-model="url"
+            :name="'param' + index"
+            v-model="server.url"
             placeholder="http://httpbin.org"
-            @keyup.enter="addNewSpec"
+            autofocus
           />
         </li>
+        <li>
+          <button class="icon" @click="removeServer(index)" v-tooltip.bottom="$t('delete')">
+            <i class="material-icons">delete</i>
+          </button>
+        </li>
+      </ul>
+      <ul>
+        <li>
+          <button class="icon" @click="addServer">
+            <i class="material-icons">add</i>
+            <span>{{ $t("add_new") }}</span>
+          </button>
+        </li>
+      </ul>
+      <ul>
         <li>
           <textarea v-model="description"></textarea>
         </li>
@@ -48,55 +69,86 @@
   </modal>
 </template>
 <script>
-import { fb } from "../../functions/fb"
-
+import { cloneDeep } from "lodash"
 export default {
   props: {
     show: Boolean,
-    spec: Object,
+    specid: String,
   },
   components: {
     modal: () => import("../../components/ui/modal"),
   },
   data() {
     return {
-      title: this.spec ? this.spec.info.title : undefined,
-      url: this.spec ? this.spec.servers[0] : undefined,
-      description: this.spec ? this.spec.description : undefined,
+      title: undefined,
+      description: undefined,
+      servers: [],
     }
+  },
+  computed: {
+    spec() {
+      let spec = this.$store.state.openapi.specs
+        .filter(spec => spec["x-internal-id"] == this.specid)
+        .pop()
+      return cloneDeep(spec)
+    },
+    emptyServer() {
+      let emptyServers = this.servers.filter(server => !server.url)
+      return emptyServers == this.servers.length
+    },
   },
   watch: {
     spec(val) {
       if (val) {
         this.title = val.info.title
-        this.url = val.servers[0]["url"]
-        this.description = val.description
+        this.description = val.info.description
+        this.servers = cloneDeep(val.servers)
       }
     },
   },
+  mounted() {
+    if (this.spec) {
+      this.title = this.spec.info.title
+      this.description = this.spec.info.description
+      this.servers = cloneDeep(this.spec.servers)
+    }
+    //this.$store.commit('openapi/setInfo', {specid: this.specid, info: {title: val}})
+    //this.$store.commit('openapi/setServers', { specid: this.specid, servers: val})
+  },
   methods: {
-    editSpec() {
-      if (!this.$data.title) {
-        this.$toast.info($t("invalid_spec_name"))
+    removeServer(index) {
+      if (this.emptyServer || this.servers.length == 1) {
+        this.$toast.error("Atleast one server is reqiured", { icon: "error" })
         return
       }
-      if (!this.$data.url) {
-        this.$toast.info($t("invalid_spec_url"))
+      this.servers.splice(index, 1)
+    },
+    addServer() {
+      this.servers.push({ url: undefined })
+    },
+    editSpec() {
+      this.$toast.clear()
+      if (!this.$data.title) {
+        this.$toast.error(this.$t("invalid_spec_name"), { icon: "error" })
+        return
+      }
+      if (this.emptyServer) {
+        this.$toast.error(this.$t("invalid_spec_url"), { icon: "error" })
         return
       }
 
       this.$store
         .dispatch("openapi/updateSpec", {
-          specid: this.$props.spec["x-internal-id"],
+          specid: this.specid,
           data: {
             title: this.$data.title,
-            url: this.$data.url,
+            servers: this.$data.servers.map(v => v.url),
             description: this.$data.description || "",
           },
         })
         .then(
           () => this.$toast.success(this.$t("success"), { icon: "done" }),
-          err => console.log(err)
+          err => this.$toast.error(err, { icon: "error" })
         )
 
       this.$emit("hide-modal")

@@ -15,6 +15,9 @@
         <button @click="showShareModalWindow" v-tooltip="$t('share')">
           <i class="material-icons">share</i>
         </button>
+        <button @click="editSpecModalWindow" v-tooltip="$t('edit')">
+          <i class="material-icons">create</i>
+        </button>
         <a class="button" :href="docurl" target="_blank" v-tooltip="$t('documentation')">
           <i class="material-icons">import_contacts</i>
         </a>
@@ -105,6 +108,12 @@
           </div>
         </div>
       </pw-modal>
+      <editOpenapi
+        v-if="onSpecPage && selectedSpec"
+        :show="showEditSpecModalWindow"
+        :specid="selectedSpec['x-internal-id']"
+        @hide-modal="showEditSpecModalWindow = false"
+      />
     </div>
   </div>
 </template>
@@ -181,6 +190,7 @@ export default {
     "pw-modal": modal,
     apiversion: version,
     addOpenapi: () => import("../components/openapi/add"),
+    editOpenapi: () => import("../components/openapi/edit"),
   },
   computed: {
     specs() {
@@ -205,6 +215,7 @@ export default {
       onSpecPage: false,
       showShareModal: false,
       showModalAdd: false,
+      showEditSpecModalWindow: false,
     }
   },
   //   computed: {
@@ -272,6 +283,9 @@ export default {
       this.$nextTick(() => {
         this.showShareModal = true
       })
+    },
+    editSpecModalWindow() {
+      this.showEditSpecModalWindow = true
     },
     selectSpec() {
       if (this.selectedSpec)

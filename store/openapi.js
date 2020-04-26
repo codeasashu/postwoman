@@ -13,6 +13,25 @@ export const mutations = {
     state.specs = specs
   },
 
+  setInfo(state, { specid, info }) {
+    state.specs.forEach((_spec, key) => {
+      if (getid(_spec) == specid) {
+        console.log("setinfo", Object.assign({}, state.specs[key].info, info), info)
+        state.specs[key].info = Object.assign({}, state.specs[key].info, info)
+        return
+      }
+    })
+  },
+
+  setServers(state, { specid, servers }) {
+    state.specs.forEach((_spec, key) => {
+      if (getid(_spec) == specid) {
+        state.specs[key].servers = servers
+        return
+      }
+    })
+  },
+
   add(state, spec) {
     state.specs.push(spec)
   },
@@ -114,17 +133,17 @@ export const actions = {
     )
   },
 
-  async addSpec({ commit }, { title, url, description }) {
+  async addSpec({ commit }, { title, servers, description }) {
     description = description || ""
-    return await this.$api.addSpec({ title, url, description }).then(
+    return await this.$api.addSpec({ title, url: servers, description }).then(
       res => commit("add", res.data),
       err => console.error("[APIERROR]", err)
     )
   },
 
-  async updateSpec({ commit }, { specid, data: { title, url, description, version } }) {
+  async updateSpec({ commit }, { specid, data: { title, servers, description, version } }) {
     description = description || ""
-    return await this.$api.updateSpec({ title, url, description }, specid, version).then(
+    return await this.$api.updateSpec({ title, url: servers, description }, specid, version).then(
       res => commit("update", { id: specid, spec: res.data }),
       err => console.error("[APIERROR]", err)
     )
