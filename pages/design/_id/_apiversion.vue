@@ -329,87 +329,6 @@
           <span>
             <button
               class="icon"
-              id="show-modal"
-              @click="showModal = true"
-              v-tooltip.bottom="$t('import_curl')"
-            >
-              <i class="material-icons">import_export</i>
-            </button>
-            <button
-              class="icon"
-              id="code"
-              @click="isHidden = !isHidden"
-              :disabled="!isValidURL"
-              v-tooltip.bottom="{
-                content: isHidden ? $t('show_code') : $t('hide_code'),
-              }"
-            >
-              <i class="material-icons">code</i>
-            </button>
-            <button
-              class="icon"
-              id="preRequestScriptButton"
-              v-tooltip.bottom="{
-                content: !showPreRequestScript
-                  ? $t('show_prerequest_script')
-                  : $t('hide_prerequest_script'),
-              }"
-              @click="showPreRequestScript = !showPreRequestScript"
-            >
-              <i class="material-icons" :class="showPreRequestScript" v-if="!showPreRequestScript">
-                playlist_add
-              </i>
-              <i class="material-icons" :class="showPreRequestScript" v-else>
-                close
-              </i>
-            </button>
-            <button
-              class="icon"
-              id="preRequestScriptButto"
-              v-tooltip.bottom="{
-                content: !testsEnabled ? 'Enable Tests' : 'Disable Tests',
-              }"
-              @click="testsEnabled = !testsEnabled"
-            >
-              <i class="material-icons" :class="testsEnabled" v-if="!testsEnabled">
-                playlist_add_check
-              </i>
-              <i class="material-icons" :class="testsEnabled" v-else>close</i>
-            </button>
-          </span>
-          <span>
-            <button
-              class="icon"
-              @click="saveOpenapi"
-              :disabled="!isValidURL"
-              v-if="isLoggedIn"
-              v-tooltip.bottom="$t('openapi_spec_save')"
-            >
-              <i class="material-icons">folder</i>
-            </button>
-            <button
-              class="icon"
-              @click="copyRequest"
-              id="copyRequest"
-              ref="copyRequest"
-              :disabled="!isValidURL"
-              v-tooltip.bottom="$t('copy_request_link')"
-            >
-              <i v-if="navigatorShare" class="material-icons">share</i>
-              <i v-else class="material-icons">file_copy</i>
-            </button>
-            <button
-              class="icon"
-              @click="saveRequest"
-              id="saveRequest"
-              ref="saveRequest"
-              :disabled="!isValidURL"
-              v-tooltip.bottom="$t('save_to_collections')"
-            >
-              <i class="material-icons">save</i>
-            </button>
-            <button
-              class="icon"
               @click="clearContent('', $event)"
               v-tooltip.bottom="$t('clear_all')"
               ref="clearAll"
@@ -969,8 +888,6 @@
       :editing-request="editRequest"
     />
 
-    <saveRequestOpenapi :show="showOasModal" @hide-modal="hideOpenapiModal" />
-
     <pw-modal v-if="showModal" @close="showModal = false">
       <div slot="header">
         <ul>
@@ -1308,7 +1225,6 @@ export default {
     login: () => import("../../../components/firebase/login"),
     tabs: () => import("../../../components/ui/tabs"),
     tab: () => import("../../../components/ui/tab"),
-    saveRequestOpenapi: () => import("../../../components/openapi/saveRequest"),
   },
   props: {
     spec: Object,
@@ -1317,7 +1233,6 @@ export default {
     return {
       _uri: undefined,
       showModal: false,
-      showOasModal: false,
       showPreRequestScript: false,
       testsEnabled: false,
       testScript: "// pw.expect('variable').toBe('value');",
@@ -1899,10 +1814,6 @@ export default {
         basepath_path = uriRegex[4]
       }
       this.$store.commit("design/setState", { value: url, attribute: "uri" })
-      if (this.preRequestScript && this.showPreRequestScript) {
-        const environmentVariables = getEnvironmentVariablesFromScript(this.preRequestScript)
-        url = parseTemplateString(value, environmentVariables)
-      }
       try {
         url = new URL(url)
         this.url = url.origin
@@ -1911,18 +1822,15 @@ export default {
         if (basepath_path) {
           path = path.replace(basepath_path, "")
           path = path.indexOf("/") !== 0 ? "/" + path : path
-          console.log("setting path1", basepath_path, path)
         }
 
         this.path = path
       } catch (error) {
-        console.log("url", url, error)
         let uriRegex = url.match(/^((http[s]?:\/\/)?(<<[^\/]+>>)?[^\/]*|)(\/?.*)$/)
         let path = uriRegex[4]
         if (basepath_path) {
           path = path.replace(basepath_path, "")
           path = path.indexOf("/") !== 0 ? "/" + path : path
-          console.log("setting path2", basepath_path, path)
         }
         this.url = uriRegex[1]
         this.path = path
@@ -1994,12 +1902,6 @@ export default {
     //   event.preventDefault()
     //   this.$data.response.headers["content-type"] = this.getResponseContentType()
     // },
-    saveOpenapi() {
-      this.$data.showOasModal = true
-    },
-    hideOpenapiModal() {
-      this.$data.showOasModal = false
-    },
     useSelectedEnvironment(environment) {
       let preRequestScriptString = ""
       for (let variable of environment.variables) {
@@ -2607,7 +2509,7 @@ export default {
           this.method = "GET"
           this.url = "https://httpbin.org"
           this.path = "/get"
-          this.uri = this.url + this.path
+          this.$data._uri = decodeURIComponent(this.path)
           this.label = ""
           this.auth = "None"
           this.httpUser = ""
@@ -2814,7 +2716,7 @@ export default {
     },
   },
   async mounted() {
-    //this.$nextTick(() => this.observeRequestButton())
+    this.$nextTick(() => this.observeRequestButton())
     this._keyListener = function(e) {
       if (e.key === "g" && (e.ctrlKey || e.metaKey)) {
         e.preventDefault()

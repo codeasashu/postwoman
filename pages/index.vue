@@ -1550,7 +1550,7 @@ export default {
     },
   },
   computed: {
-    isLoggedIn () {
+    isLoggedIn() {
       return this.$store.state.auth.loggedIn === true
     },
     uri: {
@@ -1560,10 +1560,10 @@ export default {
       set(value) {
         this.$store.commit("setState", { value, attribute: "uri" })
         let url
-        if (this.preRequestScript && this.showPreRequestScript) {
-          const environmentVariables = getEnvironmentVariablesFromScript(this.preRequestScript)
-          url = parseTemplateString(value, environmentVariables)
-        }
+        // if (this.preRequestScript && this.showPreRequestScript) {
+        //   const environmentVariables = getEnvironmentVariablesFromScript(this.preRequestScript)
+        //   url = parseTemplateString(value, environmentVariables)
+        // }
         try {
           url = new URL(url)
           this.url = url.origin
@@ -2034,6 +2034,7 @@ export default {
       }
       if (preRequestScript) {
         const environmentVariables = getEnvironmentVariablesFromScript(preRequestScript)
+        console.log("envvar", environmentVariables)
         requestOptions.url = parseTemplateString(requestOptions.url, environmentVariables)
         requestOptions.data = parseTemplateString(requestOptions.data, environmentVariables)
         for (let k in requestOptions.headers) {

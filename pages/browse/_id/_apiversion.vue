@@ -2,10 +2,13 @@
   <div class="page">
     <div class="content">
       <h2 v-if="spec">{{ spec.info.title }}</h2>
-      &nbsp;&nbsp;
+      <br />
       <nuxt-link v-if="$route.params.id" :to="`/fork/${$route.params.id}`">
         <button>{{ $t("fork") }}</button>
       </nuxt-link>
+      <a class="button" :href="docurl" target="_blank" v-tooltip="$t('documentation')">
+        <i class="material-icons">import_contacts</i>
+      </a>
       <apiversion
         :addButton="false"
         :remButton="false"
@@ -1046,6 +1049,12 @@ export default {
     },
   },
   computed: {
+    docurl() {
+      return `${this.$axios.defaults.baseURL}/docs/${this.spec["x-internal-id"]}/${this.selectedVersion}`
+    },
+    selectedVersion() {
+      return this.$route.params.apiversion || (this.spec && this.spec.info.version)
+    },
     basePath() {
       const server = this.spec.servers[0]
       return server && server.url

@@ -2,7 +2,11 @@
   <div class="page">
     <div class="content" v-if="onSpecPage && selectedSpec && mockRunning">
       <div>
-        <nuxt-link class="button" to="/mock">Back</nuxt-link>
+        <nuxt-link to="/mock">
+          <button class="bg-color">
+            <i class="material-icons success-response">arrow_back</i>
+          </button>
+        </nuxt-link>
         <button @click="stopMock">Stop Mock</button>
         <button @click="restartMock">Restart Mock</button>
         <nuxt-link class="button" :to="designpagelink">
@@ -89,7 +93,7 @@
               <input
                 id="share-text"
                 ref="sharespectext"
-                :value="`${basepath}/browse/${selectedSpec['x-internal-id']}`"
+                :value="`${basepath}/browse/${selectedSpec['x-internal-id']}/${apiversion}`"
                 :placeholder="$t('enter_curl')"
               />
             </li>
@@ -165,10 +169,9 @@ export default {
       onSpecPage = true
       spec = specs.filter(_spec => _spec["x-internal-id"] == params.id).pop()
       if (!spec) error("Spec not found", 404)
-      console.log("xver", spec["info"]["x-versions"], params.apiversion)
       if (
-        !!apiversion &&
-        apiversion != spec["info"]["version"] &&
+        !!params.apiversion &&
+        params.apiversion != spec["info"]["version"] &&
         spec["info"]["x-versions"] &&
         spec["info"]["x-versions"].indexOf(params.apiversion) < 0
       )
@@ -243,7 +246,6 @@ export default {
       const specid = this.selectedSpec["x-internal-id"]
       await this.$store.dispatch("mock/restart", { specid, version })
       this.mockInProgress = false
-      console.log("retrying...")
       window.location.reload()
     },
     changeMockVersion(version) {
@@ -291,9 +293,7 @@ export default {
     },
     async isMockRunning() {
       let mock = false
-      console.log("1", this.selectedSpec)
       if (this.selectedSpec) {
-        console.log("2", this.selectedSpec)
         mock = await this.$store.dispatch("mock/getMockStatus", {
           specid: this.selectedSpec["x-internal-id"],
           version: this.selectedSpec.info.version,

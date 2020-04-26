@@ -3,8 +3,8 @@
     <div class="content">
       <div v-if="onSpecPage">
         <nuxt-link to="/design">
-          <button class="rounded">
-            <i class="material-icons">arrow_back</i>
+          <button class="bg-color">
+            <i class="material-icons success-response">arrow_back</i>
           </button>
         </nuxt-link>
       </div>
@@ -85,7 +85,7 @@
               <input
                 id="share-text"
                 ref="sharespectext"
-                :value="`${basepath}/browse/${selectedSpec['x-internal-id']}`"
+                :value="`${basepath}/browse/${selectedSpec['x-internal-id']}/${selectedVersion}`"
                 :placeholder="$t('enter_curl')"
               />
             </li>
@@ -128,14 +128,6 @@
   transition: all 0.2s ease-in-out;
   fill: var(--act-color);
   cursor: pointer;
-}
-.rounded {
-  background-color: var(--bg-color);
-  border-color: var(--ac-color);
-
-  i {
-    color: var(--ac-color);
-  }
 }
 </style>
 <script>

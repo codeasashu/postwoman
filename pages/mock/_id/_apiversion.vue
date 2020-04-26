@@ -2,6 +2,38 @@
   <div class="page">
     <div class="content" v-if="spec && mock">
       <div class="page-columns inner-left" v-if="spec">
+        <pw-section v-if="showPreRequestScript" class="orange" label="Pre-Request" ref="preRequest">
+          <ul>
+            <li>
+              <div class="flex-wrap">
+                <label for="generatedCode">{{ $t("javascript_code") }}</label>
+                <div>
+                  <a
+                    href="https://github.com/liyasthomas/postwoman/wiki/Pre-Request-Scripts"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    <button class="icon" v-tooltip="$t('wiki')">
+                      <i class="material-icons">help</i>
+                    </button>
+                  </a>
+                </div>
+              </div>
+              <Editor
+                v-model="preRequestScript"
+                :lang="'javascript'"
+                :options="{
+                  maxLines: '16',
+                  minLines: '8',
+                  fontSize: '16px',
+                  autoScrollEditorIntoView: true,
+                  showPrintMargin: false,
+                  useWorker: false,
+                }"
+              />
+            </li>
+          </ul>
+        </pw-section>
         <pw-section class="blue" :label="$t('request')" ref="request">
           <div class="blue">
             <label for="label">{{ $t("label") }}</label>
@@ -383,15 +415,6 @@
               </button>
             </span>
             <span>
-              <button
-                class="icon"
-                @click="saveOpenapi"
-                :disabled="!isValidURL"
-                v-if="isLoggedIn"
-                v-tooltip.bottom="$t('openapi_spec_save')"
-              >
-                <i class="material-icons">folder</i>
-              </button>
               <button
                 class="icon"
                 @click="copyRequest"
@@ -986,8 +1009,6 @@
         :editing-request="editRequest"
       />
 
-      <saveRequestOpenapi :show="showOasModal" @hide-modal="hideOpenapiModal" />
-
       <pw-modal v-if="showModal" @close="showModal = false">
         <div slot="header">
           <ul>
@@ -1336,7 +1357,6 @@ export default {
     login: () => import("../../../components/firebase/login"),
     tabs: () => import("../../../components/ui/tabs"),
     tab: () => import("../../../components/ui/tab"),
-    saveRequestOpenapi: () => import("../../../components/openapi/saveRequest"),
   },
   props: {
     spec: Object,
@@ -1345,7 +1365,6 @@ export default {
     return {
       _uri: undefined,
       showModal: false,
-      showOasModal: false,
       showPreRequestScript: false,
       testsEnabled: false,
       testScript: "// pw.expect('variable').toBe('value');",
@@ -1982,12 +2001,6 @@ export default {
         this.path = path
       }
     },
-    saveOpenapi() {
-      this.$data.showOasModal = true
-    },
-    hideOpenapiModal() {
-      this.$data.showOasModal = false
-    },
     useSelectedEnvironment(environment) {
       let preRequestScriptString = ""
       for (let variable of environment.variables) {
@@ -2566,7 +2579,7 @@ export default {
           this.method = "GET"
           this.url = "https://httpbin.org"
           this.path = "/get"
-          this.uri = this.url + this.path
+          this.$data._uri = decodeURIComponent(this.path)
           this.label = ""
           this.auth = "None"
           this.httpUser = ""
